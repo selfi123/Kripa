@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? false : 'http://localhost:3000',
+  origin: process.env.NODE_ENV === 'production' ? 'https://kripa.onrender.com' : 'http://localhost:3000',
   credentials: true
 }));
 app.use(express.json());
@@ -63,8 +63,8 @@ initializeDatabase()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`🥒 Pickle MCP Server running on port ${PORT}`);
-      console.log(`🌐 Frontend: http://localhost:3000`);
-      console.log(`🔧 API: http://localhost:${PORT}/api`);
+      console.log(`\uD83C\uDF10 Frontend: https://kripa.onrender.com`);
+      console.log(`\uD83D\uDD27 API: https://kripa.onrender.com/api`);
     });
   })
   .catch(err => {

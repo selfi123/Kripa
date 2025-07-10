@@ -155,7 +155,7 @@ router.get('/google/callback',
     console.log('Generated token:', token);
 
     // Redirect to frontend with token
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = process.env.FRONTEND_URL;
     const redirectUrl = `${frontendUrl}/auth-callback?token=${token}`;
     console.log('Redirecting to:', redirectUrl);
     

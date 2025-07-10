@@ -3,7 +3,10 @@ import React, { useEffect } from 'react';
 const GoogleAuth = () => {
   useEffect(() => {
     // Redirect to backend Google OAuth route
-    window.location.href = 'http://localhost:5000/api/auth/google';
+    const backendUrl = process.env.NODE_ENV === 'development'
+      ? 'http://localhost:5000'
+      : 'https://kripa.onrender.com';
+    window.location.href = `${backendUrl}/api/auth/google`;
   }, []);
 
   return (
