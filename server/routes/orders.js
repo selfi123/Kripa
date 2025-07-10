@@ -1,0 +1,200 @@
+const express = require('express');
+const jwt = require('jsonwebtoken');
+const { db } = require('../database/init');
+
+const router = express.Router();
+
+// Middleware to verify JWT token
+const authenticateToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'pickle-secret-key');
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
+// Create new order
+router.post('/', authenticateToken, (req, res) => {
+  const { items, shippingAddress, paymentType } = req.body;
+  const userId = req.user.userId;
+  
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'Order items are required' });
+  }
+  
+  if (!shippingAddress) {
+    return res.status(400).json({ error: 'Shipping address is required' });
+  }
+  
+  // Calculate total and validate items
+  let totalAmount = 0;
+  const validatedItems = [];
+  
+  for (const item of items) {
+    if (!item.pickleId || !item.quantity || item.quantity <= 0) {
+      return res.status(400).json({ error: 'Invalid item data' });
+    }
+    
+    // Get pickle details and check stock
+    db.get('SELECT id, name, price, stock FROM pickles WHERE id = ?', [item.pickleId], (err, pickle) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+      if (!pickle) {
+        return res.status(400).json({ error: `Pickle with id ${item.pickleId} not found` });
+      }
+      if (pickle.stock < item.quantity) {
+        return res.status(400).json({ error: `Insufficient stock for ${pickle.name}` });
+      }
+      
+      validatedItems.push({
+        ...item,
+        price: pickle.price,
+        name: pickle.name
+      });
+      totalAmount += pickle.price * item.quantity;
+      
+      // If this is the last item, create the order
+      if (validatedItems.length === items.length) {
+        createOrder();
+      }
+    });
+  }
+  
+  function createOrder() {
+    // Create order
+    db.run('INSERT INTO orders (user_id, total_amount, shipping_address, payment_type) VALUES (?, ?, ?, ?)',
+      [userId, totalAmount, shippingAddress, paymentType || 'cod'], function(err) {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to create order' });
+      }
+      
+      const orderId = this.lastID;
+      
+      // Add order items
+      let itemsAdded = 0;
+      for (const item of validatedItems) {
+        db.run('INSERT INTO order_items (order_id, pickle_id, quantity, price) VALUES (?, ?, ?, ?)',
+          [orderId, item.pickleId, item.quantity, item.price], function(err) {
+          if (err) {
+            return res.status(500).json({ error: 'Failed to add order items' });
+          }
+          
+          // Update stock
+          db.run('UPDATE pickles SET stock = stock - ? WHERE id = ?',
+            [item.quantity, item.pickleId], (err) => {
+            if (err) {
+              console.error('Failed to update stock:', err);
+            }
+          });
+          
+          itemsAdded++;
+          if (itemsAdded === validatedItems.length) {
+            res.status(201).json({
+              message: 'Order created successfully',
+              orderId,
+              totalAmount
+            });
+          }
+        });
+      }
+    });
+  }
+});
+
+// Get user's order history
+router.get('/my-orders', authenticateToken, (req, res) => {
+  const userId = req.user.userId;
+  
+  db.all(`
+    SELECT o.*, 
+           COUNT(oi.id) as item_count
+    FROM orders o
+    LEFT JOIN order_items oi ON o.id = oi.order_id
+    WHERE o.user_id = ?
+    GROUP BY o.id
+    ORDER BY o.created_at DESC
+  `, [userId], (err, orders) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    res.json({ orders });
+  });
+});
+
+// Get order details
+router.get('/:orderId', authenticateToken, (req, res) => {
+  const { orderId } = req.params;
+  const userId = req.user.userId;
+  
+  // Get order details
+  db.get(`
+    SELECT o.*, u.username
+    FROM orders o
+    JOIN users u ON o.user_id = u.id
+    WHERE o.id = ? AND o.user_id = ?
+  `, [orderId, userId], (err, order) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    
+    // Get order items
+    db.all(`
+      SELECT oi.*, p.name, p.description
+      FROM order_items oi
+      JOIN pickles p ON oi.pickle_id = p.id
+      WHERE oi.order_id = ?
+    `, [orderId], (err, items) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+      
+      res.json({
+        order: {
+          ...order,
+          items
+        }
+      });
+    });
+  });
+});
+
+// Update order status (admin only)
+router.patch('/:orderId/status', authenticateToken, (req, res) => {
+  const { orderId } = req.params;
+  const { status } = req.body;
+  
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  
+  const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+  
+  db.run('UPDATE orders SET status = ? WHERE id = ?', [status, orderId], function(err) {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    
+    res.json({ message: 'Order status updated successfully' });
+  });
+});
+
+module.exports = router; 
