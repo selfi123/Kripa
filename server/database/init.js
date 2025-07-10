@@ -82,63 +82,9 @@ const initializeDatabase = () => {
         VALUES ('admin', 'admin@pickles.com', '$2a$10$rQZ9K8X2Y1L3M4N5O6P7Q8R9S0T1U2V3W4X5Y6Z7A8B9C0D1E2F3G4H5I6J', 'admin')
       `);
 
-      // Sample pickles
-      const samplePickles = [
-        {
-          name: 'Classic Dill Pickles',
-          description: 'Traditional dill pickles with garlic and spices',
-          price: 8.99,
-          category: 'Dill',
-          stock: 50
-        },
-        {
-          name: 'Spicy Jalapeño Pickles',
-          description: 'Hot and spicy pickles with jalapeño peppers',
-          price: 9.99,
-          category: 'Spicy',
-          stock: 30
-        },
-        {
-          name: 'Sweet Bread & Butter Pickles',
-          description: 'Sweet and tangy pickles perfect for sandwiches',
-          price: 7.99,
-          category: 'Sweet',
-          stock: 40
-        },
-        {
-          name: 'Garlic Dill Pickles',
-          description: 'Extra garlicky dill pickles for garlic lovers',
-          price: 10.99,
-          category: 'Dill',
-          stock: 25
-        },
-        {
-          name: 'Pickled Onions',
-          description: 'Tangy pickled red onions',
-          price: 6.99,
-          category: 'Vegetables',
-          stock: 35
-        }
-      ];
+      // All sample pickles insertion code has been removed.
 
-      const insertPickle = db.prepare(`
-        INSERT OR IGNORE INTO pickles (name, description, price, category, stock)
-        VALUES (?, ?, ?, ?, ?)
-      `);
-
-      samplePickles.forEach(pickle => {
-        insertPickle.run(pickle.name, pickle.description, pickle.price, pickle.category, pickle.stock);
-      });
-
-      insertPickle.finalize((err) => {
-        if (err) {
-          console.error('Error inserting sample data:', err);
-          reject(err);
-        } else {
-          console.log('✅ Database initialized with sample data');
-          resolve();
-        }
-      });
+      resolve();
     });
   });
 };
