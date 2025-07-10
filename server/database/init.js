@@ -1,5 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const session = require('express-session');
+const SQLiteStore = require('connect-sqlite3')(session);
 
 const dbPath = path.join(__dirname, 'pickles.db');
 const db = new sqlite3.Database(dbPath);
