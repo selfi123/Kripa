@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken');
 const { db } = require('../database/init');
 const Razorpay = require('razorpay');
 const razorpay = new Razorpay({
-  key_id: 'rzp_test_edFx1fSyBJhWK5',
-  key_secret: 'b6aSlFvZb9bMoTFWbKCVYwjh',
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
 const router = express.Router();

@@ -5,8 +5,8 @@ const ContactUs = () => (
     <h1>Contact Us</h1>
     <p>For any queries, feedback, or support, please contact us:</p>
     <ul>
-      <li>Email: <a href="mailto:support@pickles.com">support@pickles.com</a></li>
-      <li>Phone: <a href="tel:+911234567890">+91 12345 67890</a></li>
+      <li>Email: <a href="mailto:kripapicklestore@gmail.com">kripapicklestore@gmail.com</a></li>
+      <li>Phone: <a href="tel:+919847406948">+91 9847406948</a></li>
       <li>Address: 123 Pickle Street, Mumbai, India</li>
     </ul>
     <h2>Contact Form</h2>

@@ -33,7 +33,7 @@ const Cart = () => {
     }
   };
 
-  const RAZORPAY_KEY_ID = 'rzp_test_edFx1fSyBJhWK5';
+  const RAZORPAY_KEY_ID = process.env.REACT_APP_RAZORPAY_KEY_ID;
 
   const handleCheckout = async (e) => {
     e.preventDefault();
