@@ -8,6 +8,7 @@ const authRoutes = require('./routes/auth');
 const pickleRoutes = require('./routes/pickles');
 const orderRoutes = require('./routes/orders');
 const adminRoutes = require('./routes/admin');
+const contactRoutes = require('./routes/contact');
 const { initializeDatabase } = require('./database/init');
 const passport = require('./config/passport');
 const Razorpay = require('razorpay');
@@ -48,6 +49,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/pickles', pickleRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -69,8 +71,8 @@ initializeDatabase()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`🥒 Pickle MCP Server running on port ${PORT}`);
-      console.log(`\uD83C\uDF10 Frontend: http://localhost:3000`);
-      console.log(`\uD83D\uDD27 API: http://localhost:${PORT}/api`);
+      console.log(`🌐 Frontend: https://kripapickles.shop`);
+      console.log(`🔧 API: https://kripapickles.shop/api`);
     });
   })
   .catch(err => {

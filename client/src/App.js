@@ -25,6 +25,7 @@ import ShippingPolicy from './pages/ShippingPolicy';
 import TermsAndConditions from './pages/TermsAndConditions';
 import CancellationsRefunds from './pages/CancellationsRefunds';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import VerifyEmail from './pages/VerifyEmail';
 
 import './App.css';
 
@@ -42,6 +43,7 @@ function App() {
                 <Route path="/pickles/:id" element={<PickleDetail />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
                 <Route path="/auth-callback" element={<AuthCallback />} />
                 <Route path="/auth/google" element={<GoogleAuth />} />
                 <Route path="/cart" element={<Cart />} />

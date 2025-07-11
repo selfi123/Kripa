@@ -11,6 +11,7 @@ const Register = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
   
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -74,7 +75,7 @@ const Register = () => {
     try {
       const result = await register(formData.username, formData.email, formData.password);
       if (result.success) {
-        navigate('/');
+        setRegistered(true);
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -85,94 +86,103 @@ const Register = () => {
 
   return (
     <div className="form-container">
-      <h2 className="form-title">🥒 Join Our Pickle Family!</h2>
-      
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="username" className="form-label">
-            Username
-          </label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            className={`form-input ${errors.username ? 'error' : ''}`}
-            placeholder="Choose a username"
-            disabled={loading}
-          />
-          {errors.username && (
-            <div className="form-error">{errors.username}</div>
-          )}
+      <h2 className="form-title">🍋 Join Our Pickle Family!</h2>
+      {registered ? (
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <h3>Registration successful!</h3>
+          <p>Please check your email to verify your account before logging in.</p>
+          <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => navigate('/login')}>
+            Go to Login
+          </button>
         </div>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="username" className="form-label">
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              className={`form-input ${errors.username ? 'error' : ''}`}
+              placeholder="Choose a username"
+              disabled={loading}
+            />
+            {errors.username && (
+              <div className="form-error">{errors.username}</div>
+            )}
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="email" className="form-label">
-            Email Address
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className={`form-input ${errors.email ? 'error' : ''}`}
-            placeholder="Enter your email"
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`form-input ${errors.email ? 'error' : ''}`}
+              placeholder="Enter your email"
+              disabled={loading}
+            />
+            {errors.email && (
+              <div className="form-error">{errors.email}</div>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={`form-input ${errors.password ? 'error' : ''}`}
+              placeholder="Create a password"
+              disabled={loading}
+            />
+            {errors.password && (
+              <div className="form-error">{errors.password}</div>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword" className="form-label">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
+              placeholder="Confirm your password"
+              disabled={loading}
+            />
+            {errors.confirmPassword && (
+              <div className="form-error">{errors.confirmPassword}</div>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ width: '100%', marginTop: '1rem' }}
             disabled={loading}
-          />
-          {errors.email && (
-            <div className="form-error">{errors.email}</div>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password" className="form-label">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className={`form-input ${errors.password ? 'error' : ''}`}
-            placeholder="Create a password"
-            disabled={loading}
-          />
-          {errors.password && (
-            <div className="form-error">{errors.password}</div>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="confirmPassword" className="form-label">
-            Confirm Password
-          </label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
-            placeholder="Confirm your password"
-            disabled={loading}
-          />
-          {errors.confirmPassword && (
-            <div className="form-error">{errors.confirmPassword}</div>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          className="btn btn-primary"
-          style={{ width: '100%', marginTop: '1rem' }}
-          disabled={loading}
-        >
-          {loading ? 'Creating Account...' : 'Create Account'}
-        </button>
-      </form>
+          >
+            {loading ? 'Creating Account...' : 'Create Account'}
+          </button>
+        </form>
+      )}
 
       <div style={{ textAlign: 'center', marginTop: '2rem' }}>
         <p style={{ color: 'var(--light-text)' }}>

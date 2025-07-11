@@ -100,6 +100,7 @@ const AdminOrders = () => {
               <th>Payment</th>
               <th>Items</th>
               <th>Date</th>
+              <th>Shipping Address</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -114,6 +115,7 @@ const AdminOrders = () => {
                 <td style={{ textTransform: 'capitalize' }}>{o.payment_type || 'N/A'}</td>
                 <td>{o.item_count}</td>
                 <td>{new Date(o.created_at).toLocaleDateString()}</td>
+                <td style={{ maxWidth: 180, fontSize: '0.95rem', color: '#666', wordBreak: 'break-word' }}>{o.shipping_address}</td>
                 <td>
                   <select
                     value={o.status}

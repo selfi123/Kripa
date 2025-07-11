@@ -9,8 +9,10 @@ const Login = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [unverified, setUnverified] = useState(false);
+  const [resent, setResent] = useState(false);
   
-  const { login } = useAuth();
+  const { login, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -56,11 +58,14 @@ const Login = () => {
     }
     
     setLoading(true);
-    
+    setUnverified(false);
+    setResent(false);
     try {
       const result = await login(formData.email, formData.password);
       if (result.success) {
         navigate('/');
+      } else if (result.unverified) {
+        setUnverified(true);
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -69,58 +74,80 @@ const Login = () => {
     }
   };
 
+  const handleResend = async () => {
+    setLoading(true);
+    try {
+      const result = await resendVerificationEmail(formData.email);
+      if (result.success) {
+        setResent(true);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="form-container">
-      <h2 className="form-title">🥒 Welcome Back!</h2>
-      
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="email" className="form-label">
-            Email Address
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className={`form-input ${errors.email ? 'error' : ''}`}
-            placeholder="Enter your email"
-            disabled={loading}
-          />
-          {errors.email && (
-            <div className="form-error">{errors.email}</div>
-          )}
+      <h2 className="form-title">🍋 Welcome Back!</h2>
+      {unverified ? (
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <h3>Your email is not verified.</h3>
+          <p>Please check your inbox for a verification email.</p>
+          <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={handleResend} disabled={loading || resent}>
+            {resent ? 'Verification Email Sent!' : 'Resend Verification Email'}
+          </button>
+          {resent && <p style={{ color: 'green', marginTop: '1rem' }}>Verification email resent! Please check your inbox.</p>}
         </div>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`form-input ${errors.email ? 'error' : ''}`}
+              placeholder="Enter your email"
+              disabled={loading}
+            />
+            {errors.email && (
+              <div className="form-error">{errors.email}</div>
+            )}
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="password" className="form-label">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className={`form-input ${errors.password ? 'error' : ''}`}
-            placeholder="Enter your password"
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={`form-input ${errors.password ? 'error' : ''}`}
+              placeholder="Enter your password"
+              disabled={loading}
+            />
+            {errors.password && (
+              <div className="form-error">{errors.password}</div>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ width: '100%', marginTop: '1rem' }}
             disabled={loading}
-          />
-          {errors.password && (
-            <div className="form-error">{errors.password}</div>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          className="btn btn-primary"
-          style={{ width: '100%', marginTop: '1rem' }}
-          disabled={loading}
-        >
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
+      )}
 
       {/* Google Login */}
       <div style={{ textAlign: 'center', marginTop: '2rem' }}>

@@ -20,7 +20,13 @@ const Cart = () => {
   ];
 
   const [checkoutForm, setCheckoutForm] = useState({
-    shippingAddress: '',
+    name: '',
+    phone: '',
+    addressLine: '',
+    city: '',
+    state: '',
+    pincode: '',
+    country: 'India',
     paymentType: 'cod'
   });
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -43,9 +49,9 @@ const Cart = () => {
       navigate('/login');
       return;
     }
-
-    if (!checkoutForm.shippingAddress.trim()) {
-      toast.error('Please enter a shipping address');
+    // Validate address fields
+    if (!checkoutForm.name.trim() || !checkoutForm.phone.trim() || !checkoutForm.addressLine.trim() || !checkoutForm.city.trim() || !checkoutForm.state.trim() || !checkoutForm.pincode.trim() || !checkoutForm.country.trim()) {
+      toast.error('Please fill in all address fields');
       return;
     }
 
@@ -73,7 +79,7 @@ const Cart = () => {
               // Place order in backend after payment success
               const orderData = {
                 items: getCartItems(),
-                shippingAddress: checkoutForm.shippingAddress,
+                shippingAddress: `${checkoutForm.name}, ${checkoutForm.phone}, ${checkoutForm.addressLine}, ${checkoutForm.city}, ${checkoutForm.state}, ${checkoutForm.pincode}, ${checkoutForm.country}`,
                 paymentType: checkoutForm.paymentType,
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpayOrderId: response.razorpay_order_id,
@@ -101,7 +107,7 @@ const Cart = () => {
       // COD: Place order directly
       const orderData = {
         items: getCartItems(),
-        shippingAddress: checkoutForm.shippingAddress,
+        shippingAddress: `${checkoutForm.name}, ${checkoutForm.phone}, ${checkoutForm.addressLine}, ${checkoutForm.city}, ${checkoutForm.state}, ${checkoutForm.pincode}, ${checkoutForm.country}`,
         paymentType: checkoutForm.paymentType
       };
       const response = await axios.post('/api/orders', orderData);
@@ -224,14 +230,79 @@ const Cart = () => {
             ) : (
               <form onSubmit={handleCheckout} style={{ marginTop: '1rem' }}>
                 <div className="form-group">
-                  <label className="form-label">Shipping Address</label>
-                  <textarea
-                    name="shippingAddress"
-                    value={checkoutForm.shippingAddress}
-                    onChange={(e) => setCheckoutForm(f => ({ ...f, shippingAddress: e.target.value }))}
+                  <label className="form-label">Full Name</label>
+                  <input
+                    name="name"
+                    value={checkoutForm.name}
+                    onChange={e => setCheckoutForm(f => ({ ...f, name: e.target.value }))}
                     className="form-input"
-                    rows={3}
-                    placeholder="Enter your shipping address..."
+                    placeholder="Enter your full name"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Phone Number</label>
+                  <input
+                    name="phone"
+                    value={checkoutForm.phone}
+                    onChange={e => setCheckoutForm(f => ({ ...f, phone: e.target.value }))}
+                    className="form-input"
+                    placeholder="Enter your phone number"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Address Line</label>
+                  <input
+                    name="addressLine"
+                    value={checkoutForm.addressLine}
+                    onChange={e => setCheckoutForm(f => ({ ...f, addressLine: e.target.value }))}
+                    className="form-input"
+                    placeholder="House/Flat, Street, Area"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">City</label>
+                  <input
+                    name="city"
+                    value={checkoutForm.city}
+                    onChange={e => setCheckoutForm(f => ({ ...f, city: e.target.value }))}
+                    className="form-input"
+                    placeholder="City"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">State</label>
+                  <input
+                    name="state"
+                    value={checkoutForm.state}
+                    onChange={e => setCheckoutForm(f => ({ ...f, state: e.target.value }))}
+                    className="form-input"
+                    placeholder="State"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Pincode</label>
+                  <input
+                    name="pincode"
+                    value={checkoutForm.pincode}
+                    onChange={e => setCheckoutForm(f => ({ ...f, pincode: e.target.value }))}
+                    className="form-input"
+                    placeholder="Pincode"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Country</label>
+                  <input
+                    name="country"
+                    value={checkoutForm.country}
+                    onChange={e => setCheckoutForm(f => ({ ...f, country: e.target.value }))}
+                    className="form-input"
+                    placeholder="Country"
                     required
                   />
                 </div>

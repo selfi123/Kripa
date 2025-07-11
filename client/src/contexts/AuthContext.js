@@ -67,6 +67,11 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.error || 'Login failed';
+      // Detect unverified error
+      if (message.toLowerCase().includes('verify your email')) {
+        if (!silent) toast.error(message);
+        return { success: false, error: message, unverified: true };
+      }
       if (!silent) toast.error(message);
       return { success: false, error: message };
     }
@@ -79,14 +84,24 @@ export const AuthProvider = ({ children }) => {
         email,
         password
       });
-      const { token: newToken, user: userData } = response.data;
-      localStorage.setItem('token', newToken);
-      setToken(newToken);
-      setUser(userData);
-      toast.success('Registration successful!');
+      // Always show verification message, do not auto-login
+      toast.success('Registration successful! Please check your email to verify your account.');
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.error || 'Registration failed';
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
+  // Resend verification email
+  const resendVerificationEmail = async (email) => {
+    try {
+      await axios.post('/api/auth/resend-verification', { email });
+      toast.success('Verification email resent! Please check your inbox.');
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.error || 'Failed to resend verification email.';
       toast.error(message);
       return { success: false, error: message };
     }
@@ -107,6 +122,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    resendVerificationEmail,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin'
   };
