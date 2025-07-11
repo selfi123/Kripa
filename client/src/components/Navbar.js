@@ -27,10 +27,23 @@ function Footer() {
         <Link to="/cancellations-refunds">Cancellations & Refunds</Link>
         <Link to="/privacy-policy">Privacy Policy</Link>
       </div>
-      <div style={{ fontSize: '0.95rem', color: '#888' }}>© {new Date().getFullYear()} Awesome Pickles. All rights reserved.</div>
+      <div style={{ fontSize: '0.95rem', color: '#888' }}>© {new Date().getFullYear()} Kripa Pickles. All rights reserved.</div>
     </footer>
   );
 }
+
+const logoStyle = {
+  fontSize: '1.7rem',
+  fontWeight: 'bold',
+  color: 'var(--primary-color)',
+  textDecoration: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+  transition: 'transform 0.3s cubic-bezier(.68,-0.55,.27,1.55)',
+  cursor: 'pointer',
+  animation: 'logo-bounce 1.2s infinite alternate',
+};
 
 const Navbar = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
@@ -50,8 +63,8 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="nav-container">
-        <Link to="/" className="nav-logo">
-          🥒 Awesome Pickles
+        <Link to="/" className="nav-logo" style={logoStyle} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.08) rotate(-3deg)'} onMouseOut={e => e.currentTarget.style.transform = 'none'}>
+          <span role="img" aria-label="lemon" style={{ fontSize: '2rem', animation: 'spin 2s linear infinite' }}>🍋</span> Kripa Pickles
         </Link>
         
         <div className="nav-links">

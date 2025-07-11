@@ -545,3 +545,51 @@ body {
   margin-bottom: 1rem;
   color: var(--text-color);
 } 
+
+@keyframes logo-bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-8px) scale(1.05); }
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Animated headings */
+h1, h2, h3 {
+  animation: fadeInUp 0.8s cubic-bezier(.68,-0.55,.27,1.55);
+}
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Button hover and focus */
+.btn, .btn-primary, .btn-outline {
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+.btn:hover, .btn-primary:hover, .btn-outline:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 16px rgba(76,175,80,0.12);
+  filter: brightness(1.08);
+}
+
+/* Card animation */
+.card {
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.card:hover {
+  box-shadow: 0 8px 32px rgba(76,175,80,0.18);
+  transform: translateY(-6px) scale(1.03) rotate(-1deg);
+  z-index: 2;
+}
+
+/* Animate Toasts */
+.Toastify__toast {
+  animation: fadeInUp 0.5s;
+}
+
+/* Animate hero section */
+.hero {
+  animation: fadeInUp 1.2s cubic-bezier(.68,-0.55,.27,1.55);
+} 

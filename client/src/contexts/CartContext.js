@@ -34,7 +34,7 @@ export const CartProvider = ({ children }) => {
   const addToCart = (pickle, quantity = 1) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === pickle.id);
-      
+      toast.dismiss();
       if (existingItem) {
         // Update quantity if item already exists
         const updatedCart = prevCart.map(item =>
@@ -62,6 +62,7 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = (pickleId) => {
     setCart(prevCart => {
       const item = prevCart.find(item => item.id === pickleId);
+      toast.dismiss();
       if (item) {
         toast.info(`Removed ${item.name} from cart`);
       }
@@ -74,7 +75,7 @@ export const CartProvider = ({ children }) => {
       removeFromCart(pickleId);
       return;
     }
-
+    toast.dismiss();
     setCart(prevCart =>
       prevCart.map(item =>
         item.id === pickleId
@@ -86,6 +87,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     setCart([]);
+    toast.dismiss();
     toast.info('Cart cleared!');
   };
 

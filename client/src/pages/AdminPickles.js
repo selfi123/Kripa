@@ -109,12 +109,12 @@ const AdminPickles = () => {
 
   return (
     <div>
-      <h1 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '2.5rem', color: 'var(--text-color)' }}>
-        🥒 Manage Pickles
+      <h1 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '2.5rem', color: 'var(--text-color)' }} className="animated">
+        🥒 Manage Kripa Pickles
       </h1>
       {/* Add/Edit Form */}
-      <div style={{ background: 'var(--white)', padding: '2rem', borderRadius: 8, marginBottom: '2rem', boxShadow: 'var(--shadow)' }}>
-        <h2 style={{ marginBottom: '1rem', color: 'var(--text-color)' }}>{editingId ? 'Edit Pickle' : 'Add New Pickle'}</h2>
+      <div style={{ background: 'var(--white)', padding: '2rem', borderRadius: 8, marginBottom: '2rem', boxShadow: 'var(--shadow)' }} className="animated">
+        <h2 style={{ marginBottom: '1rem', color: 'var(--text-color)' }} className="animated">{editingId ? 'Edit Pickle' : 'Add New Kripa Pickle'}</h2>
         <form onSubmit={handleAddOrEdit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
           <input name="name" value={form.name} onChange={handleInputChange} placeholder="Name" required className="form-input" />
           <input name="category" value={form.category} onChange={handleInputChange} placeholder="Category" className="form-input" />
@@ -131,7 +131,7 @@ const AdminPickles = () => {
         </form>
       </div>
       {/* Pickles Table */}
-      <div className="admin-table">
+      <div className="admin-table animated">
         <table>
           <thead>
             <tr>
@@ -163,7 +163,7 @@ const AdminPickles = () => {
         </table>
       </div>
       <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-        <Link to="/admin" className="btn btn-primary">
+        <Link to="/admin" className="btn btn-primary animated">
           Back to Dashboard
         </Link>
       </div>

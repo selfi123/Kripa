@@ -75,13 +75,13 @@ const PickleCatalog = () => {
   };
 
   if (loading) {
-    return <div className="loading">Loading amazing pickles...</div>;
+    return <div className="loading animated">Loading Kripa Pickles...</div>;
   }
 
   return (
     <div>
-      <h1 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '2.5rem', color: 'var(--text-color)' }}>
-        🥒 Our Pickle Collection
+      <h1 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '2.5rem', color: 'var(--text-color)' }} className="animated">
+        🥒 Explore the Kripa Pickles Collection
       </h1>
 
       {/* Filters */}
@@ -142,7 +142,7 @@ const PickleCatalog = () => {
       {/* Results Count */}
       <div style={{ marginBottom: '2rem', color: 'var(--light-text)' }}>
         {pickles.length > 0 ? (
-          <p>Found {pickles.length} amazing pickle{pickles.length !== 1 ? 's' : ''}!</p>
+          <p>Found {pickles.length} delicious Kripa Pickle{pickles.length !== 1 ? 's' : ''}!</p>
         ) : (
           <p>No pickles found matching your criteria.</p>
         )}
@@ -150,7 +150,7 @@ const PickleCatalog = () => {
 
       {/* Pickles Grid */}
       {pickles.length > 0 ? (
-        <div className="grid">
+        <div className="grid animated">
           {pickles.map(pickle => (
             <div key={pickle.id} className="card">
               <img 
@@ -207,7 +207,7 @@ const PickleCatalog = () => {
           ))}
         </div>
       ) : (
-        <div className="empty-state">
+        <div className="empty-state animated">
           <h3>No pickles found</h3>
           <p>Try adjusting your search criteria or check back later for new arrivals!</p>
         </div>

@@ -42,30 +42,29 @@ const Home = () => {
   return (
     <div>
       {/* Hero Section */}
-      <section className="hero">
-        <h1 className="hero-title">🥒 The Best Pickles in Town!</h1>
-        <p className="hero-subtitle">
-          Discover our handcrafted pickles made with love and traditional recipes. 
-          From classic dill to spicy jalapeño, we have the perfect pickle for every taste.
+      <section className="hero animated">
+        <h1 className="hero-title animated">🍋 Welcome to Kripa Pickles!</h1>
+        <p className="hero-subtitle animated">
+          Discover our handcrafted pickles made with love and Kerala tradition. From classic lemon to spicy mango, Kripa Pickles brings authentic taste to your table.
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link to="/pickles" className="btn btn-primary">
+          <Link to="/pickles" className="btn btn-primary animated">
             <FaShoppingCart /> Shop Now
           </Link>
-          <Link to="/register" className="btn btn-outline" style={{ color: 'white', borderColor: 'white' }}>
-            Join Our Pickle Family
+          <Link to="/register" className="btn btn-outline animated" style={{ color: 'white', borderColor: 'white' }}>
+            Join the Kripa Family
           </Link>
         </div>
       </section>
 
       {/* Featured Pickles */}
       <section>
-        <h2 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '2rem', color: 'var(--text-color)' }}>
-          🌟 Featured Pickles
+        <h2 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '2rem', color: 'var(--text-color)' }} className="animated">
+          🌟 Kripa's Featured Pickles
         </h2>
         
         {featuredPickles.length > 0 ? (
-          <div className="grid">
+          <div className="grid animated">
             {featuredPickles.map(pickle => (
               <div key={pickle.id} className="card">
                 <img 
@@ -95,36 +94,36 @@ const Home = () => {
             ))}
           </div>
         ) : (
-          <div className="empty-state">
+          <div className="empty-state animated">
             <h3>No pickles available at the moment</h3>
-            <p>Check back soon for our amazing pickle selection!</p>
+            <p>Check back soon for our delicious Kripa Pickles selection!</p>
           </div>
         )}
       </section>
 
       {/* Features Section */}
       <section style={{ marginTop: '4rem' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '3rem', fontSize: '2rem', color: 'var(--text-color)' }}>
-          Why Choose Our Pickles?
+        <h2 style={{ textAlign: 'center', marginBottom: '3rem', fontSize: '2rem', color: 'var(--text-color)' }} className="animated">
+          Why Choose Kripa Pickles?
         </h2>
         
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
+        <div className="grid animated" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
           <div className="card" style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🌿</div>
             <h3>Natural Ingredients</h3>
-            <p>Made with only the finest natural ingredients and traditional recipes passed down through generations.</p>
+            <p>Made with only the finest natural ingredients and traditional Kerala recipes passed down through generations.</p>
           </div>
           
           <div className="card" style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚡</div>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🚚</div>
             <h3>Fast Delivery</h3>
-            <p>Get your favorite pickles delivered to your doorstep within 24 hours of ordering.</p>
+            <p>Get your favorite Kripa Pickles delivered to your doorstep quickly and safely.</p>
           </div>
           
           <div className="card" style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💚</div>
             <h3>Customer Satisfaction</h3>
-            <p>Join thousands of satisfied customers who love our pickles and keep coming back for more.</p>
+            <p>Join thousands of happy customers who love our pickles and keep coming back for more.</p>
           </div>
         </div>
       </section>
@@ -137,12 +136,12 @@ const Home = () => {
         background: 'var(--white)', 
         borderRadius: 'var(--border-radius)',
         boxShadow: 'var(--shadow)'
-      }}>
+      }} className="animated">
         <h2 style={{ marginBottom: '1rem', color: 'var(--text-color)' }}>
-          Ready to Experience the Best Pickles?
+          Ready to Taste the Magic of Kripa Pickles?
         </h2>
         <p style={{ marginBottom: '2rem', color: 'var(--light-text)' }}>
-          Join our pickle community and discover why our customers can't get enough!
+          Join our Kripa Pickles community and discover why our customers can't get enough!
         </p>
         <Link to="/pickles" className="btn btn-primary" style={{ fontSize: '1.25rem', padding: '1rem 2rem' }}>
           Start Shopping Now

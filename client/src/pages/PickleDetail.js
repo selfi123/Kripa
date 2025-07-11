@@ -78,32 +78,32 @@ const PickleDetail = () => {
     return stars;
   };
 
-  if (loading) return <div className="loading">Loading pickle details...</div>;
-  if (!pickle) return <div className="empty-state">Pickle not found.</div>;
+  if (loading) return <div className="loading animated">Loading pickle details...</div>;
+  if (!pickle) return <div className="empty-state animated">Pickle not found.</div>;
 
   return (
     <div>
-      <div className="pickle-detail">
+      <div className="pickle-detail animated">
         <img
           src={pickle.image_url || 'https://via.placeholder.com/400x400/4CAF50/ffffff?text=Pickle'}
           alt={pickle.name}
           className="pickle-image"
         />
         <div className="pickle-info">
-          <h1>{pickle.name}</h1>
+          <h1 className="animated">{pickle.name}</h1>
           <div className="pickle-price">₹{pickle.price}</div>
-          <div className="card-rating" style={{ marginBottom: '1rem' }}>
+          <div className="card-rating animated" style={{ marginBottom: '1rem' }}>
             <span className="stars">{renderStars(Math.round(pickle.avg_rating))}</span>
             <span style={{ marginLeft: '0.5rem' }}>({pickle.review_count} reviews)</span>
           </div>
-          <div className="pickle-description">{pickle.description}</div>
+          <div className="pickle-description animated">{pickle.description}</div>
           <div style={{ marginBottom: '1rem', color: 'var(--light-text)' }}>
             Category: <b>{pickle.category || 'Uncategorized'}</b>
           </div>
           <div style={{ marginBottom: '1rem', color: pickle.stock > 0 ? 'var(--primary-color)' : '#f44336' }}>
             {pickle.stock > 0 ? `In Stock (${pickle.stock} available)` : 'Out of Stock'}
           </div>
-          <div className="quantity-controls">
+          <div className="quantity-controls animated">
             <button className="quantity-btn" onClick={() => handleQuantityChange(-1)} disabled={quantity <= 1}>
               <FaMinus />
             </button>
@@ -113,14 +113,14 @@ const PickleDetail = () => {
             </button>
           </div>
           <button
-            className="btn btn-primary"
+            className="btn btn-primary animated"
             style={{ width: '100%', marginBottom: '1rem' }}
             onClick={handleAddToCart}
             disabled={pickle.stock === 0}
           >
             Add to Cart
           </button>
-          <Link to="/pickles" className="btn btn-outline" style={{ width: '100%' }}>
+          <Link to="/pickles" className="btn btn-outline animated" style={{ width: '100%' }}>
             ← Back to Pickles
           </Link>
         </div>
