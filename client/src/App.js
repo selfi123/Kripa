@@ -20,6 +20,11 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminPickles from './pages/AdminPickles';
 import AdminOrders from './pages/AdminOrders';
 import AdminUsers from './pages/AdminUsers';
+import ContactUs from './pages/ContactUs';
+import ShippingPolicy from './pages/ShippingPolicy';
+import TermsAndConditions from './pages/TermsAndConditions';
+import CancellationsRefunds from './pages/CancellationsRefunds';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 import './App.css';
 
@@ -45,6 +50,11 @@ function App() {
                 <Route path="/admin/pickles" element={<AdminPickles />} />
                 <Route path="/admin/orders" element={<AdminOrders />} />
                 <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/contact-us" element={<ContactUs />} />
+                <Route path="/shipping-policy" element={<ShippingPolicy />} />
+                <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+                <Route path="/cancellations-refunds" element={<CancellationsRefunds />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               </Routes>
             </main>
             <ToastContainer

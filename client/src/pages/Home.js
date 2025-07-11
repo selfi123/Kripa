@@ -82,7 +82,7 @@ const Home = () => {
                     </span>
                     <span>({pickle.review_count} reviews)</span>
                   </div>
-                  <div className="card-price">${pickle.price}</div>
+                  <div className="card-price">₹{pickle.price}</div>
                   <Link 
                     to={`/pickles/${pickle.id}`} 
                     className="btn btn-primary"

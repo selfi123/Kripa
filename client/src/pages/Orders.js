@@ -145,7 +145,7 @@ const Orders = () => {
                     </span>
                   </div>
                   <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>
-                    ${order.total_amount}
+                    ₹{order.total_amount}
                   </div>
                 </div>
               </div>
@@ -206,7 +206,7 @@ const Orders = () => {
                           </div>
                         </div>
                         <div style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>
-                          ${(item.price * item.quantity).toFixed(2)}
+                          ₹{(item.price * item.quantity).toFixed(2)}
                         </div>
                       </div>
                     ))}
@@ -222,7 +222,7 @@ const Orders = () => {
                   }}>
                     <span>Total:</span>
                     <span style={{ color: 'var(--primary-color)' }}>
-                      ${selectedOrder.total_amount}
+                      ₹{selectedOrder.total_amount}
                     </span>
                   </div>
                 </div>

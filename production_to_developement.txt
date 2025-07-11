@@ -1,0 +1,55 @@
+Production to Development Conversion Summary
+============================================
+
+This file lists all changes made to switch the project from production (https://kripapickles.shop) to local development (http://localhost:5000 and http://localhost:3000). Revert these changes to switch back to production.
+
+1. server/index.js
+------------------
+- CORS origin:
+  FROM:
+    origin: process.env.NODE_ENV === 'development' ? 'https://kripapickles.shop' : 'http://localhost:3000',
+  TO:
+    origin: process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'http://localhost:3000',
+- Console logs:
+  FROM:
+    Frontend: https://kripapickles.shop
+    API: https://kripapickles.shop/api
+  TO:
+    Frontend: http://localhost:3000
+    API: http://localhost:5000/api
+
+2. server/config/passport.js
+---------------------------
+- Google OAuth callbackURL:
+  FROM:
+    callbackURL: 'https://kripapickles.shop/api/auth/google/callback',
+  TO:
+    callbackURL: process.env.NODE_ENV === 'development' ? 'http://localhost:5000/api/auth/google/callback' : 'https://kripapickles.shop/api/auth/google/callback',
+
+3. env.example
+--------------
+- FRONTEND_URL:
+  FROM: https://kripapickles.shop
+  TO:   http://localhost:3000
+- GOOGLE_CALLBACK_URL:
+  FROM: https://kripapickles.shop/api/auth/google/callback
+  TO:   http://localhost:5000/api/auth/google/callback
+
+4. client/package.json
+----------------------
+- Proxy setting:
+  FROM: "proxy": "https://kripapickles.shop"
+  TO:   "proxy": "http://localhost:5000"
+
+5. client/src/pages/GoogleAuth.js
+---------------------------------
+- Backend URL for Google OAuth:
+  FROM:
+    const backendUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://kripapickles.shop';
+  TO:
+    const backendUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'http://localhost:5000';
+
+How to revert:
+--------------
+- Change all instances of 'localhost' and local ports back to 'https://kripapickles.shop' as shown above.
+- Update Google OAuth credentials in Google Console to use the production callback URL when deploying. 

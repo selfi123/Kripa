@@ -91,7 +91,7 @@ const PickleDetail = () => {
         />
         <div className="pickle-info">
           <h1>{pickle.name}</h1>
-          <div className="pickle-price">${pickle.price}</div>
+          <div className="pickle-price">₹{pickle.price}</div>
           <div className="card-rating" style={{ marginBottom: '1rem' }}>
             <span className="stars">{renderStars(Math.round(pickle.avg_rating))}</span>
             <span style={{ marginLeft: '0.5rem' }}>({pickle.review_count} reviews)</span>

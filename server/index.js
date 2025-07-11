@@ -10,13 +10,19 @@ const orderRoutes = require('./routes/orders');
 const adminRoutes = require('./routes/admin');
 const { initializeDatabase } = require('./database/init');
 const passport = require('./config/passport');
+const Razorpay = require('razorpay');
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'secret_placeholder',
+});
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? 'https://kripapickles.shop' : 'http://localhost:3000',
+  origin: process.env.NODE_ENV === 'development' ? 'https://kripapickles.shop' : 'http://localhost:3000',
   credentials: true
 }));
 app.use(express.json());
@@ -63,8 +69,8 @@ initializeDatabase()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`🥒 Pickle MCP Server running on port ${PORT}`);
-      console.log(`\uD83C\uDF10 Frontend: https://kripapickles.shop`);
-      console.log(`\uD83D\uDD27 API: https://kripapickles.shop/api`);
+      console.log(`\uD83C\uDF10 Frontend: http://localhost:3000`);
+      console.log(`\uD83D\uDD27 API: http://localhost:${PORT}/api`);
     });
   })
   .catch(err => {

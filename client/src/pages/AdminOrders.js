@@ -49,6 +49,20 @@ const AdminOrders = () => {
     }
   };
 
+  const handleDeleteOrder = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
+    setUpdating((prev) => ({ ...prev, [id]: true }));
+    try {
+      await axios.delete(`/api/admin/orders/${id}`);
+      setOrders((prev) => prev.filter(o => o.id !== id));
+      toast.success('Order deleted successfully!');
+    } catch (err) {
+      toast.error('Failed to delete order');
+    } finally {
+      setUpdating((prev) => ({ ...prev, [id]: false }));
+    }
+  };
+
   if (!isAdmin) {
     return (
       <div className="empty-state">
@@ -95,7 +109,7 @@ const AdminOrders = () => {
                 <td>{o.id}</td>
                 <td>{o.username}</td>
                 <td>{o.email}</td>
-                <td>${Number(o.total_amount).toFixed(2)}</td>
+                <td>₹{Number(o.total_amount).toFixed(2)}</td>
                 <td style={{ textTransform: 'capitalize' }}>{o.status}</td>
                 <td style={{ textTransform: 'capitalize' }}>{o.payment_type || 'N/A'}</td>
                 <td>{o.item_count}</td>
@@ -111,6 +125,14 @@ const AdminOrders = () => {
                       <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
                     ))}
                   </select>
+                  <button
+                    className="btn btn-danger"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => handleDeleteOrder(o.id)}
+                    disabled={updating[o.id]}
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}

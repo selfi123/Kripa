@@ -234,4 +234,25 @@ router.delete('/users/:id', authenticateAdmin, (req, res) => {
   });
 });
 
+// Delete order (admin)
+router.delete('/orders/:id', authenticateAdmin, (req, res) => {
+  const { id } = req.params;
+  // First delete order items
+  db.run('DELETE FROM order_items WHERE order_id = ?', [id], function(err) {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to delete order items' });
+    }
+    // Then delete the order itself
+    db.run('DELETE FROM orders WHERE id = ?', [id], function(err) {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to delete order' });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+      res.json({ message: 'Order deleted successfully' });
+    });
+  });
+});
+
 module.exports = router; 

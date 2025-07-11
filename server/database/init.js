@@ -44,6 +44,9 @@ const initializeDatabase = () => {
           total_amount REAL NOT NULL,
           status TEXT DEFAULT 'pending',
           shipping_address TEXT,
+          razorpay_payment_id TEXT,
+          razorpay_order_id TEXT,
+          razorpay_signature TEXT,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users (id)
         )

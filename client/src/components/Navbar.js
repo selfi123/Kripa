@@ -4,6 +4,34 @@ import { FaShoppingCart, FaUser, FaSignOutAlt, FaCog } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 
+function Footer() {
+  return (
+    <footer style={{
+      position: 'fixed',
+      left: 0,
+      bottom: 0,
+      width: '100%',
+      background: '#f8f8f8',
+      borderTop: '1px solid #e0e0e0',
+      padding: '0.75rem 0 0.5rem 0',
+      textAlign: 'center',
+      fontSize: '1rem',
+      color: '#555',
+      zIndex: 1000,
+      boxShadow: '0 -2px 8px rgba(0,0,0,0.03)'
+    }}>
+      <div style={{ marginBottom: '0.25rem', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+        <Link to="/contact-us">Contact Us</Link>
+        <Link to="/shipping-policy">Shipping Policy</Link>
+        <Link to="/terms-and-conditions">Terms & Conditions</Link>
+        <Link to="/cancellations-refunds">Cancellations & Refunds</Link>
+        <Link to="/privacy-policy">Privacy Policy</Link>
+      </div>
+      <div style={{ fontSize: '0.95rem', color: '#888' }}>© {new Date().getFullYear()} Awesome Pickles. All rights reserved.</div>
+    </footer>
+  );
+}
+
 const Navbar = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const { getCartItemCount } = useCart();
@@ -95,4 +123,11 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default function NavbarWithFooter(props) {
+  return (
+    <>
+      <Navbar {...props} />
+      <Footer />
+    </>
+  );
+} 

@@ -14,6 +14,8 @@ const Cart = () => {
   const paymentTypes = [
     { value: 'cod', label: 'Cash on Delivery' },
     { value: 'card', label: 'Credit/Debit Card' },
+    { value: 'upi', label: 'UPI' },
+    { value: 'gpay', label: 'GPay' },
     { value: 'amazon', label: 'Amazon Pay' }
   ];
 
@@ -31,6 +33,8 @@ const Cart = () => {
     }
   };
 
+  const RAZORPAY_KEY_ID = 'rzp_test_edFx1fSyBJhWK5';
+
   const handleCheckout = async (e) => {
     e.preventDefault();
     
@@ -47,12 +51,59 @@ const Cart = () => {
 
     setCheckoutLoading(true);
     try {
+      if (checkoutForm.paymentType !== 'cod') {
+        // Create Razorpay order
+        const amount = getCartTotal();
+        const { data } = await axios.post('/api/orders/create-razorpay-order', { amount });
+        const razorpayOrder = data.order;
+        // Load Razorpay script
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+        script.onload = () => {
+          const options = {
+            key: RAZORPAY_KEY_ID,
+            amount: razorpayOrder.amount,
+            currency: razorpayOrder.currency,
+            name: 'Awesome Pickles',
+            description: 'Order Payment',
+            order_id: razorpayOrder.id,
+            handler: async function (response) {
+              // Place order in backend after payment success
+              const orderData = {
+                items: getCartItems(),
+                shippingAddress: checkoutForm.shippingAddress,
+                paymentType: checkoutForm.paymentType,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpaySignature: response.razorpay_signature
+              };
+              const backendResponse = await axios.post('/api/orders', orderData);
+              if (backendResponse.data.message) {
+                toast.success('Order placed successfully!');
+                clearCart();
+                navigate('/orders');
+              }
+            },
+            prefill: {},
+            theme: { color: '#4CAF50' }
+          };
+          const rzp = new window.Razorpay(options);
+          rzp.open();
+        };
+        script.onerror = () => {
+          toast.error('Failed to load payment gateway');
+          setCheckoutLoading(false);
+        };
+        return;
+      }
+      // COD: Place order directly
       const orderData = {
         items: getCartItems(),
         shippingAddress: checkoutForm.shippingAddress,
         paymentType: checkoutForm.paymentType
       };
-
       const response = await axios.post('/api/orders', orderData);
       
       if (response.data.message) {
@@ -102,7 +153,7 @@ const Cart = () => {
               
               <div className="cart-item-info">
                 <h3>{item.name}</h3>
-                <div className="cart-item-price">${item.price}</div>
+                <div className="cart-item-price">₹{item.price}</div>
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
                   <button
@@ -127,7 +178,7 @@ const Cart = () => {
               
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontWeight: 'bold', fontSize: '1.125rem', color: 'var(--primary-color)', marginBottom: '0.5rem' }}>
-                  ${(item.price * item.quantity).toFixed(2)}
+                  ₹{(item.price * item.quantity).toFixed(2)}
                 </div>
                 <button
                   onClick={() => removeFromCart(item.id)}
@@ -150,7 +201,7 @@ const Cart = () => {
               {cart.map(item => (
                 <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <span>{item.name} × {item.quantity}</span>
-                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                  <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
             </div>
@@ -158,7 +209,7 @@ const Cart = () => {
             <hr style={{ margin: '1rem 0', border: 'none', borderTop: '1px solid var(--border)' }} />
             
             <div className="total-amount">
-              Total: ${getCartTotal().toFixed(2)}
+              Total: ₹{getCartTotal().toFixed(2)}
             </div>
 
             {!isAuthenticated ? (

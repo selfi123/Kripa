@@ -150,7 +150,7 @@ const AdminPickles = () => {
                 <td>{p.id}</td>
                 <td>{p.name}</td>
                 <td>{p.category}</td>
-                <td>${Number(p.price).toFixed(2)}</td>
+                <td>₹{Number(p.price).toFixed(2)}</td>
                 <td>{p.stock}</td>
                 <td>{p.image_url ? <img src={p.image_url} alt={p.name} style={{ width: 60, height: 40, objectFit: 'cover', borderRadius: 4 }} /> : '—'}</td>
                 <td style={{ display: 'flex', gap: 8 }}>

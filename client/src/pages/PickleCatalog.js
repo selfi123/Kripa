@@ -183,7 +183,7 @@ const PickleCatalog = () => {
                   <span>({pickle.review_count} reviews)</span>
                 </div>
                 
-                <div className="card-price">${pickle.price}</div>
+                <div className="card-price">₹{pickle.price}</div>
                 
                 {pickle.stock > 0 ? (
                   <div style={{ color: 'var(--primary-color)', marginBottom: '1rem', fontSize: '0.875rem' }}>

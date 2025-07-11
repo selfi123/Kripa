@@ -1,6 +1,11 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { db } = require('../database/init');
+const Razorpay = require('razorpay');
+const razorpay = new Razorpay({
+  key_id: 'rzp_test_edFx1fSyBJhWK5',
+  key_secret: 'b6aSlFvZb9bMoTFWbKCVYwjh',
+});
 
 const router = express.Router();
 
@@ -23,7 +28,7 @@ const authenticateToken = (req, res, next) => {
 
 // Create new order
 router.post('/', authenticateToken, (req, res) => {
-  const { items, shippingAddress, paymentType } = req.body;
+  const { items, shippingAddress, paymentType, razorpayPaymentId, razorpayOrderId, razorpaySignature } = req.body;
   const userId = req.user.userId;
   
   if (!items || !Array.isArray(items) || items.length === 0) {
@@ -71,8 +76,8 @@ router.post('/', authenticateToken, (req, res) => {
   
   function createOrder() {
     // Create order
-    db.run('INSERT INTO orders (user_id, total_amount, shipping_address, payment_type) VALUES (?, ?, ?, ?)',
-      [userId, totalAmount, shippingAddress, paymentType || 'cod'], function(err) {
+    db.run('INSERT INTO orders (user_id, total_amount, shipping_address, payment_type, razorpay_payment_id, razorpay_order_id, razorpay_signature) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [userId, totalAmount, shippingAddress, paymentType || 'cod', razorpayPaymentId || null, razorpayOrderId || null, razorpaySignature || null], function(err) {
       if (err) {
         return res.status(500).json({ error: 'Failed to create order' });
       }
@@ -107,6 +112,26 @@ router.post('/', authenticateToken, (req, res) => {
         });
       }
     });
+  }
+});
+
+// Create Razorpay order for payment
+router.post('/create-razorpay-order', authenticateToken, async (req, res) => {
+  const { amount, currency = 'INR' } = req.body;
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ error: 'Invalid amount' });
+  }
+  try {
+    const options = {
+      amount: Math.round(amount * 100), // Razorpay expects paise
+      currency,
+      receipt: `order_rcptid_${Date.now()}`
+    };
+    const order = await razorpay.orders.create(options);
+    res.json({ order });
+  } catch (err) {
+    console.error('Razorpay order error:', err);
+    res.status(500).json({ error: 'Failed to create Razorpay order' });
   }
 });
 

@@ -119,7 +119,7 @@ const AdminUsers = () => {
                 <td>{u.email}</td>
                 <td style={{ textTransform: 'capitalize' }}>{u.role}</td>
                 <td>{u.order_count || 0}</td>
-                <td>${Number(u.total_spent || 0).toFixed(2)}</td>
+                <td>₹{Number(u.total_spent || 0).toFixed(2)}</td>
                 <td>{new Date(u.created_at).toLocaleDateString()}</td>
                 <td style={{ display: 'flex', gap: 8 }}>
                   {u.id === currentUser?.id ? (
