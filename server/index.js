@@ -9,6 +9,7 @@ const pickleRoutes = require('./routes/pickles');
 const orderRoutes = require('./routes/orders');
 const adminRoutes = require('./routes/admin');
 const contactRoutes = require('./routes/contact');
+const cartRoutes = require('./routes/cart');
 const { initializeDatabase } = require('./database/init');
 const passport = require('./config/passport');
 const Razorpay = require('razorpay');
@@ -50,6 +51,7 @@ app.use('/api/pickles', pickleRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/cart', cartRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

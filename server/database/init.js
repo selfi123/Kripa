@@ -92,6 +92,16 @@ const initializeDatabase = () => {
         )
       `);
 
+      // Carts table
+      db.run(`
+        CREATE TABLE IF NOT EXISTS carts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER UNIQUE,
+          items TEXT,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        )
+      `);
 
 
       resolve();

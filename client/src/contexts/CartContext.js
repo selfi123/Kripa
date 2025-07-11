@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import axios from 'axios';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 
@@ -12,40 +14,102 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Load cart from localStorage on mount
-  useEffect(() => {
+  // Helper: Save cart to localStorage
+  const saveLocalCart = (cartItems) => {
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  };
+
+  // Helper: Load cart from localStorage
+  const loadLocalCart = () => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       try {
-        setCart(JSON.parse(savedCart));
+        return JSON.parse(savedCart);
       } catch (error) {
         console.error('Failed to load cart from localStorage:', error);
       }
     }
-  }, []);
+    return [];
+  };
 
-  // Save cart to localStorage whenever it changes
+  // Load cart on mount (local for guests, server for logged-in)
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
+    if (authLoading) return; // Wait for auth to load
+    if (isAuthenticated) {
+      // Fetch server cart
+      setLoading(true);
+      axios.get('/api/cart')
+        .then(res => {
+          setCart(res.data.items || []);
+        })
+        .catch(() => setCart([]))
+        .finally(() => setLoading(false));
+    } else {
+      setCart(loadLocalCart());
+    }
+  }, [isAuthenticated, authLoading]);
+
+  // Save cart to localStorage if not logged in
+  useEffect(() => {
+    if (!isAuthenticated) {
+      saveLocalCart(cart);
+    }
+  }, [cart, isAuthenticated]);
+
+  // Merge local cart with server cart on login
+  useEffect(() => {
+    if (authLoading) return;
+    if (isAuthenticated) {
+      const localCart = loadLocalCart();
+      if (localCart.length > 0) {
+        // Fetch server cart, merge, and save
+        axios.get('/api/cart').then(res => {
+          const serverCart = res.data.items || [];
+          // Merge: sum quantities for same pickleId
+          const merged = [...serverCart];
+          localCart.forEach(localItem => {
+            const idx = merged.findIndex(item => item.id === localItem.id);
+            if (idx !== -1) {
+              merged[idx].quantity += localItem.quantity;
+            } else {
+              merged.push(localItem);
+            }
+          });
+          setCart(merged);
+          axios.post('/api/cart', { items: merged });
+          localStorage.removeItem('cart');
+        });
+      }
+    }
+  }, [isAuthenticated, authLoading]);
+
+  // Cart actions
+  const syncServerCart = (newCart) => {
+    if (isAuthenticated) {
+      setCart(newCart);
+      axios.post('/api/cart', { items: newCart });
+    } else {
+      setCart(newCart);
+    }
+  };
 
   const addToCart = (pickle, quantity = 1) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === pickle.id);
       toast.dismiss();
+      let updatedCart;
       if (existingItem) {
-        // Update quantity if item already exists
-        const updatedCart = prevCart.map(item =>
+        updatedCart = prevCart.map(item =>
           item.id === pickle.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
         toast.success(`Updated ${pickle.name} quantity!`);
-        return updatedCart;
       } else {
-        // Add new item
         const newItem = {
           id: pickle.id,
           name: pickle.name,
@@ -53,9 +117,11 @@ export const CartProvider = ({ children }) => {
           imageUrl: pickle.image_url,
           quantity
         };
+        updatedCart = [...prevCart, newItem];
         toast.success(`Added ${pickle.name} to cart!`);
-        return [...prevCart, newItem];
       }
+      syncServerCart(updatedCart);
+      return updatedCart;
     });
   };
 
@@ -63,10 +129,12 @@ export const CartProvider = ({ children }) => {
     setCart(prevCart => {
       const item = prevCart.find(item => item.id === pickleId);
       toast.dismiss();
+      let updatedCart = prevCart.filter(item => item.id !== pickleId);
       if (item) {
         toast.info(`Removed ${item.name} from cart`);
       }
-      return prevCart.filter(item => item.id !== pickleId);
+      syncServerCart(updatedCart);
+      return updatedCart;
     });
   };
 
@@ -76,19 +144,24 @@ export const CartProvider = ({ children }) => {
       return;
     }
     toast.dismiss();
-    setCart(prevCart =>
-      prevCart.map(item =>
+    setCart(prevCart => {
+      const updatedCart = prevCart.map(item =>
         item.id === pickleId
           ? { ...item, quantity }
           : item
-      )
-    );
+      );
+      syncServerCart(updatedCart);
+      return updatedCart;
+    });
   };
 
   const clearCart = () => {
     setCart([]);
     toast.dismiss();
     toast.info('Cart cleared!');
+    if (isAuthenticated) {
+      axios.delete('/api/cart');
+    }
   };
 
   const getCartTotal = () => {
@@ -116,7 +189,8 @@ export const CartProvider = ({ children }) => {
     getCartTotal,
     getCartItemCount,
     getCartItems,
-    isEmpty: cart.length === 0
+    isEmpty: cart.length === 0,
+    loading
   };
 
   return (
