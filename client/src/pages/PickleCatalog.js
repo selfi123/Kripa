@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaStar, FaSearch, FaFilter } from 'react-icons/fa';
 
@@ -12,6 +12,7 @@ const PickleCatalog = () => {
     category: '',
     sort: 'name'
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -157,6 +158,8 @@ const PickleCatalog = () => {
                 src={pickle.image_url || 'https://via.placeholder.com/300x200/4CAF50/ffffff?text=Pickle'} 
                 alt={pickle.name}
                 className="card-image"
+                style={{ cursor: 'pointer' }}
+                onClick={() => navigate(`/pickles/${pickle.id}`)}
               />
               <div className="card-content">
                 <h3 className="card-title">{pickle.name}</h3>
