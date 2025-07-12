@@ -52,34 +52,32 @@ const getDistrictFromPincode = (pincode) => {
   return '';
 };
 
-// Calculate delivery fee
+// Calculate courier charge
 router.post('/calculate-delivery-fee', (req, res) => {
-  const { subtotal, deliveryType = 'standard', pincode } = req.body;
+  const { subtotal, deliveryType = 'standard', state } = req.body;
   
   if (!subtotal || subtotal < 0) {
     return res.status(400).json({ error: 'Invalid subtotal amount' });
   }
   
-  // Determine district
-  const district = getDistrictFromPincode(pincode);
-  let deliveryFee = 150;
-  if (district === 'Ernakulam' || district === 'Thrissur') {
-    deliveryFee = 100;
+  // Determine courier charge by state
+  let courierCharge = 150;
+  if (state && String(state).trim().toLowerCase() === 'kerala') {
+    courierCharge = 100;
   }
   // Free delivery threshold
   let freeDeliveryThreshold = 1000;
   if (subtotal >= freeDeliveryThreshold) {
-    deliveryFee = 0;
+    courierCharge = 0;
   }
-  const totalAmount = subtotal + deliveryFee;
+  const totalAmount = subtotal + courierCharge;
   res.json({
     subtotal,
-    deliveryFee,
+    courierCharge,
     totalAmount,
     freeDeliveryThreshold,
     deliveryType,
-    district,
-    pincode
+    state
   });
 });
 
@@ -132,29 +130,24 @@ router.post('/', authenticateToken, (req, res) => {
   }
   
   function calculateDeliveryAndCreateOrder() {
-    // Determine district
-    const district = getDistrictFromPincode(pincode);
-    let deliveryFee = 150;
-    if (district === 'Ernakulam' || district === 'Thrissur') {
-      deliveryFee = 100;
+    // Determine courier charge by state
+    let courierCharge = 150;
+    if (shippingAddress && shippingAddress.toLowerCase().includes('kerala')) {
+      courierCharge = 100;
     }
     // Free delivery threshold
     let freeDeliveryThreshold = 1000;
     if (subtotal >= freeDeliveryThreshold) {
-      deliveryFee = 0;
+      courierCharge = 0;
     }
-    
-    const totalAmount = subtotal + deliveryFee;
-    
-    // Create order with delivery fee
+    const totalAmount = subtotal + courierCharge;
+    // Create order with courier charge
     db.run('INSERT INTO orders (user_id, total_amount, shipping_address, payment_type, razorpay_payment_id, razorpay_order_id, razorpay_signature, delivery_fee, delivery_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [userId, totalAmount, shippingAddress, paymentType || 'cod', razorpayPaymentId || null, razorpayOrderId || null, razorpaySignature || null, deliveryFee, deliveryType], function(err) {
+      [userId, totalAmount, shippingAddress, paymentType || 'cod', razorpayPaymentId || null, razorpayOrderId || null, razorpaySignature || null, courierCharge, deliveryType], function(err) {
       if (err) {
         return res.status(500).json({ error: 'Failed to create order' });
       }
-      
       const orderId = this.lastID;
-      
       // Add order items
       let itemsAdded = 0;
       for (const item of validatedItems) {
@@ -163,7 +156,6 @@ router.post('/', authenticateToken, (req, res) => {
           if (err) {
             return res.status(500).json({ error: 'Failed to add order items' });
           }
-          
           // Update stock
           db.run('UPDATE pickles SET stock = stock - ? WHERE id = ?',
             [item.quantity, item.pickleId], (err) => {
@@ -171,17 +163,16 @@ router.post('/', authenticateToken, (req, res) => {
               console.error('Failed to update stock:', err);
             }
           });
-          
           itemsAdded++;
           if (itemsAdded === validatedItems.length) {
             res.status(201).json({
               message: 'Order created successfully',
               orderId,
               subtotal,
-              deliveryFee,
+              courierCharge,
               totalAmount,
               deliveryType,
-              district
+              state
             });
           }
         });

@@ -35,9 +35,9 @@ const Cart = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
-  // Calculate delivery fee when cart or delivery options change
+  // Calculate courier charge when cart or delivery options change
   useEffect(() => {
-    const calculateDeliveryFee = async () => {
+    const calculateCourierCharge = async () => {
       if (cart.length === 0) return;
       
       const subtotal = getCartTotal();
@@ -45,20 +45,20 @@ const Cart = () => {
         const response = await axios.post('/api/orders/calculate-delivery-fee', {
           subtotal,
           deliveryType: checkoutForm.deliveryType,
-          pincode: checkoutForm.pincode
+          state: checkoutForm.state
         });
         
-        setDeliveryFee(response.data.deliveryFee);
+        setDeliveryFee(response.data.courierCharge);
         setTotalAmount(response.data.totalAmount);
       } catch (error) {
-        console.error('Failed to calculate delivery fee:', error);
+        console.error('Failed to calculate courier charge:', error);
         setDeliveryFee(0);
         setTotalAmount(subtotal);
       }
     };
 
-    calculateDeliveryFee();
-  }, [cart, checkoutForm.deliveryType, checkoutForm.pincode, getCartTotal]);
+    calculateCourierCharge();
+  }, [cart, checkoutForm.deliveryType, checkoutForm.state, getCartTotal]);
 
   const handleQuantityChange = (pickleId, newQuantity) => {
     if (newQuantity <= 0) {
@@ -251,7 +251,7 @@ const Cart = () => {
             </div>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <span>Delivery Fee:</span>
+              <span>Courier Charge:</span>
               <span style={{ color: deliveryFee === 0 ? '#4CAF50' : 'inherit' }}>
                 {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toFixed(2)}`}
               </span>
@@ -259,7 +259,7 @@ const Cart = () => {
             
             {getCartTotal() < 1000 && (
               <div style={{ fontSize: '0.875rem', color: '#4CAF50', marginBottom: '0.5rem', textAlign: 'center' }}>
-                Add ₹{(1000 - getCartTotal()).toFixed(2)} more for FREE delivery!
+                Add ₹{(1000 - getCartTotal()).toFixed(2)} more for FREE courier!
               </div>
             )}
             
