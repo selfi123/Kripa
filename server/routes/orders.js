@@ -65,8 +65,8 @@ router.post('/calculate-delivery-fee', (req, res) => {
   if (state && String(state).trim().toLowerCase() === 'kerala') {
     courierCharge = 100;
   }
-  // Coupon logic
-  const validCoupons = ['FRIENDFREE'];
+  // Coupon logic (from env)
+  const validCoupons = (process.env.COUPON_CODES || '').split(',').map(c => c.trim().toUpperCase()).filter(Boolean);
   if (coupon && validCoupons.includes(String(coupon).trim().toUpperCase())) {
     courierCharge = 0;
   }
@@ -145,8 +145,9 @@ router.post('/', authenticateToken, (req, res) => {
     if (shippingAddress && shippingAddress.toLowerCase().includes('kerala')) {
       courierCharge = 100;
     }
-    // Coupon logic
-      const validCoupons = (process.env.COUPON_CODES || '').split(',').map(c => c.trim().toUpperCase()).filter(Boolean);    if (req.body.coupon && validCoupons.includes(String(req.body.coupon).trim().toUpperCase())) {
+    // Coupon logic (from env)
+    const validCoupons = (process.env.COUPON_CODES || '').split(',').map(c => c.trim().toUpperCase()).filter(Boolean);
+    if (req.body.coupon && validCoupons.includes(String(req.body.coupon).trim().toUpperCase())) {
       courierCharge = 0;
     }
     // Free delivery threshold
