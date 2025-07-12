@@ -10,7 +10,7 @@ const Home = () => {
   useEffect(() => {
     const fetchFeaturedPickles = async () => {
       try {
-        const response = await axios.get('/api/pickles?sort=limit=6');
+        const response = await axios.get('/api/pickles?sort=limit=3&sort=avg_rating');
         setFeaturedPickles(response.data.pickles);
       } catch (error) {
         console.error('Failed to fetch featured pickles:', error);
