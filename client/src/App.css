@@ -644,3 +644,29 @@ h1, h2, h3 {
     padding: 1rem 1rem;
   }
 } 
+
+.no-preservatives-banner {
+  width: 100%;
+  background: linear-gradient(90deg, #a8e063 0%, #56ab2f 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 1.25rem 2rem;
+  margin: 2rem 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 12px rgba(76,175,80,0.10);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+  letter-spacing: 0.01em;
+}
+@media (max-width: 600px) {
+  .no-preservatives-banner {
+    padding: 1rem 0.5rem;
+    font-size: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+} 

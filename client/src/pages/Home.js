@@ -62,6 +62,14 @@ const Home = () => {
         </div>
       </section>
 
+      {/* No Preservatives Banner */}
+      <div className="no-preservatives-banner animated">
+        <span style={{ fontSize: '2rem' }}>✅</span>
+        <span>
+          <span style={{ fontWeight: 700 }}>No Preservatives Added!</span> Our pickles are 100% natural, made fresh in small batches for your health and taste.
+        </span>
+      </div>
+
       {/* All Pickles */}
       <section>
         <h2 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '2rem', color: 'var(--text-color)' }} className="animated">
