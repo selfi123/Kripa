@@ -31,7 +31,7 @@ const ContactUs = () => {
       <ul>
         <li>Email: <a href="mailto:kripapicklestore@gmail.com">kripapicklestore@gmail.com</a></li>
         <li>Phone: <a href="tel:+919847406948">+91 98474 06948</a></li>
-        <li>Address: 123 Pickle Street, Mumbai, India</li>
+        <li>Address: North Paravur, Attupuram, Ayroor PO, 683579 ,Ernakulam, Kerala, India</li>
       </ul>
       <h2 className="animated">Contact Form</h2>
       <form style={{maxWidth: 400}} className="animated" onSubmit={handleSubmit}>

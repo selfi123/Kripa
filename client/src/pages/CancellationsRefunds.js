@@ -8,7 +8,7 @@ const CancellationsRefunds = () => (
       <li>If you receive a damaged or incorrect product, contact us within 48 hours for a replacement or refund.</li>
       <li>Refunds are processed within 5-7 business days to your original payment method.</li>
       <li>For COD orders, refunds will be processed via bank transfer.</li>
-      <li>Contact <a href="mailto:support@pickles.com">support@pickles.com</a> for all refund/cancellation requests.</li>
+      <li>Contact <a href="mailto:kripapicklestore@gmail.com">kripapicklestore@gmail.com</a> for all refund/cancellation requests.</li>
     </ul>
   </div>
 );
