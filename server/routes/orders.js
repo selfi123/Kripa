@@ -146,8 +146,7 @@ router.post('/', authenticateToken, (req, res) => {
       courierCharge = 100;
     }
     // Coupon logic
-    const validCoupons = ['FRIENDFREE'];
-    if (req.body.coupon && validCoupons.includes(String(req.body.coupon).trim().toUpperCase())) {
+      const validCoupons = (process.env.COUPON_CODES || '').split(',').map(c => c.trim().toUpperCase()).filter(Boolean);    if (req.body.coupon && validCoupons.includes(String(req.body.coupon).trim().toUpperCase())) {
       courierCharge = 0;
     }
     // Free delivery threshold
