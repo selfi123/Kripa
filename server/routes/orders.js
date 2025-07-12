@@ -54,7 +54,7 @@ const getDistrictFromPincode = (pincode) => {
 
 // Calculate courier charge
 router.post('/calculate-delivery-fee', (req, res) => {
-  const { subtotal, state } = req.body;
+  const { subtotal, state, coupon } = req.body;
   
   if (!subtotal || subtotal < 0) {
     return res.status(400).json({ error: 'Invalid subtotal amount' });
@@ -64,6 +64,11 @@ router.post('/calculate-delivery-fee', (req, res) => {
   let courierCharge = 150;
   if (state && String(state).trim().toLowerCase() === 'kerala') {
     courierCharge = 100;
+  }
+  // Coupon logic
+  const validCoupons = ['FRIENDFREE'];
+  if (coupon && validCoupons.includes(String(coupon).trim().toUpperCase())) {
+    courierCharge = 0;
   }
   // Free delivery threshold
   let freeDeliveryThreshold = 1000;
@@ -76,7 +81,8 @@ router.post('/calculate-delivery-fee', (req, res) => {
     courierCharge,
     totalAmount,
     freeDeliveryThreshold,
-    state
+    state,
+    couponApplied: courierCharge === 0 && coupon ? true : false
   });
 });
 
@@ -139,6 +145,11 @@ router.post('/', authenticateToken, (req, res) => {
     if (shippingAddress && shippingAddress.toLowerCase().includes('kerala')) {
       courierCharge = 100;
     }
+    // Coupon logic
+    const validCoupons = ['FRIENDFREE'];
+    if (req.body.coupon && validCoupons.includes(String(req.body.coupon).trim().toUpperCase())) {
+      courierCharge = 0;
+    }
     // Free delivery threshold
     let freeDeliveryThreshold = 1000;
     if (subtotal >= freeDeliveryThreshold) {
@@ -175,7 +186,8 @@ router.post('/', authenticateToken, (req, res) => {
               subtotal,
               courierCharge,
               totalAmount,
-              state
+              state,
+              couponApplied: courierCharge === 0 && req.body.coupon ? true : false
             });
           }
         });

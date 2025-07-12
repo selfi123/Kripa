@@ -26,7 +26,8 @@ const Cart = () => {
     state: '',
     pincode: '',
     country: 'India',
-    paymentType: 'card'
+    paymentType: 'card',
+    coupon: ''
   });
   
   const [deliveryFee, setDeliveryFee] = useState(0);
@@ -42,7 +43,8 @@ const Cart = () => {
       try {
         const response = await axios.post('/api/orders/calculate-delivery-fee', {
           subtotal,
-          state: checkoutForm.state
+          state: checkoutForm.state,
+          coupon: checkoutForm.coupon
         });
         
         setDeliveryFee(response.data.courierCharge);
@@ -55,7 +57,7 @@ const Cart = () => {
     };
 
     calculateCourierCharge();
-  }, [cart, checkoutForm.state, getCartTotal]);
+  }, [cart, checkoutForm.state, checkoutForm.coupon, getCartTotal]);
 
   const handleQuantityChange = (pickleId, newQuantity) => {
     if (newQuantity <= 0) {
@@ -134,7 +136,8 @@ const Cart = () => {
       const orderData = {
         items: getCartItems(),
         shippingAddress: `${checkoutForm.name}, ${checkoutForm.phone}, ${checkoutForm.addressLine}, ${checkoutForm.city}, ${checkoutForm.state}, ${checkoutForm.pincode}, ${checkoutForm.country}`,
-        paymentType: checkoutForm.paymentType
+        paymentType: checkoutForm.paymentType,
+        coupon: checkoutForm.coupon
       };
       const response = await axios.post('/api/orders', orderData);
       
@@ -366,6 +369,17 @@ const Cart = () => {
                       <option key={pt.value} value={pt.value}>{pt.label}</option>
                     ))}
                   </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Coupon Code (if any)</label>
+                  <input
+                    name="coupon"
+                    value={checkoutForm.coupon}
+                    onChange={e => setCheckoutForm(f => ({ ...f, coupon: e.target.value }))}
+                    className="form-input"
+                    placeholder="Enter coupon code"
+                  />
                 </div>
                 
                 <button
