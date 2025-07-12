@@ -593,3 +593,54 @@ h1, h2, h3 {
 .hero {
   animation: fadeInUp 1.2s cubic-bezier(.68,-0.55,.27,1.55);
 } 
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 1rem;
+}
+
+@media (max-width: 900px) {
+  .nav-container {
+    flex-direction: row;
+    gap: 0;
+  }
+  .hamburger {
+    display: block;
+    z-index: 1100;
+  }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 70px;
+    right: 10px;
+    background: var(--white);
+    box-shadow: var(--shadow);
+    border-radius: var(--border-radius);
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    min-width: 200px;
+    animation: fadeInUp 0.3s;
+    z-index: 1050;
+  }
+  .nav-links.open {
+    display: flex;
+  }
+}
+
+@media (max-width: 600px) {
+  .nav-container {
+    flex-direction: row;
+    padding: 0 0.5rem;
+  }
+  .nav-logo {
+    font-size: 1.1rem;
+  }
+  .nav-links {
+    min-width: 150px;
+    padding: 1rem 1rem;
+  }
+} 

@@ -82,7 +82,7 @@ const PickleCatalog = () => {
   return (
     <div>
       <h1 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '2.5rem', color: 'var(--text-color)' }} className="animated">
-        🥒 Explore the Kripa Pickles Collection
+        🍋 Explore the Kripa Pickles Collection
       </h1>
 
       {/* Filters */}

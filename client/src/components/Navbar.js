@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaUser, FaSignOutAlt, FaCog } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaSignOutAlt, FaCog, FaBars } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 
@@ -50,6 +50,7 @@ const Navbar = () => {
   const { getCartItemCount } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = React.useState(false);
 
   const handleLogout = () => {
     logout();
@@ -60,28 +61,31 @@ const Navbar = () => {
     return location.pathname === path;
   };
 
+  // Close menu on navigation
+  React.useEffect(() => { setMenuOpen(false); }, [location.pathname]);
+
   return (
     <nav className="navbar">
       <div className="nav-container">
         <Link to="/" className="nav-logo" style={logoStyle} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.08) rotate(-3deg)'} onMouseOut={e => e.currentTarget.style.transform = 'none'}>
           <span role="img" aria-label="lemon" style={{ fontSize: '2rem', animation: 'spin 2s linear infinite' }}>🍋</span> Kripa Pickles
         </Link>
-        
-        <div className="nav-links">
+        <button className="hamburger" aria-label="Menu" onClick={() => setMenuOpen(m => !m)}>
+          <FaBars size={24} />
+        </button>
+        <div className={`nav-links${menuOpen ? ' open' : ''}`}>
           <Link 
             to="/" 
             className={`nav-link ${isActive('/') ? 'active' : ''}`}
           >
             Home
           </Link>
-          
           <Link 
             to="/pickles" 
             className={`nav-link ${isActive('/pickles') ? 'active' : ''}`}
           >
             Pickles
           </Link>
-          
           {isAuthenticated && (
             <Link 
               to="/orders" 
@@ -90,7 +94,6 @@ const Navbar = () => {
               My Orders
             </Link>
           )}
-          
           {isAdmin && (
             <Link 
               to="/admin" 
@@ -99,14 +102,12 @@ const Navbar = () => {
               <FaCog /> Admin
             </Link>
           )}
-          
           <Link to="/cart" className="nav-link cart-icon">
             <FaShoppingCart />
             {getCartItemCount() > 0 && (
               <span className="cart-badge">{getCartItemCount()}</span>
             )}
           </Link>
-          
           {isAuthenticated ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <span style={{ color: 'var(--primary-color)', fontWeight: '600' }}>
