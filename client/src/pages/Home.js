@@ -10,7 +10,7 @@ const Home = () => {
   useEffect(() => {
     const fetchFeaturedPickles = async () => {
       try {
-        const response = await axios.get('/api/pickles?sort=avg_rating&limit=6');
+        const response = await axios.get('/api/pickles?sort=limit=6');
         setFeaturedPickles(response.data.pickles);
       } catch (error) {
         console.error('Failed to fetch featured pickles:', error);
@@ -57,10 +57,10 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Pickles */}
+      {/* All Pickles */}
       <section>
         <h2 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '2rem', color: 'var(--text-color)' }} className="animated">
-          🌟 Kripa's Featured Pickles
+          🥒 All Kripa Pickles
         </h2>
         
         {featuredPickles.length > 0 ? (
