@@ -12,7 +12,6 @@ const Cart = () => {
   const navigate = useNavigate();
   
   const paymentTypes = [
-    { value: 'cod', label: 'Cash on Delivery' },
     { value: 'card', label: 'Credit/Debit Card' },
     { value: 'upi', label: 'UPI' },
     { value: 'gpay', label: 'GPay' },
@@ -27,8 +26,7 @@ const Cart = () => {
     state: '',
     pincode: '',
     country: 'India',
-    paymentType: 'cod',
-    deliveryType: 'standard'
+    paymentType: 'card'
   });
   
   const [deliveryFee, setDeliveryFee] = useState(0);
@@ -44,7 +42,6 @@ const Cart = () => {
       try {
         const response = await axios.post('/api/orders/calculate-delivery-fee', {
           subtotal,
-          deliveryType: checkoutForm.deliveryType,
           state: checkoutForm.state
         });
         
@@ -58,7 +55,7 @@ const Cart = () => {
     };
 
     calculateCourierCharge();
-  }, [cart, checkoutForm.deliveryType, checkoutForm.state, getCartTotal]);
+  }, [cart, checkoutForm.state, getCartTotal]);
 
   const handleQuantityChange = (pickleId, newQuantity) => {
     if (newQuantity <= 0) {
@@ -110,7 +107,6 @@ const Cart = () => {
                 items: getCartItems(),
                 shippingAddress: `${checkoutForm.name}, ${checkoutForm.phone}, ${checkoutForm.addressLine}, ${checkoutForm.city}, ${checkoutForm.state}, ${checkoutForm.pincode}, ${checkoutForm.country}`,
                 paymentType: checkoutForm.paymentType,
-                deliveryType: checkoutForm.deliveryType,
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpayOrderId: response.razorpay_order_id,
                 razorpaySignature: response.razorpay_signature
@@ -138,8 +134,7 @@ const Cart = () => {
       const orderData = {
         items: getCartItems(),
         shippingAddress: `${checkoutForm.name}, ${checkoutForm.phone}, ${checkoutForm.addressLine}, ${checkoutForm.city}, ${checkoutForm.state}, ${checkoutForm.pincode}, ${checkoutForm.country}`,
-        paymentType: checkoutForm.paymentType,
-        deliveryType: checkoutForm.deliveryType
+        paymentType: checkoutForm.paymentType
       };
       const response = await axios.post('/api/orders', orderData);
       
@@ -356,31 +351,6 @@ const Cart = () => {
                     placeholder="Country"
                     required
                   />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Delivery Type</label>
-                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                      <input
-                        type="radio"
-                        name="deliveryType"
-                        value="standard"
-                        checked={checkoutForm.deliveryType === 'standard'}
-                        onChange={e => setCheckoutForm(f => ({ ...f, deliveryType: e.target.value }))}
-                      />
-                      <FaTruck /> Standard (2-3 days)
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                      <input
-                        type="radio"
-                        name="deliveryType"
-                        value="express"
-                        checked={checkoutForm.deliveryType === 'express'}
-                        onChange={e => setCheckoutForm(f => ({ ...f, deliveryType: e.target.value }))}
-                      />
-                      <FaRocket /> Express (Same day)
-                    </label>
-                  </div>
                 </div>
                 
                 <div className="form-group">

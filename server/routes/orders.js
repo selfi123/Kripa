@@ -54,7 +54,7 @@ const getDistrictFromPincode = (pincode) => {
 
 // Calculate courier charge
 router.post('/calculate-delivery-fee', (req, res) => {
-  const { subtotal, deliveryType = 'standard', state } = req.body;
+  const { subtotal, state } = req.body;
   
   if (!subtotal || subtotal < 0) {
     return res.status(400).json({ error: 'Invalid subtotal amount' });
@@ -76,14 +76,13 @@ router.post('/calculate-delivery-fee', (req, res) => {
     courierCharge,
     totalAmount,
     freeDeliveryThreshold,
-    deliveryType,
     state
   });
 });
 
 // Create new order
 router.post('/', authenticateToken, (req, res) => {
-  const { items, shippingAddress, paymentType, deliveryType = 'standard', pincode, razorpayPaymentId, razorpayOrderId, razorpaySignature } = req.body;
+  const { items, shippingAddress, paymentType, razorpayPaymentId, razorpayOrderId, razorpaySignature } = req.body;
   const userId = req.user.userId;
   
   if (!items || !Array.isArray(items) || items.length === 0) {
@@ -93,7 +92,12 @@ router.post('/', authenticateToken, (req, res) => {
   if (!shippingAddress) {
     return res.status(400).json({ error: 'Shipping address is required' });
   }
-  
+
+  // Disallow COD
+  if (paymentType === 'cod') {
+    return res.status(400).json({ error: 'Cash on Delivery is not available. Please use prepaid payment methods.' });
+  }
+
   // Calculate total and validate items
   let subtotal = 0;
   const validatedItems = [];
@@ -142,8 +146,8 @@ router.post('/', authenticateToken, (req, res) => {
     }
     const totalAmount = subtotal + courierCharge;
     // Create order with courier charge
-    db.run('INSERT INTO orders (user_id, total_amount, shipping_address, payment_type, razorpay_payment_id, razorpay_order_id, razorpay_signature, delivery_fee, delivery_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [userId, totalAmount, shippingAddress, paymentType || 'cod', razorpayPaymentId || null, razorpayOrderId || null, razorpaySignature || null, courierCharge, deliveryType], function(err) {
+    db.run('INSERT INTO orders (user_id, total_amount, shipping_address, payment_type, razorpay_payment_id, razorpay_order_id, razorpay_signature, delivery_fee) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [userId, totalAmount, shippingAddress, paymentType, razorpayPaymentId || null, razorpayOrderId || null, razorpaySignature || null, courierCharge], function(err) {
       if (err) {
         return res.status(500).json({ error: 'Failed to create order' });
       }
@@ -171,7 +175,6 @@ router.post('/', authenticateToken, (req, res) => {
               subtotal,
               courierCharge,
               totalAmount,
-              deliveryType,
               state
             });
           }
