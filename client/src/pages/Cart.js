@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaTrash, FaPlus, FaMinus, FaShoppingCart } from 'react-icons/fa';
+import { FaTrash, FaPlus, FaMinus, FaShoppingCart, FaTruck, FaRocket } from 'react-icons/fa';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
@@ -27,9 +27,38 @@ const Cart = () => {
     state: '',
     pincode: '',
     country: 'India',
-    paymentType: 'cod'
+    paymentType: 'cod',
+    deliveryType: 'standard'
   });
+  
+  const [deliveryFee, setDeliveryFee] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  // Calculate delivery fee when cart or delivery options change
+  useEffect(() => {
+    const calculateDeliveryFee = async () => {
+      if (cart.length === 0) return;
+      
+      const subtotal = getCartTotal();
+      try {
+        const response = await axios.post('/api/orders/calculate-delivery-fee', {
+          subtotal,
+          deliveryType: checkoutForm.deliveryType,
+          pincode: checkoutForm.pincode
+        });
+        
+        setDeliveryFee(response.data.deliveryFee);
+        setTotalAmount(response.data.totalAmount);
+      } catch (error) {
+        console.error('Failed to calculate delivery fee:', error);
+        setDeliveryFee(0);
+        setTotalAmount(subtotal);
+      }
+    };
+
+    calculateDeliveryFee();
+  }, [cart, checkoutForm.deliveryType, checkoutForm.pincode, getCartTotal]);
 
   const handleQuantityChange = (pickleId, newQuantity) => {
     if (newQuantity <= 0) {
@@ -39,7 +68,7 @@ const Cart = () => {
     }
   };
 
-  const RAZORPAY_KEY_ID = process.env.REACT_APP_RAZORPAY_KEY_ID;
+  const RAZORPAY_KEY_ID = process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_placeholder';
 
   const handleCheckout = async (e) => {
     e.preventDefault();
@@ -59,7 +88,7 @@ const Cart = () => {
     try {
       if (checkoutForm.paymentType !== 'cod') {
         // Create Razorpay order
-        const amount = getCartTotal();
+        const amount = totalAmount;
         const { data } = await axios.post('/api/orders/create-razorpay-order', { amount });
         const razorpayOrder = data.order;
         // Load Razorpay script
@@ -72,7 +101,7 @@ const Cart = () => {
             key: RAZORPAY_KEY_ID,
             amount: razorpayOrder.amount,
             currency: razorpayOrder.currency,
-            name: 'Awesome Pickles',
+            name: 'Kripa Pickles',
             description: 'Order Payment',
             order_id: razorpayOrder.id,
             handler: async function (response) {
@@ -81,6 +110,7 @@ const Cart = () => {
                 items: getCartItems(),
                 shippingAddress: `${checkoutForm.name}, ${checkoutForm.phone}, ${checkoutForm.addressLine}, ${checkoutForm.city}, ${checkoutForm.state}, ${checkoutForm.pincode}, ${checkoutForm.country}`,
                 paymentType: checkoutForm.paymentType,
+                deliveryType: checkoutForm.deliveryType,
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpayOrderId: response.razorpay_order_id,
                 razorpaySignature: response.razorpay_signature
@@ -108,7 +138,8 @@ const Cart = () => {
       const orderData = {
         items: getCartItems(),
         shippingAddress: `${checkoutForm.name}, ${checkoutForm.phone}, ${checkoutForm.addressLine}, ${checkoutForm.city}, ${checkoutForm.state}, ${checkoutForm.pincode}, ${checkoutForm.country}`,
-        paymentType: checkoutForm.paymentType
+        paymentType: checkoutForm.paymentType,
+        deliveryType: checkoutForm.deliveryType
       };
       const response = await axios.post('/api/orders', orderData);
       
@@ -214,8 +245,28 @@ const Cart = () => {
             
             <hr style={{ margin: '1rem 0', border: 'none', borderTop: '1px solid var(--border)' }} />
             
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span>Subtotal:</span>
+              <span>₹{getCartTotal().toFixed(2)}</span>
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span>Delivery Fee:</span>
+              <span style={{ color: deliveryFee === 0 ? '#4CAF50' : 'inherit' }}>
+                {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toFixed(2)}`}
+              </span>
+            </div>
+            
+            {getCartTotal() < 1000 && (
+              <div style={{ fontSize: '0.875rem', color: '#4CAF50', marginBottom: '0.5rem', textAlign: 'center' }}>
+                Add ₹{(1000 - getCartTotal()).toFixed(2)} more for FREE delivery!
+              </div>
+            )}
+            
+            <hr style={{ margin: '1rem 0', border: 'none', borderTop: '1px solid var(--border)' }} />
+            
             <div className="total-amount">
-              Total: ₹{getCartTotal().toFixed(2)}
+              Total: ₹{totalAmount.toFixed(2)}
             </div>
 
             {!isAuthenticated ? (
@@ -306,6 +357,32 @@ const Cart = () => {
                     required
                   />
                 </div>
+                <div className="form-group">
+                  <label className="form-label">Delivery Type</label>
+                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                      <input
+                        type="radio"
+                        name="deliveryType"
+                        value="standard"
+                        checked={checkoutForm.deliveryType === 'standard'}
+                        onChange={e => setCheckoutForm(f => ({ ...f, deliveryType: e.target.value }))}
+                      />
+                      <FaTruck /> Standard (2-3 days)
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                      <input
+                        type="radio"
+                        name="deliveryType"
+                        value="express"
+                        checked={checkoutForm.deliveryType === 'express'}
+                        onChange={e => setCheckoutForm(f => ({ ...f, deliveryType: e.target.value }))}
+                      />
+                      <FaRocket /> Express (Same day)
+                    </label>
+                  </div>
+                </div>
+                
                 <div className="form-group">
                   <label className="form-label">Payment Type</label>
                   <select

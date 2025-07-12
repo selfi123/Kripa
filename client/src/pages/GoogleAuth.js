@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 const GoogleAuth = () => {
   useEffect(() => {
     // Redirect to backend Google OAuth route
-    const backendUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://kripapickles.shop';
+    const backendUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'http://localhost:5000';
     window.location.href = `${backendUrl}/api/auth/google`;
   }, []);
 

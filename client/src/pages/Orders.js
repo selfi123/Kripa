@@ -147,6 +147,16 @@ const Orders = () => {
                   <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>
                     ₹{order.total_amount}
                   </div>
+                  {order.delivery_fee > 0 && (
+                    <div style={{ fontSize: '0.875rem', color: 'var(--light-text)' }}>
+                      + ₹{order.delivery_fee} delivery
+                    </div>
+                  )}
+                  {order.delivery_fee === 0 && (
+                    <div style={{ fontSize: '0.875rem', color: '#4CAF50' }}>
+                      ✓ Free delivery
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -186,6 +196,18 @@ const Orders = () => {
                     <p style={{ marginTop: '0.25rem', color: 'var(--light-text)' }}>
                       {selectedOrder.shipping_address}
                     </p>
+                  </div>
+
+                  <div style={{ marginBottom: '1rem' }}>
+                    <strong>Delivery Information:</strong>
+                    <div style={{ marginTop: '0.25rem', color: 'var(--light-text)' }}>
+                      <div>Type: {selectedOrder.delivery_type || 'standard'} delivery</div>
+                      {selectedOrder.delivery_fee > 0 ? (
+                        <div>Delivery Fee: ₹{selectedOrder.delivery_fee}</div>
+                      ) : (
+                        <div style={{ color: '#4CAF50' }}>✓ Free delivery</div>
+                      )}
+                    </div>
                   </div>
 
                   <div style={{ marginBottom: '1rem' }}>

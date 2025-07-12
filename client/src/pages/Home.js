@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaStar, FaShoppingCart } from 'react-icons/fa';
 
 const Home = () => {
   const [featuredPickles, setFeaturedPickles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchFeaturedPickles = async () => {
@@ -33,6 +34,10 @@ const Home = () => {
       );
     }
     return stars;
+  };
+
+  const handleImageClick = (pickleId) => {
+    navigate(`/pickles/${pickleId}`);
   };
 
   if (loading) {
@@ -71,6 +76,8 @@ const Home = () => {
                   src={pickle.image_url || 'https://via.placeholder.com/300x200/4CAF50/ffffff?text=Pickle'} 
                   alt={pickle.name}
                   className="card-image"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleImageClick(pickle.id)}
                 />
                 <div className="card-content">
                   <h3 className="card-title">{pickle.name}</h3>

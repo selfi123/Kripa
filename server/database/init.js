@@ -49,6 +49,8 @@ const initializeDatabase = () => {
           razorpay_payment_id TEXT,
           razorpay_order_id TEXT,
           razorpay_signature TEXT,
+          delivery_fee REAL DEFAULT 0,
+          delivery_type TEXT DEFAULT 'standard',
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users (id)
         )
