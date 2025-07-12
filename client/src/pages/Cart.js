@@ -67,7 +67,7 @@ const Cart = () => {
     }
   };
 
-  const RAZORPAY_KEY_ID = process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_placeholder';
+  const RAZORPAY_KEY_ID = process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_live_ycqb4Z5j4Weu3L';
 
   const handleCheckout = async (e) => {
     e.preventDefault();
