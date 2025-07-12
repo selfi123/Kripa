@@ -4,7 +4,7 @@ import { FaTrash, FaPlus, FaMinus, FaShoppingCart, FaTruck, FaRocket } from 'rea
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 
 const Cart = () => {
   const { cart, updateQuantity, removeFromCart, clearCart, getCartTotal, getCartItems } = useCart();

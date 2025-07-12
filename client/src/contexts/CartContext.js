@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 
@@ -100,7 +100,6 @@ export const CartProvider = ({ children }) => {
   const addToCart = (pickle, quantity = 1) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === pickle.id);
-      toast.dismiss();
       let updatedCart;
       if (existingItem) {
         updatedCart = prevCart.map(item =>
@@ -128,7 +127,6 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = (pickleId) => {
     setCart(prevCart => {
       const item = prevCart.find(item => item.id === pickleId);
-      toast.dismiss();
       let updatedCart = prevCart.filter(item => item.id !== pickleId);
       if (item) {
         toast.info(`Removed ${item.name} from cart`);
@@ -143,7 +141,6 @@ export const CartProvider = ({ children }) => {
       removeFromCart(pickleId);
       return;
     }
-    toast.dismiss();
     setCart(prevCart => {
       const updatedCart = prevCart.map(item =>
         item.id === pickleId
@@ -157,7 +154,6 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     setCart([]);
-    toast.dismiss();
     toast.info('Cart cleared!');
     if (isAuthenticated) {
       axios.delete('/api/cart');

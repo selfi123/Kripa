@@ -33,6 +33,7 @@
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
     "razorpay": "^2.9.6",
+    "react-hot-toast": "^2.5.2",
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {
