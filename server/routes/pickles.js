@@ -38,6 +38,12 @@ router.get('/', (req, res) => {
   const validSortFields = ['name', 'price', 'avg_rating', 'created_at'];
   const sortField = validSortFields.includes(sort) ? sort : 'name';
   query += ` ORDER BY ${sortField} ${sortField === 'price' ? 'ASC' : 'ASC'}`;
+
+  // Add limit support
+  if (req.query.limit) {
+    query += ' LIMIT ?';
+    params.push(Number(req.query.limit));
+  }
   
   db.all(query, params, (err, pickles) => {
     if (err) {
