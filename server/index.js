@@ -10,7 +10,7 @@ const orderRoutes = require('./routes/orders');
 const adminRoutes = require('./routes/admin');
 const contactRoutes = require('./routes/contact');
 const cartRoutes = require('./routes/cart');
-const { initializeDatabase } = require('./database/init');
+const { pool, initializeDatabase } = require('./database/init');
 const passport = require('./config/passport');
 const Razorpay = require('razorpay');
 

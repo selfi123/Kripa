@@ -1,67 +1,37 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const { db } = require('../database/init');
-
+const { pool } = require('../database/init');
 const router = express.Router();
+const authenticateToken = require('./auth').authenticateToken;
 
-// Middleware to verify admin access
-const authenticateAdmin = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  
-  if (!token) {
-    return res.status(401).json({ error: 'Authentication required' });
+// Middleware to check admin
+function authenticateAdmin(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
   }
-  
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'pickle-secret-key');
-    if (decoded.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
-    }
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Invalid token' });
-  }
-};
+  next();
+}
 
 // Get all orders (admin)
-router.get('/orders', authenticateAdmin, (req, res) => {
-  const { status, limit = 50, offset = 0 } = req.query;
-  
-  let query = `
-    SELECT o.*, u.username, u.email,
-           COUNT(oi.id) as item_count
-    FROM orders o
-    JOIN users u ON o.user_id = u.id
-    LEFT JOIN order_items oi ON o.id = oi.order_id
-  `;
-  
-  const conditions = [];
-  const params = [];
-  
-  if (status) {
-    conditions.push('o.status = ?');
-    params.push(status);
+router.get('/orders', authenticateToken, authenticateAdmin, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT o.*, u.username, COUNT(oi.id) as item_count
+      FROM orders o
+      LEFT JOIN users u ON o.user_id = u.id
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      GROUP BY o.id, u.username
+      ORDER BY o.created_at DESC
+    `);
+    res.json({ orders: rows });
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
   }
-  
-  if (conditions.length > 0) {
-    query += ' WHERE ' + conditions.join(' AND ');
-  }
-  
-  query += ' GROUP BY o.id ORDER BY o.created_at DESC LIMIT ? OFFSET ?';
-  params.push(parseInt(limit), parseInt(offset));
-  
-  db.all(query, params, (err, orders) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
-    }
-    res.json({ orders });
-  });
 });
 
 // Get all users (admin)
-router.get('/users', authenticateAdmin, (req, res) => {
-  db.all(`
+router.get('/users', authenticateToken, authenticateAdmin, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
 SELECT u.id, u.username, u.email, u.role, u.created_at,
        COUNT(o.id) as order_count,
        SUM(o.total_amount) as total_spent
@@ -69,131 +39,85 @@ FROM users u
 LEFT JOIN orders o ON u.id = o.user_id
 GROUP BY u.id
 ORDER BY u.created_at DESC
-  `, (err, users) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
-    }
-    res.json({ users });
-  });
+  `);
+    res.json({ users: rows });
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 // Add new pickle (admin)
-router.post('/pickles', authenticateAdmin, (req, res) => {
+router.post('/pickles', authenticateToken, authenticateAdmin, async (req, res) => {
   const { name, description, price, category, stock, imageUrl } = req.body;
-  
   if (!name || !price || price <= 0) {
     return res.status(400).json({ error: 'Name and valid price are required' });
   }
-  
-  db.run(`
-    INSERT INTO pickles (name, description, price, category, stock, image_url)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `, [name, description, price, category, stock || 0, imageUrl], function(err) {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to add pickle' });
-    }
-    
-    res.status(201).json({
-      message: 'Pickle added successfully',
-      pickleId: this.lastID
-    });
-  });
+  try {
+    const result = await pool.query(
+      'INSERT INTO pickles (name, description, price, category, stock, image_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+      [name, description, price, category, stock || 0, imageUrl]
+    );
+    res.status(201).json({ message: 'Pickle added successfully', pickleId: result.rows[0].id });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add pickle' });
+  }
 });
 
 // Update pickle (admin)
-router.put('/pickles/:id', authenticateAdmin, (req, res) => {
+router.put('/pickles/:id', authenticateToken, authenticateAdmin, async (req, res) => {
   const { id } = req.params;
   const { name, description, price, category, stock, imageUrl } = req.body;
-  
   if (!name || !price || price <= 0) {
     return res.status(400).json({ error: 'Name and valid price are required' });
   }
-  
-  db.run(`
-    UPDATE pickles 
-    SET name = ?, description = ?, price = ?, category = ?, stock = ?, image_url = ?
-    WHERE id = ?
-  `, [name, description, price, category, stock || 0, imageUrl, id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to update pickle' });
-    }
-    if (this.changes === 0) {
-      return res.status(404).json({ error: 'Pickle not found' });
-    }
-    
+  try {
+    const result = await pool.query(
+      'UPDATE pickles SET name = $1, description = $2, price = $3, category = $4, stock = $5, image_url = $6 WHERE id = $7',
+      [name, description, price, category, stock || 0, imageUrl, id]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Pickle not found' });
     res.json({ message: 'Pickle updated successfully' });
-  });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update pickle' });
+  }
 });
 
 // Delete pickle (admin)
-router.delete('/pickles/:id', authenticateAdmin, (req, res) => {
+router.delete('/pickles/:id', authenticateToken, authenticateAdmin, async (req, res) => {
   const { id } = req.params;
-  
-  db.run('DELETE FROM pickles WHERE id = ?', [id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to delete pickle' });
-    }
-    if (this.changes === 0) {
-      return res.status(404).json({ error: 'Pickle not found' });
-    }
-    
+  try {
+    const result = await pool.query('DELETE FROM pickles WHERE id = $1', [id]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Pickle not found' });
     res.json({ message: 'Pickle deleted successfully' });
-  });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete pickle' });
+  }
 });
 
 // Get dashboard stats (admin)
-router.get('/dashboard', authenticateAdmin, (req, res) => {
-  // Get total orders and revenue
-  db.get(`
-    SELECT COUNT(*) as total_orders,
-           SUM(total_amount) as total_revenue,
-           AVG(total_amount) as avg_order_value
-    FROM orders
-  `, (err, orderStats) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
-    }
-    
-    // Get total users
-    db.get('SELECT COUNT(*) as total_users FROM users WHERE role = "user"', (err, userStats) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
-      
-      // Get total pickles
-      db.get('SELECT COUNT(*) as total_pickles FROM pickles', (err, pickleStats) => {
-        if (err) {
-          return res.status(500).json({ error: 'Database error' });
-        }
-        
-        // Get recent orders
-        db.all(`
-          SELECT o.*, u.username
-          FROM orders o
-          JOIN users u ON o.user_id = u.id
-          ORDER BY o.created_at DESC
-          LIMIT 5
-        `, (err, recentOrders) => {
-          if (err) {
-            return res.status(500).json({ error: 'Database error' });
-          }
-          
-          res.json({
-            stats: {
-              ...orderStats,
-              ...userStats,
-              ...pickleStats
-            },
-            recentOrders
-          });
-        });
-      });
+router.get('/dashboard', authenticateToken, authenticateAdmin, async (req, res) => {
+  try {
+    const orderStats = (await pool.query('SELECT COUNT(*) as total_orders, SUM(total_amount) as total_revenue, AVG(total_amount) as avg_order_value FROM orders')).rows[0];
+    const userStats = (await pool.query('SELECT COUNT(*) as total_users FROM users WHERE role = $1', ['user'])).rows[0];
+    const pickleStats = (await pool.query('SELECT COUNT(*) as total_pickles FROM pickles')).rows[0];
+    const recentOrders = (await pool.query(`
+      SELECT o.*, u.username
+      FROM orders o
+      JOIN users u ON o.user_id = u.id
+      ORDER BY o.created_at DESC
+      LIMIT 5
+    `)).rows;
+    res.json({
+      stats: { ...orderStats, ...userStats, ...pickleStats },
+      recentOrders
     });
-  });
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 // Update user role (admin)
-router.patch('/users/:id/role', authenticateAdmin, (req, res) => {
+router.patch('/users/:id/role', authenticateToken, authenticateAdmin, async (req, res) => {
   const { id } = req.params;
   const { role } = req.body;
   
@@ -202,20 +126,17 @@ router.patch('/users/:id/role', authenticateAdmin, (req, res) => {
     return res.status(400).json({ error: 'Invalid role' });
   }
   
-  db.run('UPDATE users SET role = ? WHERE id = ?', [role, id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
-    }
-    if (this.changes === 0) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
+  try {
+    const result = await pool.query('UPDATE users SET role = $1 WHERE id = $2', [role, id]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'User not found' });
     res.json({ message: 'User role updated successfully' });
-  });
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 // Delete user (admin)
-router.delete('/users/:id', authenticateAdmin, (req, res) => {
+router.delete('/users/:id', authenticateToken, authenticateAdmin, async (req, res) => {
   const { id } = req.params;
 
   // Prevent deleting yourself
@@ -223,36 +144,26 @@ router.delete('/users/:id', authenticateAdmin, (req, res) => {
     return res.status(400).json({ error: "You cannot delete your own account." });
   }
 
-  db.run('DELETE FROM users WHERE id = ?', [id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to delete user' });
-    }
-    if (this.changes === 0) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+  try {
+    const result = await pool.query('DELETE FROM users WHERE id = $1', [id]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'User not found' });
     res.json({ message: 'User deleted successfully' });
-  });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
 });
 
 // Delete order (admin)
-router.delete('/orders/:id', authenticateAdmin, (req, res) => {
+router.delete('/orders/:id', authenticateToken, authenticateAdmin, async (req, res) => {
   const { id } = req.params;
-  // First delete order items
-  db.run('DELETE FROM order_items WHERE order_id = ?', [id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to delete order items' });
-    }
-    // Then delete the order itself
-    db.run('DELETE FROM orders WHERE id = ?', [id], function(err) {
-      if (err) {
-        return res.status(500).json({ error: 'Failed to delete order' });
-      }
-      if (this.changes === 0) {
-        return res.status(404).json({ error: 'Order not found' });
-      }
-      res.json({ message: 'Order deleted successfully' });
-    });
-  });
+  try {
+    await pool.query('DELETE FROM order_items WHERE order_id = $1', [id]);
+    const result = await pool.query('DELETE FROM orders WHERE id = $1', [id]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Order not found' });
+    res.json({ message: 'Order deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete order' });
+  }
 });
 
 module.exports = router; 

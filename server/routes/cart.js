@@ -1,58 +1,46 @@
 const express = require('express');
-const { db } = require('../database/init');
-const jwt = require('jsonwebtoken');
-
+const { pool } = require('../database/init');
 const router = express.Router();
+const authenticateToken = require('./auth').authenticateToken;
 
-// Middleware to verify JWT token
-const authenticateToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
+// Get cart for user
+router.get('/', authenticateToken, async (req, res) => {
+  const userId = req.user.userId;
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'pickle-secret-key');
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Invalid token' });
-  }
-};
-
-// Get user's cart
-router.get('/', authenticateToken, (req, res) => {
-  const userId = req.user.userId;
-  db.get('SELECT items FROM carts WHERE user_id = ?', [userId], (err, row) => {
-    if (err) return res.status(500).json({ error: 'Database error' });
-    if (!row) return res.json({ items: [] });
-    let items = [];
-    try { items = JSON.parse(row.items); } catch { items = []; }
+    const { rows } = await pool.query('SELECT items FROM carts WHERE user_id = $1', [userId]);
+    if (rows.length === 0) return res.json({ items: [] });
+    const items = JSON.parse(rows[0].items || '[]');
     res.json({ items });
-  });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch cart' });
+  }
 });
 
-// Update user's cart (replace all items)
-router.post('/', authenticateToken, (req, res) => {
+// Update cart for user
+router.post('/', authenticateToken, async (req, res) => {
   const userId = req.user.userId;
-  const items = req.body.items || [];
-  const itemsJson = JSON.stringify(items);
-  db.run(
-    'INSERT INTO carts (user_id, items, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(user_id) DO UPDATE SET items = excluded.items, updated_at = CURRENT_TIMESTAMP',
-    [userId, itemsJson],
-    function (err) {
-      if (err) return res.status(500).json({ error: 'Database error' });
-      res.json({ message: 'Cart updated' });
-    }
-  );
+  const { items } = req.body;
+  try {
+    const itemsStr = JSON.stringify(items || []);
+    await pool.query(
+      'INSERT INTO carts (user_id, items, updated_at) VALUES ($1, $2, NOW()) ON CONFLICT (user_id) DO UPDATE SET items = $2, updated_at = NOW()',
+      [userId, itemsStr]
+    );
+    res.json({ message: 'Cart updated' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update cart' });
+  }
 });
 
-// Clear user's cart
-router.delete('/', authenticateToken, (req, res) => {
+// Delete cart for user
+router.delete('/', authenticateToken, async (req, res) => {
   const userId = req.user.userId;
-  db.run('DELETE FROM carts WHERE user_id = ?', [userId], function (err) {
-    if (err) return res.status(500).json({ error: 'Database error' });
+  try {
+    await pool.query('DELETE FROM carts WHERE user_id = $1', [userId]);
     res.json({ message: 'Cart cleared' });
-  });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to clear cart' });
+  }
 });
 
 module.exports = router; 

@@ -1,306 +1,105 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const { db } = require('../database/init');
-const Razorpay = require('razorpay');
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || 'secret_placeholder',
-});
-
+const { pool } = require('../database/init');
 const router = express.Router();
-
-// Middleware to verify JWT token
-const authenticateToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  
-  if (!token) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
-  
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'pickle-secret-key');
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Invalid token' });
-  }
-};
-
-// Helper: Map pincode to district (simple prefix-based)
-const getDistrictFromPincode = (pincode) => {
-  if (!pincode) return '';
-  const pin = String(pincode);
-  if (pin.startsWith('68')) {
-    // Ernakulam (68xxxx)
-    return 'Ernakulam';
-  }
-  if (pin.startsWith('67')) {
-    // Kozhikode (67xxxx)
-    return 'Kozhikode';
-  }
-  if (pin.startsWith('69')) {
-    // Trivandrum (69xxxx)
-    return 'Trivandrum';
-  }
-  if (pin.startsWith('68')) {
-    // Thrissur (68xxxx, but overlaps with Ernakulam)
-    // We'll use a more specific check below
-    if (pin.startsWith('680')) return 'Thrissur';
-    if (pin.startsWith('682')) return 'Ernakulam';
-  }
-  // Add more as needed
-  return '';
-};
-
-// Calculate courier charge
-router.post('/calculate-delivery-fee', (req, res) => {
-  const { subtotal, state, coupon } = req.body;
-  
-  if (!subtotal || subtotal < 0) {
-    return res.status(400).json({ error: 'Invalid subtotal amount' });
-  }
-  
-  // Determine courier charge by state
-  let courierCharge = 150;
-  if (state && String(state).trim().toLowerCase() === 'kerala') {
-    courierCharge = 100;
-  }
-  // Coupon logic (from env)
-  const validCoupons = (process.env.COUPON_CODES || '').split(',').map(c => c.trim().toUpperCase()).filter(Boolean);
-  if (coupon && validCoupons.includes(String(coupon).trim().toUpperCase())) {
-    courierCharge = 0;
-  }
-  // Free delivery threshold
-  let freeDeliveryThreshold = 1000;
-  if (subtotal >= freeDeliveryThreshold) {
-    courierCharge = 0;
-  }
-  const totalAmount = subtotal + courierCharge;
-  res.json({
-    subtotal,
-    courierCharge,
-    totalAmount,
-    freeDeliveryThreshold,
-    state,
-    couponApplied: courierCharge === 0 && coupon ? true : false
-  });
-});
+const authenticateToken = require('./auth').authenticateToken;
 
 // Create new order
-router.post('/', authenticateToken, (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   const { items, shippingAddress, paymentType, razorpayPaymentId, razorpayOrderId, razorpaySignature } = req.body;
   const userId = req.user.userId;
-  
   if (!items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'Order items are required' });
   }
-  
   if (!shippingAddress) {
     return res.status(400).json({ error: 'Shipping address is required' });
   }
-
-  // Disallow COD
   if (paymentType === 'cod') {
     return res.status(400).json({ error: 'Cash on Delivery is not available. Please use prepaid payment methods.' });
   }
-
-  // Calculate total and validate items
   let subtotal = 0;
   const validatedItems = [];
-  
-  for (const item of items) {
-    if (!item.pickleId || !item.quantity || item.quantity <= 0) {
-      return res.status(400).json({ error: 'Invalid item data' });
-    }
-    
-    // Get pickle details and check stock
-    db.get('SELECT id, name, price, stock FROM pickles WHERE id = ?', [item.pickleId], (err, pickle) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
+  try {
+    for (const item of items) {
+      if (!item.pickleId || !item.quantity || item.quantity <= 0) {
+        return res.status(400).json({ error: 'Invalid item data' });
       }
+      const { rows } = await pool.query('SELECT id, name, price, stock FROM pickles WHERE id = $1', [item.pickleId]);
+      const pickle = rows[0];
       if (!pickle) {
         return res.status(400).json({ error: `Pickle with id ${item.pickleId} not found` });
       }
       if (pickle.stock < item.quantity) {
         return res.status(400).json({ error: `Insufficient stock for ${pickle.name}` });
       }
-      
-      validatedItems.push({
-        ...item,
-        price: pickle.price,
-        name: pickle.name
-      });
+      validatedItems.push({ ...item, price: pickle.price, name: pickle.name });
       subtotal += pickle.price * item.quantity;
-      
-      // If this is the last item, calculate delivery fee and create the order
-      if (validatedItems.length === items.length) {
-        calculateDeliveryAndCreateOrder();
-      }
-    });
-  }
-  
-  function calculateDeliveryAndCreateOrder() {
-    // Determine courier charge by state
-    let courierCharge = 150;
-    if (shippingAddress && shippingAddress.toLowerCase().includes('kerala')) {
-      courierCharge = 100;
     }
-    // Coupon logic (from env)
-    const validCoupons = (process.env.COUPON_CODES || '').split(',').map(c => c.trim().toUpperCase()).filter(Boolean);
-    if (req.body.coupon && validCoupons.includes(String(req.body.coupon).trim().toUpperCase())) {
-      courierCharge = 0;
+    // TODO: Calculate delivery fee and coupon logic if needed
+    // Create order
+    const orderResult = await pool.query(
+      'INSERT INTO orders (user_id, total_amount, shipping_address, payment_type, razorpay_payment_id, razorpay_order_id, razorpay_signature, delivery_fee) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+      [userId, subtotal, shippingAddress, paymentType, razorpayPaymentId, razorpayOrderId, razorpaySignature, 0]
+    );
+    const orderId = orderResult.rows[0].id;
+    for (const item of validatedItems) {
+      await pool.query('INSERT INTO order_items (order_id, pickle_id, quantity, price) VALUES ($1, $2, $3, $4)', [orderId, item.pickleId, item.quantity, item.price]);
+      await pool.query('UPDATE pickles SET stock = stock - $1 WHERE id = $2', [item.quantity, item.pickleId]);
     }
-    // Free delivery threshold
-    let freeDeliveryThreshold = 1000;
-    if (subtotal >= freeDeliveryThreshold) {
-      courierCharge = 0;
-    }
-    const totalAmount = subtotal + courierCharge;
-    // Create order with courier charge
-    db.run('INSERT INTO orders (user_id, total_amount, shipping_address, payment_type, razorpay_payment_id, razorpay_order_id, razorpay_signature, delivery_fee) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [userId, totalAmount, shippingAddress, paymentType, razorpayPaymentId || null, razorpayOrderId || null, razorpaySignature || null, courierCharge], function(err) {
-      if (err) {
-        return res.status(500).json({ error: 'Failed to create order' });
-      }
-      const orderId = this.lastID;
-      // Add order items
-      let itemsAdded = 0;
-      for (const item of validatedItems) {
-        db.run('INSERT INTO order_items (order_id, pickle_id, quantity, price) VALUES (?, ?, ?, ?)',
-          [orderId, item.pickleId, item.quantity, item.price], function(err) {
-          if (err) {
-            return res.status(500).json({ error: 'Failed to add order items' });
-          }
-          // Update stock
-          db.run('UPDATE pickles SET stock = stock - ? WHERE id = ?',
-            [item.quantity, item.pickleId], (err) => {
-            if (err) {
-              console.error('Failed to update stock:', err);
-            }
-          });
-          itemsAdded++;
-          if (itemsAdded === validatedItems.length) {
-            res.status(201).json({
-              message: 'Order created successfully',
-              orderId,
-              subtotal,
-              courierCharge,
-              totalAmount,
-              state,
-              couponApplied: courierCharge === 0 && req.body.coupon ? true : false
-            });
-          }
-        });
-      }
-    });
-  }
-});
-
-// Create Razorpay order for payment
-router.post('/create-razorpay-order', authenticateToken, async (req, res) => {
-  const { amount, currency = 'INR' } = req.body;
-  if (!amount || amount <= 0) {
-    return res.status(400).json({ error: 'Invalid amount' });
-  }
-  try {
-    const options = {
-      amount: Math.round(amount * 100), // Razorpay expects paise
-      currency,
-      receipt: `order_rcptid_${Date.now()}`
-    };
-    const order = await razorpay.orders.create(options);
-    res.json({ order });
+    res.status(201).json({ message: 'Order created successfully', orderId, subtotal });
   } catch (err) {
-    console.error('Razorpay order error:', err);
-    res.status(500).json({ error: 'Failed to create Razorpay order' });
+    res.status(500).json({ error: 'Failed to create order' });
   }
-});
-
-// Get user's order history
-router.get('/my-orders', authenticateToken, (req, res) => {
-  const userId = req.user.userId;
-  
-  db.all(`
-    SELECT o.*, 
-           COUNT(oi.id) as item_count
-    FROM orders o
-    LEFT JOIN order_items oi ON o.id = oi.order_id
-    WHERE o.user_id = ?
-    GROUP BY o.id
-    ORDER BY o.created_at DESC
-  `, [userId], (err, orders) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
-    }
-    
-    res.json({ orders });
-  });
 });
 
 // Get order details
-router.get('/:orderId', authenticateToken, (req, res) => {
+router.get('/:orderId', authenticateToken, async (req, res) => {
   const { orderId } = req.params;
   const userId = req.user.userId;
-  
-  // Get order details
-  db.get(`
-    SELECT o.*, u.username
-    FROM orders o
-    JOIN users u ON o.user_id = u.id
-    WHERE o.id = ? AND o.user_id = ?
-  `, [orderId, userId], (err, order) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
-    }
-    if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-    
-    // Get order items
-    db.all(`
+  try {
+    const { rows } = await pool.query(`
+      SELECT o.*, u.username
+      FROM orders o
+      JOIN users u ON o.user_id = u.id
+      WHERE o.id = $1 AND o.user_id = $2
+    `, [orderId, userId]);
+    const order = rows[0];
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    const { rows: items } = await pool.query(`
       SELECT oi.*, p.name, p.description
       FROM order_items oi
       JOIN pickles p ON oi.pickle_id = p.id
-      WHERE oi.order_id = ?
-    `, [orderId], (err, items) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
-      
-      res.json({
-        order: {
-          ...order,
-          items
-        }
-      });
-    });
-  });
+      WHERE oi.order_id = $1
+    `, [orderId]);
+    res.json({ order: { ...order, items } });
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
-// Update order status (admin only)
-router.patch('/:orderId/status', authenticateToken, (req, res) => {
+// Update order status (admin)
+router.put('/:orderId/status', async (req, res) => {
   const { orderId } = req.params;
   const { status } = req.body;
-  
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Admin access required' });
+  try {
+    const result = await pool.query('UPDATE orders SET status = $1 WHERE id = $2 RETURNING *', [status, orderId]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Order not found' });
+    res.json({ message: 'Order status updated!' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update status' });
   }
-  
-  const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-  if (!validStatuses.includes(status)) {
-    return res.status(400).json({ error: 'Invalid status' });
+});
+
+// Delete order (admin)
+router.delete('/:orderId', async (req, res) => {
+  const { orderId } = req.params;
+  try {
+    await pool.query('DELETE FROM order_items WHERE order_id = $1', [orderId]);
+    const result = await pool.query('DELETE FROM orders WHERE id = $1 RETURNING *', [orderId]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Order not found' });
+    res.json({ message: 'Order deleted successfully!' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete order' });
   }
-  
-  db.run('UPDATE orders SET status = ? WHERE id = ?', [status, orderId], function(err) {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
-    }
-    if (this.changes === 0) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-    
-    res.json({ message: 'Order status updated successfully' });
-  });
 });
 
 module.exports = router; 
