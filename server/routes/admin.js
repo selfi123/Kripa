@@ -171,4 +171,17 @@ router.delete('/orders/:id', authenticateToken, authenticateAdmin, async (req, r
   }
 });
 
+// Update order status (admin)
+router.put('/orders/:id/status', authenticateToken, authenticateAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    const result = await pool.query('UPDATE orders SET status = $1 WHERE id = $2 RETURNING *', [status, id]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Order not found' });
+    res.json({ message: 'Order status updated!' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update status' });
+  }
+});
+
 module.exports = router; 
