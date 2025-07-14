@@ -132,6 +132,24 @@ router.get('/:orderId', authenticateToken, async (req, res) => {
   }
 });
 
+// Get all orders for the logged-in user
+router.get('/my-orders', authenticateToken, async (req, res) => {
+  const userId = req.user.userId;
+  try {
+    const { rows } = await pool.query(`
+      SELECT o.*, COUNT(oi.id) as item_count
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      WHERE o.user_id = $1
+      GROUP BY o.id
+      ORDER BY o.created_at DESC
+    `, [userId]);
+    res.json({ orders: rows });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
 // Update order status (admin)
 router.put('/:orderId/status', async (req, res) => {
   const { orderId } = req.params;
