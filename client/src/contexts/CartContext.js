@@ -88,12 +88,10 @@ export const CartProvider = ({ children }) => {
   }, [isAuthenticated, authLoading]);
 
   // Cart actions
+  // Only sync with backend, do not update state
   const syncServerCart = (newCart) => {
     if (isAuthenticated) {
-      setCart(newCart);
       axios.post('/api/cart', { items: newCart });
-    } else {
-      setCart(newCart);
     }
   };
 
@@ -129,7 +127,7 @@ export const CartProvider = ({ children }) => {
       const item = prevCart.find(item => item.id === pickleId);
       let updatedCart = prevCart.filter(item => item.id !== pickleId);
       if (item) {
-        toast.info(`Removed ${item.name} from cart`);
+        toast.success(`Removed ${item.name} from cart`);
       }
       syncServerCart(updatedCart);
       return updatedCart;
