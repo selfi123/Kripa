@@ -137,11 +137,11 @@ router.get('/my-orders', authenticateToken, async (req, res) => {
   const userId = req.user.userId;
   try {
     const { rows } = await pool.query(`
-      SELECT o.*, COUNT(oi.id) as item_count
+      SELECT o.id, o.user_id, o.total_amount, o.status, o.shipping_address, o.razorpay_payment_id, o.razorpay_order_id, o.razorpay_signature, o.delivery_fee, o.delivery_type, o.payment_type, o.created_at, COUNT(oi.id) as item_count
       FROM orders o
       LEFT JOIN order_items oi ON o.id = oi.order_id
       WHERE o.user_id = $1
-      GROUP BY o.id
+      GROUP BY o.id, o.user_id, o.total_amount, o.status, o.shipping_address, o.razorpay_payment_id, o.razorpay_order_id, o.razorpay_signature, o.delivery_fee, o.delivery_type, o.payment_type, o.created_at
       ORDER BY o.created_at DESC
     `, [userId]);
     res.json({ orders: rows });
