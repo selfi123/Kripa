@@ -39,7 +39,7 @@ const AdminOrders = () => {
   const handleStatusChange = async (id, newStatus) => {
     setUpdating((prev) => ({ ...prev, [id]: true }));
     try {
-      await axios.patch(`/api/orders/${id}/status`, { status: newStatus });
+      await axios.put(`/api/admin/orders/${id}/status`, { status: newStatus });
       setOrders((prev) => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
       toast.success('Order status updated!');
     } catch (err) {
