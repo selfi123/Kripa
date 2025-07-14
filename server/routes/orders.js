@@ -2,6 +2,7 @@ const express = require('express');
 const { pool } = require('../database/init');
 const router = express.Router();
 const authenticateToken = require('./auth').authenticateToken;
+const Razorpay = require('razorpay');
 
 // Calculate delivery fee and coupon logic
 router.post('/calculate-delivery-fee', async (req, res) => {
@@ -78,6 +79,31 @@ router.post('/', authenticateToken, async (req, res) => {
     res.status(201).json({ message: 'Order created successfully', orderId, subtotal, deliveryFee, totalAmount });
   } catch (err) {
     res.status(500).json({ error: 'Failed to create order' });
+  }
+});
+
+// Create Razorpay order endpoint
+router.post('/create-razorpay-order', async (req, res) => {
+  const { amount } = req.body;
+  if (!amount || isNaN(amount) || amount <= 0) {
+    return res.status(400).json({ error: 'Invalid amount' });
+  }
+  try {
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+    const options = {
+      amount: Math.round(amount * 100), // amount in paise
+      currency: 'INR',
+      receipt: 'order_rcpt_' + Math.floor(Math.random() * 1000000),
+      payment_capture: 1
+    };
+    const order = await razorpay.orders.create(options);
+    res.json({ order });
+  } catch (err) {
+    console.error('Razorpay order error:', err);
+    res.status(500).json({ error: 'Failed to create Razorpay order' });
   }
 });
 
