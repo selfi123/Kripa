@@ -3,9 +3,32 @@ const { pool } = require('../database/init');
 const router = express.Router();
 const authenticateToken = require('./auth').authenticateToken;
 
+// Calculate delivery fee and coupon logic
+router.post('/calculate-delivery-fee', async (req, res) => {
+  const { subtotal, state, coupon } = req.body;
+  let courierCharge = 99;
+  let couponApplied = false;
+  let couponMessage = '';
+
+  // Free delivery if subtotal >= 1000
+  if (subtotal >= 1000) {
+    courierCharge = 0;
+    couponMessage = 'Free delivery for orders above ₹1000!';
+  }
+  // Coupon logic
+  else if (coupon && coupon.trim().toUpperCase() === 'FREESHIP') {
+    courierCharge = 0;
+    couponApplied = true;
+    couponMessage = 'Coupon applied: Free delivery!';
+  }
+
+  const totalAmount = subtotal + courierCharge;
+  res.json({ courierCharge, totalAmount, couponApplied, couponMessage });
+});
+
 // Create new order
 router.post('/', authenticateToken, async (req, res) => {
-  const { items, shippingAddress, paymentType, razorpayPaymentId, razorpayOrderId, razorpaySignature } = req.body;
+  const { items, shippingAddress, paymentType, razorpayPaymentId, razorpayOrderId, razorpaySignature, coupon } = req.body;
   const userId = req.user.userId;
   if (!items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'Order items are required' });
@@ -34,18 +57,25 @@ router.post('/', authenticateToken, async (req, res) => {
       validatedItems.push({ ...item, price: pickle.price, name: pickle.name });
       subtotal += pickle.price * item.quantity;
     }
-    // TODO: Calculate delivery fee and coupon logic if needed
+    // Delivery fee and coupon logic
+    let deliveryFee = 99;
+    if (subtotal >= 1000) {
+      deliveryFee = 0;
+    } else if (coupon && coupon.trim().toUpperCase() === 'FREESHIP') {
+      deliveryFee = 0;
+    }
+    const totalAmount = subtotal + deliveryFee;
     // Create order
     const orderResult = await pool.query(
       'INSERT INTO orders (user_id, total_amount, shipping_address, payment_type, razorpay_payment_id, razorpay_order_id, razorpay_signature, delivery_fee) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
-      [userId, subtotal, shippingAddress, paymentType, razorpayPaymentId, razorpayOrderId, razorpaySignature, 0]
+      [userId, totalAmount, shippingAddress, paymentType, razorpayPaymentId, razorpayOrderId, razorpaySignature, deliveryFee]
     );
     const orderId = orderResult.rows[0].id;
     for (const item of validatedItems) {
       await pool.query('INSERT INTO order_items (order_id, pickle_id, quantity, price) VALUES ($1, $2, $3, $4)', [orderId, item.pickleId, item.quantity, item.price]);
       await pool.query('UPDATE pickles SET stock = stock - $1 WHERE id = $2', [item.quantity, item.pickleId]);
     }
-    res.status(201).json({ message: 'Order created successfully', orderId, subtotal });
+    res.status(201).json({ message: 'Order created successfully', orderId, subtotal, deliveryFee, totalAmount });
   } catch (err) {
     res.status(500).json({ error: 'Failed to create order' });
   }
