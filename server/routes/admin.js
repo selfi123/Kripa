@@ -37,7 +37,7 @@ SELECT u.id, u.username, u.email, u.role, u.created_at,
        SUM(o.total_amount) as total_spent
 FROM users u
 LEFT JOIN orders o ON u.id = o.user_id
-GROUP BY u.id
+GROUP BY u.id, u.username, u.email, u.role, u.created_at
 ORDER BY u.created_at DESC
   `);
     res.json({ users: rows });
@@ -48,14 +48,17 @@ ORDER BY u.created_at DESC
 
 // Add new pickle (admin)
 router.post('/pickles', authenticateToken, authenticateAdmin, async (req, res) => {
-  const { name, description, price, category, stock, imageUrl } = req.body;
+  let { name, description, price, category, stock, imageUrl, image_url } = req.body;
   if (!name || !price || price <= 0) {
     return res.status(400).json({ error: 'Name and valid price are required' });
   }
+  // Accept either imageUrl or image_url from client
+  if (!image_url && imageUrl) image_url = imageUrl;
+  if (typeof image_url === 'undefined') image_url = null;
   try {
     const result = await pool.query(
       'INSERT INTO pickles (name, description, price, category, stock, image_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-      [name, description, price, category, stock || 0, imageUrl]
+      [name, description, price, category, stock || 0, image_url]
     );
     res.status(201).json({ message: 'Pickle added successfully', pickleId: result.rows[0].id });
   } catch (err) {
@@ -66,14 +69,16 @@ router.post('/pickles', authenticateToken, authenticateAdmin, async (req, res) =
 // Update pickle (admin)
 router.put('/pickles/:id', authenticateToken, authenticateAdmin, async (req, res) => {
   const { id } = req.params;
-  const { name, description, price, category, stock, imageUrl } = req.body;
+  let { name, description, price, category, stock, imageUrl, image_url } = req.body;
   if (!name || !price || price <= 0) {
     return res.status(400).json({ error: 'Name and valid price are required' });
   }
+  if (!image_url && imageUrl) image_url = imageUrl;
+  if (typeof image_url === 'undefined') image_url = null;
   try {
     const result = await pool.query(
       'UPDATE pickles SET name = $1, description = $2, price = $3, category = $4, stock = $5, image_url = $6 WHERE id = $7',
-      [name, description, price, category, stock || 0, imageUrl, id]
+      [name, description, price, category, stock || 0, image_url, id]
     );
     if (result.rowCount === 0) return res.status(404).json({ error: 'Pickle not found' });
     res.json({ message: 'Pickle updated successfully' });
