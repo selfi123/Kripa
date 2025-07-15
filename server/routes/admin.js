@@ -184,4 +184,28 @@ router.put('/orders/:id/status', authenticateToken, authenticateAdmin, async (re
   }
 });
 
+// Get order details (admin)
+router.get('/orders/:id', authenticateToken, authenticateAdmin, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { rows } = await pool.query(`
+      SELECT o.*, u.username, u.email
+      FROM orders o
+      JOIN users u ON o.user_id = u.id
+      WHERE o.id = $1
+    `, [id]);
+    const order = rows[0];
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    const { rows: items } = await pool.query(`
+      SELECT oi.*, p.name, p.description, p.image_url
+      FROM order_items oi
+      JOIN pickles p ON oi.pickle_id = p.id
+      WHERE oi.order_id = $1
+    `, [id]);
+    res.json({ order: { ...order, items } });
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 module.exports = router; 

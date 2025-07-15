@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-hot-toast';
+import { FaBox, FaTruck, FaCheckCircle, FaClock, FaTimesCircle } from 'react-icons/fa';
 
 const statusOptions = [
   'pending',
@@ -18,6 +19,8 @@ const AdminOrders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState({});
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
   useEffect(() => {
     if (isAdmin) fetchOrders();
@@ -60,6 +63,35 @@ const AdminOrders = () => {
       toast.error('Failed to delete order');
     } finally {
       setUpdating((prev) => ({ ...prev, [id]: false }));
+    }
+  };
+
+  const fetchOrderDetails = async (orderId) => {
+    setDetailsLoading(true);
+    try {
+      const response = await axios.get(`/api/admin/orders/${orderId}`);
+      setSelectedOrder(response.data.order);
+    } catch (error) {
+      toast.error('Failed to fetch order details');
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'pending':
+        return <FaClock style={{ color: '#FF9800' }} />;
+      case 'processing':
+        return <FaBox style={{ color: '#2196F3' }} />;
+      case 'shipped':
+        return <FaTruck style={{ color: '#9C27B0' }} />;
+      case 'delivered':
+        return <FaCheckCircle style={{ color: '#4CAF50' }} />;
+      case 'cancelled':
+        return <FaTimesCircle style={{ color: '#f44336' }} />;
+      default:
+        return <FaClock style={{ color: '#FF9800' }} />;
     }
   };
 
@@ -135,12 +167,91 @@ const AdminOrders = () => {
                   >
                     Delete
                   </button>
+                  <button
+                    className="btn btn-outline btn-small"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => fetchOrderDetails(o.id)}
+                  >
+                    View Details
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {/* Order Details Modal */}
+      {selectedOrder && (
+        <div style={{
+          margin: '2rem auto',
+          maxWidth: 700,
+          background: 'var(--background)',
+          borderRadius: 'var(--border-radius)',
+          border: '1px solid var(--border)',
+          padding: '2rem',
+          position: 'relative',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.08)'
+        }}>
+          <button
+            style={{ position: 'absolute', top: 10, right: 10, fontSize: 18, background: 'none', border: 'none', cursor: 'pointer' }}
+            onClick={() => setSelectedOrder(null)}
+            aria-label="Close"
+          >✕</button>
+          <h2 style={{ marginBottom: '1rem', color: 'var(--text-color)' }}>Order #{selectedOrder.id} Details</h2>
+          <div style={{ marginBottom: '1rem' }}>
+            <strong>Status:</strong> <span style={{ marginLeft: 8 }}>{getStatusIcon(selectedOrder.status)} {selectedOrder.status}</span>
+          </div>
+          <div style={{ marginBottom: '1rem' }}>
+            <strong>Customer:</strong> {selectedOrder.username} ({selectedOrder.email})
+          </div>
+          <div style={{ marginBottom: '1rem' }}>
+            <strong>Shipping Address:</strong>
+            <div style={{ color: 'var(--light-text)', marginTop: 4 }}>{selectedOrder.shipping_address}</div>
+          </div>
+          <div style={{ marginBottom: '1rem' }}>
+            <strong>Payment Type:</strong> {selectedOrder.payment_type || 'N/A'}
+          </div>
+          <div style={{ marginBottom: '1rem' }}>
+            <strong>Order Date:</strong> {new Date(selectedOrder.created_at).toLocaleString()}
+          </div>
+          <div style={{ marginBottom: '1rem' }}>
+            <strong>Total Amount:</strong> ₹{Number(selectedOrder.total_amount).toFixed(2)}
+            {selectedOrder.delivery_fee > 0 && (
+              <span style={{ fontSize: '0.95rem', color: 'var(--light-text)', marginLeft: 8 }}>
+                + ₹{selectedOrder.delivery_fee} delivery
+              </span>
+            )}
+            {selectedOrder.delivery_fee === 0 && (
+              <span style={{ fontSize: '0.95rem', color: '#4CAF50', marginLeft: 8 }}>
+                ✓ Free delivery
+              </span>
+            )}
+          </div>
+          <div style={{ marginBottom: '1rem' }}>
+            <strong>Order Items:</strong>
+            <ul style={{ marginTop: 8 }}>
+              {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                selectedOrder.items.map(item => (
+                  <li key={item.id} style={{ marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      {item.image_url && (
+                        <img src={item.image_url} alt={item.name} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid #eee' }} />
+                      )}
+                      <div>
+                        <div style={{ fontWeight: 600 }}>{item.name}</div>
+                        <div style={{ fontSize: 14, color: '#666' }}>{item.description}</div>
+                        <div style={{ fontSize: 14 }}>Qty: {item.quantity} × ₹{item.price}</div>
+                      </div>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <li>No items found for this order.</li>
+              )}
+            </ul>
+          </div>
+        </div>
+      )}
       <div style={{ marginTop: '2rem', textAlign: 'center' }}>
         <Link to="/admin" className="btn btn-primary">
           Back to Dashboard
