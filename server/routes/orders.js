@@ -43,10 +43,10 @@ router.post('/', authenticateToken, async (req, res) => {
   let subtotal = 0;
   const validatedItems = [];
   try {
-    for (const item of items) {
-      if (!item.pickleId || !item.quantity || item.quantity <= 0) {
-        return res.status(400).json({ error: 'Invalid item data' });
-      }
+  for (const item of items) {
+    if (!item.pickleId || !item.quantity || item.quantity <= 0) {
+      return res.status(400).json({ error: 'Invalid item data' });
+    }
       const { rows } = await pool.query('SELECT id, name, price, stock FROM pickles WHERE id = $1', [item.pickleId]);
       const pickle = rows[0];
       if (!pickle) {
@@ -72,10 +72,10 @@ router.post('/', authenticateToken, async (req, res) => {
       [userId, totalAmount, shippingAddress, paymentType, razorpayPaymentId, razorpayOrderId, razorpaySignature, deliveryFee]
     );
     const orderId = orderResult.rows[0].id;
-    for (const item of validatedItems) {
+      for (const item of validatedItems) {
       await pool.query('INSERT INTO order_items (order_id, pickle_id, quantity, price) VALUES ($1, $2, $3, $4)', [orderId, item.pickleId, item.quantity, item.price]);
       await pool.query('UPDATE pickles SET stock = stock - $1 WHERE id = $2', [item.quantity, item.pickleId]);
-    }
+            }
     res.status(201).json({ message: 'Order created successfully', orderId, subtotal, deliveryFee, totalAmount });
   } catch (err) {
     res.status(500).json({ error: 'Failed to create order' });
@@ -113,11 +113,11 @@ router.get('/my-orders', authenticateToken, async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT o.id, o.user_id, o.total_amount, o.delivery_fee, o.created_at, o.razorpay_payment_id, o.razorpay_order_id, o.razorpay_signature, o.payment_type, o.delivery_type, o.status, o.shipping_address, COUNT(oi.id) as item_count
-      FROM orders o
-      LEFT JOIN order_items oi ON o.id = oi.order_id
+    FROM orders o
+    LEFT JOIN order_items oi ON o.id = oi.order_id
       WHERE o.user_id = $1
       GROUP BY o.id, o.user_id, o.total_amount, o.delivery_fee, o.created_at, o.razorpay_payment_id, o.razorpay_order_id, o.razorpay_signature, o.payment_type, o.delivery_type, o.status, o.shipping_address
-      ORDER BY o.created_at DESC
+    ORDER BY o.created_at DESC
     `, [userId]);
     res.json({ orders: rows });
   } catch (err) {
@@ -131,9 +131,9 @@ router.get('/:orderId', authenticateToken, async (req, res) => {
   const userId = req.user.userId;
   try {
     const { rows } = await pool.query(`
-      SELECT o.*, u.username
-      FROM orders o
-      JOIN users u ON o.user_id = u.id
+    SELECT o.*, u.username
+    FROM orders o
+    JOIN users u ON o.user_id = u.id
       WHERE o.id = $1 AND o.user_id = $2
     `, [orderId, userId]);
     const order = rows[0];
@@ -147,7 +147,7 @@ router.get('/:orderId', authenticateToken, async (req, res) => {
     res.json({ order: { ...order, items } });
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
-  }
+      }
 });
 
 // Update order status (admin)

@@ -28,14 +28,14 @@ passport.use(new GoogleStrategy({
     const { rows } = await pool.query('SELECT * FROM users WHERE google_id = $1 OR email = $2', [profile.id, profile.emails[0].value]);
     let user = rows[0];
     if (user) {
-      // Update Google ID if not set
+        // Update Google ID if not set
       if (!user.google_id) {
         await pool.query('UPDATE users SET google_id = $1 WHERE id = $2', [profile.id, user.id]);
         user.google_id = profile.id;
-      }
+        }
       return done(null, user);
-    }
-    // Create new user
+      }
+      // Create new user
     const result = await pool.query(
       'INSERT INTO users (username, email, google_id, role, verified) VALUES ($1, $2, $3, $4, $5) RETURNING *',
       [profile.displayName, profile.emails[0].value, profile.id, 'user', true]

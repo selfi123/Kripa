@@ -15,29 +15,29 @@ function generateToken(user) {
 async function sendVerificationEmail(email, username, verificationToken) {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   const verifyUrl = `${frontendUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
-  const transporter = nodemailer.createTransport({
+        const transporter = nodemailer.createTransport({
     service: 'gmail',
-    auth: {
+          auth: {
       user: process.env.CONTACT_EMAIL_USER,
       pass: process.env.CONTACT_EMAIL_PASS,
-    },
-  });
-  const mailOptions = {
+          },
+        });
+        const mailOptions = {
     from: process.env.CONTACT_EMAIL_USER,
-    to: email,
-    subject: 'Verify your email for Kripa Pickles',
-    html: `<div style="font-family:sans-serif;max-width:480px;margin:auto;padding:24px;border:1px solid #eee;border-radius:8px;">
-      <h2 style="color:#e6b800;">Welcome to Kripa Pickles 🍋</h2>
-      <p>Hi <b>${username}</b>,</p>
-      <p>Thank you for registering! Please verify your email address to activate your account.</p>
-      <p style="text-align:center;margin:32px 0;">
-        <a href="${verifyUrl}" style="background:#e6b800;color:#fff;padding:12px 24px;border-radius:4px;text-decoration:none;font-weight:bold;">Verify Email</a>
-      </p>
-      <p>If you did not sign up, you can ignore this email.</p>
-      <hr style="margin:24px 0;">
-      <p style="font-size:12px;color:#888;">Kripa Pickles 🍋<br>www.kripapickles.shop</p>
-    </div>`
-  };
+          to: email,
+          subject: 'Verify your email for Kripa Pickles',
+          html: `<div style="font-family:sans-serif;max-width:480px;margin:auto;padding:24px;border:1px solid #eee;border-radius:8px;">
+            <h2 style="color:#e6b800;">Welcome to Kripa Pickles 🍋</h2>
+            <p>Hi <b>${username}</b>,</p>
+            <p>Thank you for registering! Please verify your email address to activate your account.</p>
+            <p style="text-align:center;margin:32px 0;">
+              <a href="${verifyUrl}" style="background:#e6b800;color:#fff;padding:12px 24px;border-radius:4px;text-decoration:none;font-weight:bold;">Verify Email</a>
+            </p>
+            <p>If you did not sign up, you can ignore this email.</p>
+            <hr style="margin:24px 0;">
+            <p style="font-size:12px;color:#888;">Kripa Pickles 🍋<br>www.kripapickles.shop</p>
+          </div>`
+        };
   await transporter.sendMail(mailOptions);
 }
 
@@ -78,9 +78,9 @@ router.get('/verify-email', async (req, res) => {
       // Check if user exists and is already verified
       const { rows: userByEmail } = await pool.query('SELECT verified FROM users WHERE email = $1', [email]);
       if (userByEmail[0] && userByEmail[0].verified) {
-        return res.status(200).json({ message: 'Email already verified.' });
-      }
-      return res.status(400).json({ error: 'Invalid or expired verification link.' });
+          return res.status(200).json({ message: 'Email already verified.' });
+        }
+        return res.status(400).json({ error: 'Invalid or expired verification link.' });
     }
     if (user.verified) {
       return res.status(200).json({ message: 'Email already verified.' });
@@ -155,12 +155,12 @@ router.get('/profile', authenticateToken, async (req, res) => {
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login', session: false }), (req, res) => {
-  // Generate JWT token
+    // Generate JWT token
   const token = generateToken(req.user);
-  // Redirect to frontend with token
+    // Redirect to frontend with token
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-  const redirectUrl = `${frontendUrl}/auth-callback?token=${token}`;
-  res.redirect(redirectUrl);
+    const redirectUrl = `${frontendUrl}/auth-callback?token=${token}`;
+    res.redirect(redirectUrl);
 });
 
 // JWT authentication middleware
@@ -176,5 +176,5 @@ function authenticateToken(req, res, next) {
   }
 }
 
-module.exports = router;
+module.exports = router; 
 module.exports.authenticateToken = authenticateToken; 

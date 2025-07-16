@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://yourdomain.com/</loc>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/login</loc>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/register</loc>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/cart</loc>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/orders</loc>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/pickles</loc>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/contact-us</loc>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/privacy-policy</loc>
+  </url>
+  <url>
+    <loc>https://yourdomain.com/terms-and-conditions</loc>
+  </url>
+  <!-- Add more URLs as needed, e.g., for static product pages -->
+</urlset> 

@@ -47,13 +47,13 @@ router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const { rows } = await pool.query(`
-      SELECT p.*, 
-             COALESCE(AVG(r.rating), 0) as avg_rating,
-             COUNT(r.id) as review_count
-      FROM pickles p
-      LEFT JOIN reviews r ON p.id = r.pickle_id
+    SELECT p.*, 
+           COALESCE(AVG(r.rating), 0) as avg_rating,
+           COUNT(r.id) as review_count
+    FROM pickles p
+    LEFT JOIN reviews r ON p.id = r.pickle_id
       WHERE p.id = $1
-      GROUP BY p.id
+    GROUP BY p.id
     `, [id]);
     const pickle = rows[0];
     if (!pickle) return res.status(404).json({ error: 'Pickle not found' });
@@ -67,7 +67,7 @@ router.get('/:id', async (req, res) => {
     res.json({ pickle: { ...pickle, reviews } });
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
-  }
+      }
 });
 
 // Get categories
@@ -77,7 +77,7 @@ router.get('/categories/all', async (req, res) => {
     res.json({ categories: rows.map(c => c.category) });
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
-  }
+    }
 });
 
 // Add review (requires authentication)
@@ -93,7 +93,7 @@ router.post('/:id/reviews', async (req, res) => {
     // Check if user already reviewed this pickle
     const { rowCount } = await pool.query('SELECT id FROM reviews WHERE user_id = $1 AND pickle_id = $2', [decoded.userId, id]);
     if (rowCount > 0) return res.status(400).json({ error: 'You have already reviewed this pickle' });
-    // Add review
+      // Add review
     const result = await pool.query('INSERT INTO reviews (user_id, pickle_id, rating, comment) VALUES ($1, $2, $3, $4) RETURNING id', [decoded.userId, id, rating, comment]);
     res.status(201).json({ message: 'Review added successfully', reviewId: result.rows[0].id });
   } catch (error) {
