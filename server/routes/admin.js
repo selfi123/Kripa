@@ -6,26 +6,26 @@ const authenticateToken = require('./auth').authenticateToken;
 // Middleware to check admin
 function authenticateAdmin(req, res, next) {
   if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Admin access required' });
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    next();
   }
-  next();
-}
 
 // Get all orders (admin)
 router.get('/orders', authenticateToken, authenticateAdmin, async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT o.*, u.username, COUNT(oi.id) as item_count
-      FROM orders o
+    FROM orders o
       LEFT JOIN users u ON o.user_id = u.id
-      LEFT JOIN order_items oi ON o.id = oi.order_id
+    LEFT JOIN order_items oi ON o.id = oi.order_id
       GROUP BY o.id, u.username
       ORDER BY o.created_at DESC
     `);
     res.json({ orders: rows });
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
-  }
+    }
 });
 
 // Get all users (admin)
@@ -43,7 +43,7 @@ ORDER BY u.created_at DESC
     res.json({ users: rows });
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
-  }
+    }
 });
 
 // Add new pickle (admin)
@@ -106,15 +106,15 @@ router.get('/dashboard', authenticateToken, authenticateAdmin, async (req, res) 
     const userStats = (await pool.query('SELECT COUNT(*) as total_users FROM users WHERE role = $1', ['user'])).rows[0];
     const pickleStats = (await pool.query('SELECT COUNT(*) as total_pickles FROM pickles')).rows[0];
     const recentOrders = (await pool.query(`
-      SELECT o.*, u.username
-      FROM orders o
-      JOIN users u ON o.user_id = u.id
-      ORDER BY o.created_at DESC
-      LIMIT 5
+          SELECT o.*, u.username
+          FROM orders o
+          JOIN users u ON o.user_id = u.id
+          ORDER BY o.created_at DESC
+          LIMIT 5
     `)).rows;
-    res.json({
+          res.json({
       stats: { ...orderStats, ...userStats, ...pickleStats },
-      recentOrders
+            recentOrders
     });
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
@@ -168,7 +168,7 @@ router.delete('/orders/:id', authenticateToken, authenticateAdmin, async (req, r
     res.json({ message: 'Order deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete order' });
-  }
+    }
 });
 
 // Update order status (admin)
@@ -181,7 +181,7 @@ router.put('/orders/:id/status', authenticateToken, authenticateAdmin, async (re
     res.json({ message: 'Order status updated!' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update status' });
-  }
+      }
 });
 
 // Get order details (admin)

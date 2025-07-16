@@ -1,31 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://yourdomain.com/</loc>
+    <loc>https://kripapickles.shop/</loc>
   </url>
   <url>
-    <loc>https://yourdomain.com/login</loc>
+    <loc>https://kripapickles.shop/pickles</loc>
+  </url>
+  <!-- Example dynamic pickle detail URL, replace with real IDs for full SEO -->
+  <url>
+    <loc>https://kripapickles.shop/pickles/1</loc>
   </url>
   <url>
-    <loc>https://yourdomain.com/register</loc>
+    <loc>https://kripapickles.shop/login</loc>
   </url>
   <url>
-    <loc>https://yourdomain.com/cart</loc>
+    <loc>https://kripapickles.shop/register</loc>
   </url>
   <url>
-    <loc>https://yourdomain.com/orders</loc>
+    <loc>https://kripapickles.shop/contact-us</loc>
   </url>
   <url>
-    <loc>https://yourdomain.com/pickles</loc>
+    <loc>https://kripapickles.shop/cart</loc>
   </url>
   <url>
-    <loc>https://yourdomain.com/contact-us</loc>
+    <loc>https://kripapickles.shop/orders</loc>
   </url>
   <url>
-    <loc>https://yourdomain.com/privacy-policy</loc>
+    <loc>https://kripapickles.shop/shipping-policy</loc>
   </url>
   <url>
-    <loc>https://yourdomain.com/terms-and-conditions</loc>
+    <loc>https://kripapickles.shop/terms-and-conditions</loc>
   </url>
-  <!-- Add more URLs as needed, e.g., for static product pages -->
+  <url>
+    <loc>https://kripapickles.shop/cancellations-refunds</loc>
+  </url>
+  <url>
+    <loc>https://kripapickles.shop/privacy-policy</loc>
+  </url>
 </urlset> 
