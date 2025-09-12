@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -24,7 +25,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'development' ? 'https://kripapickles.shop' : 'http://localhost:3000',
+  origin: process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://kripapickles.shop',
   credentials: true
 }));
 app.use(express.json());
@@ -32,6 +33,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session middleware
 app.use(session({
+  store: new pgSession({
+    pool: require('./database/init').pool,
+    tableName: 'user_sessions'
+  }),
   secret: process.env.SESSION_SECRET || 'pickle-secret-key',
   resave: false,
   saveUninitialized: false,
@@ -73,8 +78,8 @@ initializeDatabase()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`🥒 Pickle MCP Server running on port ${PORT}`);
-      console.log(`🌐 Frontend: https://kripapickles.shop`);
-      console.log(`🔧 API: https://kripapickles.shop/api`);
+      console.log(`🌐 Frontend: http://localhost:3000`);
+      console.log(`🔧 API: http://localhost:5000/api`);
     });
   })
   .catch(err => {
