@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://kripapickles.shop/</loc>
+  </url>
+  <url>
+    <loc>https://kripapickles.shop/pickles</loc>
+  </url>
+  <!-- Example dynamic pickle detail URL, replace with real IDs for full SEO -->
+  <url>
+    <loc>https://kripapickles.shop/pickles/1</loc>
+  </url>
+  <url>
+    <loc>https://kripapickles.shop/login</loc>
+  </url>
+  <url>
+    <loc>https://kripapickles.shop/register</loc>
+  </url>
+  <url>
+    <loc>https://kripapickles.shop/contact-us</loc>
+  </url>
+  <url>
+    <loc>https://kripapickles.shop/cart</loc>
+  </url>
+  <url>
+    <loc>https://kripapickles.shop/orders</loc>
+  </url>
+  <url>
+    <loc>https://kripapickles.shop/shipping-policy</loc>
+  </url>
+  <url>
+    <loc>https://kripapickles.shop/terms-and-conditions</loc>
+  </url>
+  <url>
+    <loc>https://kripapickles.shop/cancellations-refunds</loc>
+  </url>
+  <url>
+    <loc>https://kripapickles.shop/privacy-policy</loc>
+  </url>
+</urlset> 
