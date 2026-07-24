@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KRIPA Admin Dashboard</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --gold: #C9A96E;
+            --gold-dark: #9E7A40;
+            --gold-light: #E8C98A;
+            --dark: #0A0A0A;
+            --dark-2: #111;
+            --dark-3: #1A1A1A;
+            --dark-4: #222;
+            --text: #E8E0D0;
+            --text-muted: #888;
+            --border: rgba(201, 169, 110, 0.15);
+            --font-heading: 'Cormorant Garamond', Georgia, serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
+
+        body {
+            background: var(--dark);
+            color: var(--text);
+            font-family: var(--font-body);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            min-height: 100vh;
+            background: var(--dark-2);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar-logo {
+            font-family: var(--font-heading);
+            font-size: 28px;
+            letter-spacing: 6px;
+            color: var(--gold);
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-logo small {
+            display: block;
+            font-family: var(--font-body);
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 0;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 24px;
+            color: var(--text-muted);
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sidebar-link:hover {
+            color: var(--gold);
+            background: rgba(201, 169, 110, 0.06);
+        }
+
+        .sidebar-link.active {
+            color: var(--gold);
+            background: rgba(201, 169, 110, 0.08);
+            border-left: 2px solid var(--gold);
+        }
+
+        .sidebar-bottom {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-bottom button {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 12px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .sidebar-bottom button:hover {
+            border-color: rgba(255, 80, 80, 0.5);
+            color: #ff8080;
+        }
+
+        /* Main */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .topbar {
+            background: var(--dark-2);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .topbar-title {
+            font-family: var(--font-heading);
+            font-size: 22px;
+            letter-spacing: 2px;
+            color: var(--gold);
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light));
+            color: var(--dark);
+            box-shadow: 0 4px 16px rgba(201, 169, 110, 0.2);
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(201, 169, 110, 0.35);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px;
+            min-width: 0;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--dark-2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .stat-val {
+            font-family: var(--font-heading);
+            font-size: 32px;
+            color: var(--gold);
+        }
+
+        /* Table */
+        .table-wrap {
+            background: var(--dark-2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow-x: auto;
+        }
+
+        .table-header {
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 9px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            min-width: 200px;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--gold);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            background: var(--dark-3);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(201, 169, 110, 0.04);
+            font-size: 13px;
+        }
+
+        tr:last-child td {
+            border: none;
+        }
+
+        tr:hover td {
+            background: rgba(201, 169, 110, 0.03);
+        }
+
+        .td-badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: rgba(201, 169, 110, 0.15);
+            color: var(--gold);
+            border-color: rgba(201, 169, 110, 0.4);
+        }
+
+        /* Flowchart styles for admin modal */
+        .stepper-progress {
+            position: absolute;
+            top: 24px;
+            z-index: 1;
+            height: 2px;
+            background: var(--gold);
+            transition: width 0.5s ease;
+        }
+        .stepper-bg {
+            position: absolute;
+            top: 24px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(255,255,255,0.08);
+            z-index: 0;
+        }
+        .step {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80px;
+        }
+        .step-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--dark);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            transition: 0.4s;
+        }
+        .step-circle svg { width: 20px; height: 20px; }
+        .step-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            transition: 0.4s;
+        }
+        .step.completed .step-circle { border-color: var(--gold); background: var(--dark); color: var(--gold); }
+        .step.completed .step-label { color: var(--text); }
+        .step.active .step-circle { border-color: var(--gold); background: var(--gold); color: var(--dark); box-shadow: 0 0 20px rgba(201, 169, 110, 0.3); }
+        .step.active .step-label { color: var(--gold); font-weight: 600; }
+
+        .badge-normal {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .td-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn-edit:hover {
+            border-color: var(--gold);
+            background: rgba(201, 169, 110, 0.1);
+        }
+
+        .icon-btn-del:hover {
+            border-color: rgba(255, 80, 80, 0.5);
+            background: rgba(255, 80, 80, 0.08);
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--dark-2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px;
+            width: 100%;
+            max-width: 560px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal h3 {
+            font-family: var(--font-heading);
+            font-size: 22px;
+            color: var(--gold);
+            letter-spacing: 2px;
+            margin-bottom: 28px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 11px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--gold);
+        }
+
+        .form-group select option {
+            background: var(--dark-3);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        /* Toggle */
+        .featured-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .toggle-track {
+            width: 44px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .toggle-track.on {
+            background: var(--gold);
+        }
+
+        .toggle-thumb {
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: left 0.3s;
+        }
+
+        .toggle-track.on .toggle-thumb {
+            left: 23px;
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* File drop */
+        .file-drop {
+            border: 2px dashed rgba(201, 169, 110, 0.2);
+            border-radius: 12px;
+            padding: 28px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .file-drop.drag-over {
+            border-color: var(--gold);
+            background: rgba(201, 169, 110, 0.06);
+        }
+
+        .file-drop:hover {
+            border-color: rgba(201, 169, 110, 0.4);
+        }
+
+        #img-previews,
+        #cat-img-preview,
+        #edit-img-previews {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        /* Delete modal */
+        .delete-modal-inner {
+            max-width: 380px;
+            text-align: center;
+        }
+
+        .delete-warning {
+            font-size: 40px;
+            margin-bottom: 16px;
+        }
+
+        .delete-modal-inner p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 28px;
+        }
+
+        .delete-modal-inner strong {
+            color: var(--gold);
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* ── Mobile responsive sidebar ───────────────── */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                min-height: unset;
+                flex-direction: row;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                position: sticky;
+                top: 0;
+                z-index: 50;
+                overflow-x: auto;
+            }
+
+            .sidebar-logo,
+            .sidebar-bottom {
+                display: none;
+            }
+
+            .sidebar-nav {
+                display: flex;
+                flex-direction: row;
+                padding: 0;
+                flex: 1;
+                overflow-x: auto;
+            }
+
+            .sidebar-link {
+                padding: 14px 18px;
+                white-space: nowrap;
+                font-size: 12px;
+                border-left: none !important;
+                border-bottom: 2px solid transparent;
+            }
+
+            .sidebar-link.active {
+                border-bottom: 2px solid var(--gold);
+                background: rgba(201, 169, 110, 0.06);
+            }
+
+            .content {
+                padding: 16px;
+            }
+
+            .topbar {
+                padding: 14px 16px;
+            }
+
+            .topbar-title {
+                font-size: 18px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .modal {
+                padding: 24px;
+                margin: 16px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .search-box input {
+                min-width: 140px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th,
+            td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500;600&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body style="opacity: 0; pointer-events: none; transition: opacity 0.2s;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">KRIPA<small>Admin Portal</small></div>
+        <nav class="sidebar-nav">
+            <button class="sidebar-link active" onclick="showTab('products')">📦 Products</button>
+            <button class="sidebar-link" onclick="showTab('categories')">🗂️ Categories</button>
+            <button class="sidebar-link" onclick="showTab('orders')">🛒 Orders</button>
+            <button class="sidebar-link" onclick="showTab('preorders')">🔖 Pre-orders</button>
+            <button class="sidebar-link" onclick="showTab('users')">👤 Users</button>
+            <a href="/" class="sidebar-link" style="text-decoration:none;" target="_blank">🌐 View Store</a>
+        </nav>
+        <div class="sidebar-bottom">
+            <button onclick="logout()">Sign Out</button>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+        <div class="topbar">
+            <span class="topbar-title" id="tab-title">Products</span>
+            <div class="topbar-actions">
+                <button class="btn btn-gold" id="add-btn" onclick="openAddProductModal()">+ Add Product</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Revenue</div>
+                    <div class="stat-val" id="stat-revenue">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Orders</div>
+                    <div class="stat-val" id="stat-orders">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pending Orders</div>
+                    <div class="stat-val" id="stat-pending">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Products</div>
+                    <div class="stat-val" id="stat-total">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Users</div>
+                    <div class="stat-val" id="stat-users">—</div>
+                </div>
+            </div>
+
+            <!-- PRODUCTS TAB -->
+            <div id="tab-products" class="tab-content">
+                <div class="table-wrap">
+                    <div class="table-header">
+                        <span style="font-size:14px;letter-spacing:1px;color:var(--gold);">All Products</span>
+                        <div class="search-box"><input type="text" placeholder="Search products…"
+                                oninput="filterTable(this.value)" /></div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody">
+                            <tr>
+                                <td colspan="7" style="padding:40px;text-align:center;color:var(--text-muted);">Loading…
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CATEGORIES TAB -->
+            <div id="tab-categories" class="tab-content" style="display:none;">
+                <div class="table-wrap">
+                    <div class="table-header">
+                        <span style="font-size:14px;letter-spacing:1px;color:var(--gold);">All Categories</span>
+                        <button class="btn btn-gold" onclick="openAddCatModal()">+ Add Category</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Cover</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categories-tbody">
+                            <tr>
+                                <td colspan="4" style="padding:40px;text-align:center;color:var(--text-muted);">Loading…
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- USERS TAB -->
+            <div id="tab-users" class="tab-content" style="display:none;">
+                <div class="table-wrap">
+                    <div class="table-header"><span
+                            style="font-size:14px;letter-spacing:1px;color:var(--gold);">Registered Users</span></div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody">
+                            <tr>
+                                <td colspan="4" style="padding:40px;text-align:center;color:var(--text-muted);">Loading…
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PREORDERS TAB -->
+            <div id="tab-preorders" class="tab-content" style="display:none;">
+                <div class="table-wrap" style="margin-bottom:28px;">
+                    <div class="table-header">
+                        <span style="font-size:14px;letter-spacing:1px;color:#a855f7;">🔖 Pre-order Listings</span>
+                        <button class="btn btn-gold" onclick="openAddPreorderModal()"
+                            style="background:linear-gradient(135deg,#6d28d9,#a855f7);">+ New Listing</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Price (est.)</th>
+                                <th>Delivery</th>
+                                <th>Slots</th>
+                                <th>Booked</th>
+                                <th>Closes At</th>
+                                <th>Active</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="preorders-tbody">
+                            <tr>
+                                <td colspan="9" style="padding:40px;text-align:center;color:var(--text-muted);">Loading…
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-wrap">
+                    <div class="table-header">
+                        <span style="font-size:14px;letter-spacing:1px;color:var(--gold);">📋 Booking Requests</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Listing</th>
+                                <th>Customer</th>
+                                <th>Email</th>
+                                <th>Qty</th>
+                                <th>Booked On</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prebook-requests-tbody">
+                            <tr>
+                                <td colspan="5" style="padding:40px;text-align:center;color:var(--text-muted);">Loading…
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ORDERS TAB -->
+            <div id="tab-orders" class="tab-content" style="display:none;">
+                <div class="table-wrap">
+                    <div class="table-header">
+                        <span style="font-size:14px;letter-spacing:1px;color:var(--gold);">All Orders</span>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div class="search-box"><input type="text" placeholder="Search by name, ID…"
+                                    oninput="filterOrders(this.value)" /></div>
+                            <button onclick="exportOrdersCSV()"
+                                style="padding:8px 16px;background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.3);color:var(--gold);border-radius:8px;font-size:11px;font-weight:600;letter-spacing:1px;cursor:pointer;white-space:nowrap;transition:all 0.2s;"
+                                onmouseover="this.style.background='rgba(201,169,110,0.2)'"
+                                onmouseout="this.style.background='rgba(201,169,110,0.1)'">⬇️ Export CSV</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Address</th>
+                                <th>Total</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody">
+                            <tr>
+                                <td colspan="8" style="padding:40px;text-align:center;color:var(--text-muted);">Loading…
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ═══════════════════════ PRODUCT MODAL ══════════════════════ -->
+    <div class="modal-overlay" id="product-modal">
+        <div class="modal">
+            <h3 id="modal-title">Add Product</h3>
+            <form id="product-form" onsubmit="return false;">
+                <input type="hidden" id="edit-id" />
+                <input type="hidden" id="p-featured" value="false" />
+                <input type="hidden" id="p-send-push" value="false" />
+                <input type="hidden" id="p-colors" value="[]" />
+                <div class="form-group"><label>Product Name *</label><input type="text" id="p-name"
+                        placeholder="e.g. KRIPA Mango Pickle" required /></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Category *</label><select id="p-category">
+                            <option value="">Select…</option>
+                        </select></div>
+                </div>
+                <div class="form-group"><label>Description</label><textarea id="p-description" rows="3"
+                        placeholder="Product description…"></textarea></div>
+
+                
+                <div class="featured-row" style="margin-bottom: 24px;">
+                    <div class="toggle-track" id="featured-toggle" onclick="toggleFeatured()">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                    <span class="toggle-label" id="featured-label">Not featured on homepage</span>
+                </div>
+                
+                <!-- NEW VARIANTS SECTION -->
+                <div class="form-group" style="margin-bottom:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <label style="margin:0;">Product Variants (Weights) *</label>
+                        <button type="button" onclick="addVariantRow()" class="btn btn-gold" style="padding:6px 12px; font-size:11px;">+ Add Weight</button>
+                    </div>
+                    <div id="variants-container" style="display:flex; flex-direction:column; gap:12px;">
+                        <!-- Variant rows will be injected here -->
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Product Images</label>
+                    <div class="file-drop" id="file-drop" onclick="document.getElementById('p-images').click()">
+                        📷 Click or drag &amp; drop images here
+                        <input type="file" id="p-images" accept="image/*" multiple style="display:none;"
+                            onchange="handleImageFiles(this.files)" />
+                    </div>
+                    <div id="img-previews"></div>
+                </div>
+                <div class="featured-row" style="margin-top:20px;padding-top:14px;border-top:1px dashed rgba(201,169,110,0.2);">
+                    <div class="toggle-track" id="push-toggle" onclick="togglePush()">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                    <div>
+                        <span class="toggle-label" id="push-label" style="display:block;margin-bottom:2px;color:var(--text);font-weight:500;">Do not send push alert</span>
+                        <span style="font-size:10px;color:var(--text-muted);">Toggle to broadcast an alert to all subscribers when saving.</span>
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeProductModal()">Cancel</button>
+                <button class="btn btn-gold" id="submit-btn" onclick="submitProduct()">Save Product</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════ CATEGORY MODAL ═════════════════════ -->
+    <div class="modal-overlay" id="cat-modal">
+        <div class="modal">
+            <h3 id="cat-modal-title">Add Category</h3>
+            <form id="cat-form" onsubmit="return false;">
+                <input type="hidden" id="edit-cat-id" />
+                <div class="form-group"><label>Category Name *</label><input type="text" id="cat-name"
+                        placeholder="e.g. Mango Pickles" required /></div>
+                <div class="form-group"><label>Parent Category <span
+                            style="color:var(--text-muted);font-size:10px;">(leave empty = top-level)</span></label>
+                    <select id="cat-parent">
+                        <option value="">— Top Level —</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Description</label><textarea id="cat-description" rows="2"
+                        placeholder="Short description…"></textarea></div>
+                <div class="form-group">
+                    <label>Cover Image</label>
+                    <div class="file-drop" onclick="document.getElementById('cat-image-input').click()"
+                        style="padding:18px;">
+                        🖼️ Click to upload cover photo
+                        <input type="file" id="cat-image-input" accept="image/*" style="display:none;"
+                            onchange="handleCatImage(this.files)" />
+                    </div>
+                    <div id="cat-img-preview" style="margin-top:12px;"></div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeCatModal()">Cancel</button>
+                <button class="btn btn-gold" id="submit-cat-btn" onclick="submitCategory()">Save Category</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════ DELETE MODAL ═══════════════════════ -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal delete-modal-inner">
+            <div class="delete-warning">🗑️</div>
+            <h3 style="text-align:center;margin-bottom:12px;">Confirm Delete</h3>
+            <p>Are you sure you want to delete <strong id="delete-name"></strong>? This action cannot be undone.</p>
+            <div class="modal-footer" style="justify-content:center;">
+                <button class="btn btn-outline"
+                    onclick="document.getElementById('delete-modal').classList.remove('open')">Cancel</button>
+                <button class="btn"
+                    style="background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.4);color:#ff8080;"
+                    id="confirm-del-btn" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/admin/admin.js"></script>
+    <script>
+        checkAuth();
+        const _showTab = showTab;
+        window.showTab = function (tab) {
+            _showTab(tab);
+            const titles = { products: 'Products', categories: 'Categories', users: 'Users', orders: 'Orders' };
+            document.getElementById('tab-title').textContent = titles[tab] || tab;
+            const addBtn = document.getElementById('add-btn');
+            if (tab === 'products') { addBtn.textContent = '+ Add Product'; addBtn.onclick = openAddProductModal; addBtn.style.display = ''; }
+            else if (tab === 'categories') { addBtn.textContent = '+ Add Category'; addBtn.onclick = openAddCatModal; addBtn.style.display = ''; }
+            else { addBtn.style.display = 'none'; }
+            if (tab === 'orders') loadAdminOrders();
+        };
+
+        let allOrders = [];
+
+
+
+        async function loadAdminOrders() {
+            const tbody = document.getElementById('orders-tbody');
+            try {
+                const res = await fetch('/api/admin/orders', { headers: { 'x-admin-token': getToken() } });
+                allOrders = await res.json();
+                renderOrdersTable(allOrders);
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--text-muted);">Failed to load orders.</td></tr>`;
+            }
+        }
+
+        function renderOrdersTable(orders) {
+            const tbody = document.getElementById('orders-tbody');
+            if (!orders.length) {
+                tbody.innerHTML = `<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--text-muted);">No orders yet.</td></tr>`;
+                return;
+            }
+            const statusColors = { paid: '#5cb85c', pending: '#f0ad4e', processing: '#5bc0de', shipped: '#9E7A40', delivered: '#5cb85c', cancelled: '#d9534f', refunding: '#f0ad4e', refunded: '#5bc0de' };
+            tbody.innerHTML = orders.map(o => {
+                const addr = o.address || {};
+                const items = o.items || [];
+                const statusOpts = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunding', 'refunded'];
+                return `<tr>
+                    <td style="font-size:11px;color:var(--gold);font-family:monospace;">#${o.id.slice(0, 8).toUpperCase()}</td>
+                    <td>
+                        <div style="font-weight:500;">${addr.name || o.guest_email || 'Guest'}</div>
+                        <div style="font-size:11px;color:var(--text-muted);">${addr.phone || ''}</div>
+                    </td>
+                    <td>
+                        <div style="display:flex;flex-direction:column;gap:8px;max-width:260px;">
+                            ${items.slice(0, 3).map(i => `
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <img src="${i.thumb || ''}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;border:1px solid rgba(201,169,110,0.15);background:#1a1a1a;flex-shrink:0;" onerror="this.style.display='none'"/>
+                                <div style="min-width:0;">
+                                    <div style="font-size:12px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">${i.name}</div>
+                                    <div style="font-size:10px;color:var(--text-muted);margin-top:1px;">
+                                        ${i.category || ''}
+                                        ${i.selectedSize ? ` · <span style="color:var(--gold);">Size: ${i.selectedSize}</span>` : ''}
+                                        ${i.selectedColor ? ` · <span style="color:var(--gold);">Color: ${i.selectedColor}</span>` : ''}
+                                        · Qty: ${i.qty || 1}
+                                    </div>
+                                    <div style="font-size:11px;color:var(--gold);">₹${(parseFloat(i.price) * (i.qty || 1)).toLocaleString('en-IN')}</div>
+                                </div>
+                            </div>`).join('')}
+                            ${items.length > 3 ? `<div style="font-size:11px;color:var(--text-muted);padding-left:48px;">+${items.length - 3} more item${items.length - 3 > 1 ? 's' : ''}</div>` : ''}
+                        </div>
+                    </td>
+                    <td style="font-size:12px;color:var(--text-muted);max-width:160px;">
+                        ${addr.line1 || '—'}<br/>
+                        ${addr.city || ''}, ${addr.state || ''} ${addr.pincode || ''}
+                    </td>
+                    <td style="color:var(--gold);font-weight:600;">₹${parseFloat(o.total).toLocaleString('en-IN')}</td>
+                    <td style="font-size:11px;color:var(--text-muted);">${new Date(o.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                    <td>
+                        <select id="status-${o.id}" style="background:rgba(${getStatusRgb(o.status)},0.1);border:1px solid rgba(${getStatusRgb(o.status)},0.3);color:${statusColors[o.status] || '#888'};border-radius:8px;padding:5px 8px;font-size:11px;letter-spacing:1px;text-transform:uppercase;outline:none;cursor:pointer;">
+                            ${statusOpts.map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="openOrderDetail('${o.id}')" class="btn btn-outline" style="font-size:11px;padding:6px 12px;">👁 View</button>
+                            <button onclick="updateOrderStatus('${o.id}')" class="btn btn-outline" style="font-size:11px;padding:6px 12px;">Update</button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        /* ─── ORDER DETAIL MODAL ───────────────────────────────────────────── */
+        function openOrderDetail(id) {
+            const o = allOrders.find(x => x.id === id);
+            if (!o) return;
+            const addr = o.address || {};
+            const items = o.items || [];
+            const statusColors = { paid: '#5cb85c', pending: '#f0ad4e', processing: '#5bc0de', shipped: '#c9a96e', delivered: '#5cb85c', cancelled: '#d9534f', refunding: '#f0ad4e', refunded: '#5bc0de' };
+            const sc = statusColors[o.status] || '#888';
+
+            // Build items HTML
+            const itemsHtml = items.map(i => `
+                <div style="display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid rgba(201,169,110,0.06);">
+                    <img src="${i.thumb || ''}" style="width:60px;height:60px;object-fit:cover;border-radius:10px;border:1px solid rgba(201,169,110,0.15);background:#1a1a1a;flex-shrink:0;" onerror="this.style.display='none'" />
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">${i.name}</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+                            ${i.category ? `<span style="font-size:10px;background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:20px;color:var(--text-muted);">${i.category}</span>` : ''}
+                            ${(i.selectedSize || i.size) ? `<span style="font-size:10px;background:rgba(201,169,110,0.15);padding:2px 10px;border-radius:20px;color:var(--gold);font-weight:600;">📏 Size: ${i.selectedSize || i.size}</span>` : ''}
+                            ${i.selectedColor ? `<span style="font-size:10px;background:rgba(201,169,110,0.15);padding:2px 10px;border-radius:20px;color:var(--gold);font-weight:600;">🎨 Color: ${i.selectedColor}</span>` : ''}
+                            <span style="font-size:10px;background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:20px;color:var(--text-muted);">Qty: ${i.qty || 1}</span>
+                        </div>
+                        <div style="font-size:13px;color:var(--gold);font-weight:600;">₹${(parseFloat(i.price) * (i.qty || 1)).toLocaleString('en-IN')} <span style="font-size:11px;font-weight:400;color:var(--text-muted);">@ ₹${parseFloat(i.price).toLocaleString('en-IN')} each</span></div>
+                    </div>
+                </div>`).join('');
+
+            // Box packaging: checkout stores it as item.box on the first item or as a separate item
+            const boxItem = items.find(i => i.box);
+            const boxData = boxItem?.box || null;
+            const boxLabel = boxData?.label || '';
+            const boxCharge = parseFloat(boxData?.price || 0);
+
+            document.getElementById('order-detail-inner').innerHTML = `
+                <!-- Header -->
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:28px;">
+                    <div>
+                        <p style="font-size:9px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">Order ID</p>
+                        <p style="font-family:monospace;font-size:16px;color:var(--gold);font-weight:700;">#${o.id.toUpperCase()}</p>
+                        <p style="font-size:11px;color:var(--text-muted);margin-top:4px;">${new Date(o.created_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                    <span style="padding:6px 16px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+                        background:rgba(${getStatusRgb(o.status)},0.12);color:${sc};border:1px solid rgba(${getStatusRgb(o.status)},0.3);">${o.status}</span>
+                </div>
+
+                <!-- Tracking Flowchart -->
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(201,169,110,0.1);border-radius:14px;padding:24px;margin-bottom:24px;">
+                    <h4 style="font-size:13px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;font-weight:600;">Tracking Status</h4>
+                    <div class="stepper-wrap" style="position:relative;display:flex;justify-content:space-between;align-items:flex-start;max-width:600px;margin:0 auto;padding-bottom:16px;">
+                        <div class="stepper-bg"></div>
+                        <div id="admin-stepper" style="width:100%;position:relative;display:flex;justify-content:space-between;"></div>
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(201,169,110,0.1);border-radius:14px;padding:18px;">
+                    <h4 style="font-size:12px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">Order Items</h4>
+                    ${itemsHtml}
+                </div>
+
+                <!-- Two-col: Customer Info + Delivery Address -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;margin-top:24px;">
+                    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(201,169,110,0.1);border-radius:14px;padding:18px;">
+                        <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;">Customer</p>
+                        <p style="font-weight:600;font-size:15px;color:var(--text);margin-bottom:4px;">${addr.name || '—'}</p>
+                        <p style="font-size:13px;color:var(--text-muted);margin-bottom:2px;">📞 ${addr.phone || '—'}</p>
+                        <p style="font-size:12px;color:var(--text-muted);">✉️ ${o.guest_email || '—'}</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(201,169,110,0.1);border-radius:14px;padding:18px;">
+                        <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;">Delivery Address</p>
+                        <p style="font-size:13px;color:var(--text);line-height:1.8;">
+                            ${addr.line1 || ''}${addr.line2 ? '<br>' + addr.line2 : ''}<br>
+                            ${addr.city || ''}${addr.state ? ', ' + addr.state : ''}${addr.pincode ? ' – ' + addr.pincode : ''}<br>
+                            ${addr.country || ''}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Price Summary -->
+                <div style="background:rgba(201,169,110,0.04);border:1px solid rgba(201,169,110,0.1);border-radius:14px;padding:18px;margin-bottom:24px;">
+                    <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;">Payment Summary</p>
+                    ${([
+                    ['Subtotal', o.subtotal],
+                    ['Delivery', o.delivery_charge],
+                    ...(boxData ? [['Packaging — ' + boxLabel, boxCharge]] : [])
+                ]).filter(([, v]) => v != null)
+                    .map(([label, val]) => `
+                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;">
+                            <span style="color:var(--text-muted);">${label}</span>
+                            <span style="color:var(--text);">₹${parseFloat(val || 0).toLocaleString('en-IN')}</span>
+                        </div>`).join('')}
+                    <div style="display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(201,169,110,0.15);font-size:16px;font-weight:700;">
+                        <span style="color:var(--text);">Total</span>
+                        <span style="color:var(--gold);">₹${parseFloat(o.total || 0).toLocaleString('en-IN')}</span>
+                    </div>
+                </div>
+
+                <!-- Payment IDs -->
+                ${(o.razorpay_order_id || o.razorpay_payment_id) ? `
+                <div style="margin-bottom:24px;">
+                    <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Payment Reference</p>
+                    ${o.razorpay_order_id ? `<p style="font-size:11px;color:var(--text-muted);font-family:monospace;margin-bottom:4px;">Order: ${o.razorpay_order_id}</p>` : ''}
+                    ${o.razorpay_payment_id ? `<p style="font-size:11px;color:var(--text-muted);font-family:monospace;">Payment: ${o.razorpay_payment_id}</p>` : ''}
+                </div>` : ''}
+
+                <!-- Status Change -->
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <input type="text" id="od-tracking-${o.id}" placeholder="Courier Tracking ID (e.g. DTDC AWB)" value="${o.tracking_id || ''}" style="flex:1;min-width:180px;background:rgba(255,255,255,0.05);border:1px solid rgba(201,169,110,0.3);color:var(--text);border-radius:10px;padding:10px 14px;font-size:12px;outline:none;" />
+                    <select id="od-status-${o.id}" style="flex:1;min-width:140px;background:rgba(${getStatusRgb(o.status)},0.08);border:1px solid rgba(${getStatusRgb(o.status)},0.3);color:${sc};border-radius:10px;padding:10px 14px;font-size:12px;letter-spacing:1px;text-transform:uppercase;outline:none;cursor:pointer;">
+                        ${['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunding', 'refunded'].map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
+                    </select>
+                    <button onclick="updateOrderStatusFromDetail('${o.id}')" class="btn btn-gold" style="white-space:nowrap;">Save Status</button>
+                    <a href="/api/orders/${o.id}/invoice" target="_blank" class="btn btn-outline" style="white-space:nowrap;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:10px 14px;">Download Invoice</a>
+                </div>
+            `;
+            
+            updateAdminStepper(o.status);
+
+            document.getElementById('order-detail-modal').style.display = 'flex';
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function updateAdminStepper(status) {
+            let steps = ['ordered', 'processing', 'shipped', 'delivered'];
+            let labels = ['Ordered', 'Processing', 'Shipped', 'Delivered'];
+            let icons = ['check', 'package', 'truck', 'home'];
+            let currentIndex = 0;
+
+            if (status === 'cancelled' || status === 'refunding' || status === 'refunded') {
+                steps = ['ordered', 'cancelled', 'refunding', 'refunded'];
+                labels = ['Ordered', 'Cancelled', 'Refunding', 'Refunded'];
+                icons = ['check', 'x-circle', 'refresh-ccw', 'check-circle'];
+                if (status === 'cancelled') currentIndex = 1;
+                else if (status === 'refunding') currentIndex = 2;
+                else if (status === 'refunded') currentIndex = 3;
+            } else {
+                if (status === 'paid' || status === 'pending') currentIndex = 0;
+                else if (status === 'processing') currentIndex = 1;
+                else if (status === 'shipped') currentIndex = 2;
+                else if (status === 'delivered') currentIndex = 3;
+            }
+
+            const stepper = document.getElementById('admin-stepper');
+            if (!stepper) return;
+            stepper.innerHTML = `
+                <div class="stepper-progress" id="admin-stepper-progress" style="width: 0%;"></div>
+                ${steps.map((step, i) => `
+                <div class="step" id="admin-step-${step}">
+                    <div class="step-circle"><i data-lucide="${icons[i]}"></i></div>
+                    <div class="step-label">${labels[i]}</div>
+                </div>
+                `).join('')}
+            `;
+            if (window.lucide) lucide.createIcons();
+
+            for (let i = 0; i <= currentIndex; i++) {
+                const el = document.getElementById('admin-step-' + steps[i]);
+                if (el) {
+                    el.classList.add(i === currentIndex ? 'active' : 'completed');
+                    if (i < currentIndex) el.classList.remove('active');
+                }
+            }
+            
+            const pct = (currentIndex / (steps.length - 1)) * 100;
+            const progressEl = document.getElementById('admin-stepper-progress');
+            if (progressEl) progressEl.style.width = `${pct}%`;
+
+            if (status === 'cancelled' || status === 'refunding' || status === 'refunded') {
+                if (progressEl) progressEl.style.background = '#d9534f';
+                const cancelCircle = document.querySelector('#admin-step-cancelled .step-circle');
+                const cancelLabel = document.querySelector('#admin-step-cancelled .step-label');
+                if (cancelCircle) {
+                    cancelCircle.style.background = '#d9534f';
+                    cancelCircle.style.borderColor = '#d9534f';
+                    cancelCircle.style.color = 'var(--dark)';
+                }
+                if (cancelLabel) cancelLabel.style.color = '#d9534f';
+            }
+        }
+
+        function closeOrderDetail() {
+            document.getElementById('order-detail-modal').style.display = 'none';
+        }
+
+        async function updateOrderStatusFromDetail(orderId) {
+            const select = document.getElementById('od-status-' + orderId);
+            const trackInput = document.getElementById('od-tracking-' + orderId);
+            const newStatus = select?.value;
+            const trackingId = trackInput?.value;
+            if (!newStatus) return;
+            const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'x-admin-token': getToken() },
+                body: JSON.stringify({ status: newStatus, tracking_id: trackingId })
+            });
+            if (res.ok) {
+                closeOrderDetail();
+                loadAdminOrders();
+            } else { alert('Failed to update status.'); }
+        }
+
+        function getStatusRgb(s) {
+            return { paid: '92,184,92', pending: '240,173,78', processing: '91,192,222', shipped: '158,122,64', delivered: '92,184,92', cancelled: '217,83,79' }[s] || '136,136,136';
+        }
+
+        function filterOrders(q) {
+            const filtered = allOrders.filter(o => {
+                const addr = o.address || {};
+                return (addr.name || '').toLowerCase().includes(q.toLowerCase()) ||
+                    o.id.toLowerCase().includes(q.toLowerCase()) ||
+                    (o.guest_email || '').toLowerCase().includes(q.toLowerCase());
+            });
+            renderOrdersTable(filtered);
+        }
+
+        function exportOrdersCSV() {
+            if (!allOrders.length) { alert('No orders to export.'); return; }
+            const esc = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+            const headers = ['Order ID', 'Date', 'Customer', 'Phone', 'Email', 'Items', 'Address', 'Subtotal', 'Delivery', 'Total', 'Status'];
+            const rows = allOrders.map(o => {
+                const addr = o.address || {};
+                const items = (o.items || []).map(i => {
+                    let desc = i.name;
+                    let opts = [];
+                    if (i.selectedSize) opts.push(`Size: ${i.selectedSize}`);
+                    if (i.selectedColor) opts.push(`Color: ${i.selectedColor}`);
+                    if (opts.length) desc += ` (${opts.join(', ')})`;
+                    return `${desc} x${i.qty || 1}`;
+                }).join('; ');
+                const address = [addr.line1, addr.city, addr.state, addr.pincode].filter(Boolean).join(', ');
+                return [
+                    o.id.slice(0, 8).toUpperCase(),
+                    new Date(o.created_at).toLocaleDateString('en-IN'),
+                    addr.name || o.guest_email || 'Guest',
+                    addr.phone || '',
+                    o.guest_email || '',
+                    items,
+                    address,
+                    o.subtotal || 0,
+                    o.delivery_charge || 0,
+                    o.total || 0,
+                    o.status || ''
+                ].map(esc).join(',');
+            });
+            const csv = [headers.join(','), ...rows].join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `kripa_orders_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        async function updateOrderStatus(orderId) {
+            const select = document.getElementById('status-' + orderId);
+            const newStatus = select.value;
+            const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'x-admin-token': getToken() },
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (res.ok) {
+                select.style.background = 'rgba(92,184,92,0.15)';
+                setTimeout(() => loadAdminOrders(), 800);
+            } else { alert('Failed to update status.'); }
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        // PRE-ORDERS ADMIN
+        // ══════════════════════════════════════════════════════════════════
+        let allPreorderListings = [];
+        let editingPreorderId = null;
+        let _poImgData = null;
+        let _poSizes = [];
+
+        // ── Size chip helpers ─────────────────────────────────────────────────
+        function renderPOSizeChips() {
+            const el = document.getElementById('po-size-chips');
+            if (!el) return;
+            el.innerHTML = _poSizes.map((s, i) =>
+                `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);border-radius:20px;padding:4px 12px;font-size:12px;color:#c084fc;">
+                    ${s}
+                    <span onclick="_poSizes.splice(${i},1);renderPOSizeChips();" style="cursor:pointer;opacity:0.6;font-size:11px;">✕</span>
+                 </span>`
+            ).join('');
+        }
+        function addPOSize() {
+            const inp = document.getElementById('po-size-input');
+            const val = (inp?.value || '').trim();
+            if (!val) return;
+            if (!_poSizes.includes(val)) { _poSizes.push(val); renderPOSizeChips(); }
+            inp.value = '';
+        }
+        function addPOSizePreset(sizes) {
+            sizes.forEach(s => { if (!_poSizes.includes(s)) _poSizes.push(s); });
+            renderPOSizeChips();
+        }
+        function clearPOSizes() { _poSizes = []; renderPOSizeChips(); }
+
+        // ── Category dropdown helper ──────────────────────────────────────────
+        function populatePOCategorySelect(selected = '') {
+            const sel = document.getElementById('po-category');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">Select category…</option>' +
+                allCategories.map(c =>
+                    `<option value="${c.name}" ${c.name === selected ? 'selected' : ''}>${c.name}</option>`
+                ).join('');
+        }
+
+        async function loadAdminPreorders() {
+            await Promise.all([loadPreorderListings(), loadPrebookRequests()]);
+        }
+
+        async function loadPreorderListings() {
+            const tbody = document.getElementById('preorders-tbody');
+            try {
+                const rows = await fetch('/api/preorders/admin/listings', {
+                    headers: { 'x-admin-token': getToken() }
+                }).then(r => r.json());
+                allPreorderListings = rows;
+                renderPreordersTable(rows);
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="9" style="padding:40px;text-align:center;color:#e07070;">Failed to load pre-orders.</td></tr>`;
+            }
+        }
+
+        function renderPreordersTable(rows) {
+            const tbody = document.getElementById('preorders-tbody');
+            if (!rows.length) {
+                tbody.innerHTML = `<tr><td colspan="9" style="padding:40px;text-align:center;color:var(--text-muted);">No pre-order listings yet.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = rows.map(p => `<tr>
+                <td><img src="/api/preorders/${p.id}/thumb" style="width:48px;height:36px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none'" /></td>
+                <td style="font-weight:500;color:var(--text);">${p.name}</td>
+                <td style="color:var(--gold);">₹${parseFloat(p.price).toLocaleString('en-IN')}</td>
+                <td style="color:#a855f7;">${p.expected_delivery || '—'}</td>
+                <td>${p.max_slots ?? '∞'}</td>
+                <td><span style="color:#5cb85c;font-weight:600;">${p.booked_count}</span></td>
+                <td style="font-size:12px;color:var(--text-muted);">${p.closes_at ? new Date(p.closes_at).toLocaleDateString('en-IN') : '—'}</td>
+                <td><span style="color:${p.is_active ? '#5cb85c' : '#e07070'};">${p.is_active ? '✅' : '❌'}</span></td>
+                <td class="td-actions">
+                    <button class="icon-btn icon-btn-edit" onclick="openEditPreorderModal('${p.id}')">✏️</button>
+                    <button class="icon-btn icon-btn-del" onclick="deletePreorderListing('${p.id}','${p.name.replace(/'/g, "\\'")}')" >🗑️</button>
+                </td>
+            </tr>`).join('');
+        }
+
+        async function loadPrebookRequests() {
+            const tbody = document.getElementById('prebook-requests-tbody');
+            try {
+                const rows = await fetch('/api/preorders/admin/bookings', {
+                    headers: { 'x-admin-token': getToken() }
+                }).then(r => r.json());
+                if (!rows.length) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--text-muted);">No bookings yet.</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = rows.map(b => `<tr>
+                    <td style="color:var(--gold);font-weight:500;">${b.listing_name}</td>
+                    <td>${b.user_name || '—'}</td>
+                    <td style="color:var(--text-muted);font-size:12px;">${b.user_email || '—'}</td>
+                    <td style="font-weight:600;">${b.quantity}</td>
+                    <td style="font-size:12px;color:var(--text-muted);">${new Date(b.created_at).toLocaleDateString('en-IN')}</td>
+                </tr>`).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="5" style="padding:40px;text-align:center;color:#e07070;">Failed to load bookings.</td></tr>`;
+            }
+        }
+
+        function openAddPreorderModal() {
+            editingPreorderId = null;
+            _poImgData = null;
+            _poSizes = [];
+            document.getElementById('po-modal-title').textContent = 'New Pre-order Listing';
+            document.getElementById('po-form').reset();
+            document.getElementById('po-active-toggle').className = 'toggle-track on';
+            document.getElementById('po-active-label').textContent = 'Active';
+            document.getElementById('po-img-preview').innerHTML = '';
+            populatePOCategorySelect('');
+            renderPOSizeChips();
+            document.getElementById('po-modal').classList.add('open');
+        }
+
+        function openEditPreorderModal(id) {
+            const p = allPreorderListings.find(l => l.id === id);
+            if (!p) return;
+            editingPreorderId = id;
+            _poImgData = null;
+            _poSizes = Array.isArray(p.available_sizes) ? [...p.available_sizes] : [];
+            document.getElementById('po-modal-title').textContent = 'Edit Pre-order Listing';
+            document.getElementById('po-name').value = p.name;
+            populatePOCategorySelect(p.category || '');
+            document.getElementById('po-price').value = p.price;
+            document.getElementById('po-description').value = p.description || '';
+            document.getElementById('po-delivery').value = p.expected_delivery || '';
+            document.getElementById('po-closes-at').value = p.closes_at ? new Date(p.closes_at).toISOString().slice(0, 16) : '';
+            document.getElementById('po-max-slots').value = p.max_slots ?? '';
+            const isActive = p.is_active;
+            document.getElementById('po-active-toggle').className = 'toggle-track' + (isActive ? ' on' : '');
+            document.getElementById('po-active-label').textContent = isActive ? 'Active' : 'Inactive';
+            document.getElementById('po-img-preview').innerHTML = `<img src="/api/preorders/${id}/thumb" style="width:80px;height:60px;object-fit:cover;border-radius:8px;" onerror="this.style.display='none'" />`;
+            renderPOSizeChips();
+            document.getElementById('po-modal').classList.add('open');
+        }
+
+        function closePOModal() { document.getElementById('po-modal').classList.remove('open'); }
+
+        let _poActiveVal = true;
+        function togglePOActive() {
+            _poActiveVal = !_poActiveVal;
+            document.getElementById('po-active-toggle').className = 'toggle-track' + (_poActiveVal ? ' on' : '');
+            document.getElementById('po-active-label').textContent = _poActiveVal ? 'Active' : 'Inactive';
+        }
+
+        async function savePreorderListing() {
+            const name = document.getElementById('po-name').value.trim();
+            if (!name) { alert('Name is required.'); return; }
+            const body = {
+                name,
+                category: document.getElementById('po-category').value,
+                description: document.getElementById('po-description').value.trim(),
+                price: parseFloat(document.getElementById('po-price').value) || 0,
+                expected_delivery: document.getElementById('po-delivery').value.trim() || null,
+                closes_at: document.getElementById('po-closes-at').value || null,
+                max_slots: document.getElementById('po-max-slots').value ? parseInt(document.getElementById('po-max-slots').value) : null,
+                is_active: _poActiveVal,
+                available_sizes: _poSizes.length ? _poSizes : null,
+            };
+            if (_poImgData) body.image = _poImgData;
+
+            const url = editingPreorderId
+                ? `/api/preorders/admin/listings/${editingPreorderId}`
+                : '/api/preorders/admin/listings';
+            const method = editingPreorderId ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method, headers: { 'Content-Type': 'application/json', 'x-admin-token': getToken() },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                closePOModal();
+                loadAdminPreorders();
+            } else {
+                const d = await res.json();
+                alert('Error: ' + (d.error || 'Failed to save'));
+            }
+        }
+
+        async function deletePreorderListing(id, name) {
+            if (!confirm(`Delete pre-order listing "${name}"? All bookings for this listing will also be deleted.`)) return;
+            const res = await fetch(`/api/preorders/admin/listings/${id}`, {
+                method: 'DELETE', headers: { 'x-admin-token': getToken() }
+            });
+            if (res.ok) loadAdminPreorders();
+            else alert('Failed to delete.');
+        }
+
+        // Image upload for pre-order listing
+        function handlePOImageDrop(e) {
+            e.preventDefault();
+            const file = e.dataTransfer?.files[0] || e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                _poImgData = ev.target.result;
+                document.getElementById('po-img-preview').innerHTML = `<img src="${_poImgData}" style="width:80px;height:60px;object-fit:cover;border-radius:8px;" />`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+    </script>
+
+    <!-- PRE-ORDER ADMIN MODAL -->
+    <div class="modal-overlay" id="po-modal">
+        <div class="modal">
+            <h3 id="po-modal-title">New Pre-order Listing</h3>
+            <form id="po-form" onsubmit="return false;">
+                <div class="form-group"><label>Name *</label><input type="text" id="po-name"
+                        placeholder="e.g. KRIPA Diamond Chand Bali (Pre-order)" required /></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Category</label>
+                        <select id="po-category">
+                            <option value="">Select category…</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Estimated Price (₹)</label><input type="number" id="po-price"
+                            placeholder="1299" min="0" /></div>
+                </div>
+                <div class="form-group"><label>Description</label><textarea id="po-description" rows="2"
+                        placeholder="Brief description of the pre-order item…"></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Expected Delivery</label><input type="text" id="po-delivery"
+                            placeholder="e.g. April 2026" /></div>
+                    <div class="form-group"><label>Max Slots <span
+                                style="color:var(--text-muted);font-size:10px;">(blank = unlimited)</span></label><input
+                            type="number" id="po-max-slots" placeholder="e.g. 50" min="1" /></div>
+                </div>
+                <!-- WEIGHT PICKER -->
+                <div class="form-group">
+                    <label>Available Weights <span
+                            style="color:var(--text-muted);font-size:10px;">(optional)</span></label>
+                    <div id="po-size-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <input id="po-size-input" type="text" placeholder="e.g. 100g, 500g…"
+                            style="flex:1;padding:8px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none;"
+                            onkeydown="if(event.key==='Enter'){event.preventDefault();addPOSize();}" />
+                        <button type="button" onclick="addPOSize()" class="btn btn-outline"
+                            style="padding:8px 14px;">Add</button>
+                    </div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+                        <button type="button" onclick="addPOSizePreset(['100g','250g','500g','1kg'])" class="btn btn-outline"
+                            style="padding:4px 10px;font-size:10px;">Standard</button>
+                        <button type="button" onclick="addPOSizePreset(['50g','100g'])"
+                            class="btn btn-outline" style="padding:4px 10px;font-size:10px;">Sample</button>
+                        <button type="button" onclick="clearPOSizes()" class="btn btn-outline"
+                            style="padding:4px 10px;font-size:10px;color:#e07070;border-color:rgba(224,80,80,0.3);">Clear</button>
+                    </div>
+                </div>
+                <!-- /WEIGHT PICKER -->
+                <div class="form-group"><label>Booking Closes At <span
+                            style="color:var(--text-muted);font-size:10px;">(optional)</span></label><input
+                        type="datetime-local" id="po-closes-at" /></div>
+                <div class="featured-row">
+                    <div class="toggle-track on" id="po-active-toggle" onclick="togglePOActive()">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                    <span class="toggle-label" id="po-active-label">Active</span>
+                </div>
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <div class="file-drop" onclick="document.getElementById('po-img-input').click()"
+                        ondragover="event.preventDefault()" ondrop="handlePOImageDrop(event)">
+                        Click or drag an image here
+                    </div>
+                    <input type="file" id="po-img-input" accept="image/*" style="display:none;"
+                        onchange="handlePOImageDrop(event)" />
+                    <div id="po-img-preview" style="margin-top:10px;"></div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closePOModal()">Cancel</button>
+                <button class="btn btn-gold" onclick="savePreorderListing()"
+                    style="background:linear-gradient(135deg,#6d28d9,#a855f7);">Save Listing</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDER DETAIL SLIDE PANEL -->
+    <div id="order-detail-modal" onclick="if(event.target===this)closeOrderDetail()" style="
+        display:none;position:fixed;inset:0;z-index:200;
+        background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);
+        justify-content:flex-end;">
+        <div style="width:100%;max-width:560px;height:100vh;overflow-y:auto;
+            background:var(--dark-2);border-left:1px solid rgba(201,169,110,0.15);
+            padding:32px;box-shadow:-24px 0 80px rgba(0,0,0,0.5);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
+                <span style="font-family:var(--font-heading);font-size:20px;color:var(--gold);letter-spacing:2px;">Order
+                    Details</span>
+                <button onclick="closeOrderDetail()"
+                    style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px 14px;color:var(--text-muted);cursor:pointer;font-size:20px;line-height:1;">&#x2715;</button>
+            </div>
+            <div id="order-detail-inner"></div>
+        </div>
+    </div>
+    <style>
+        @keyframes slideInRight {
+            from {
+                transform: translateX(60px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        #order-detail-modal>div {
+            animation: slideInRight 0.26s cubic-bezier(.4, 0, .2, 1);
+        }
+    </style>
+</body>
+
+</html>

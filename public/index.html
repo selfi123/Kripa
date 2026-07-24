@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIPA | Find Your Finest Pickles</title>
+  <meta name="description"
+    content="Welcome to KRIPA, your ultimate pickles destination where timeless elegance meets modern style. Shop curated traditional pickles, chutneys, and authentic spices." />
+  <link rel="stylesheet" href="/css/styles.css?v=1.3" />
+  <link rel="icon" type="image/png" href="/images/favicon.png" />
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+</head>
+
+<body>
+
+  <!-- NAVIGATION -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo" style="display:flex;flex-direction:column;line-height:1;">KRIPA</a>
+      <ul class="nav-links">
+        <li><a href="/" class="active">Home</a></li>
+        <li><a href="/#categories">Our Pickles</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="nav-icon-btn" id="search-btn" aria-label="Search">
+          <i data-lucide="search" style="width:18px;height:18px;"></i>
+        </button>
+        <a href="https://www.instagram.com/kripav_.official" target="_blank" class="nav-icon-btn hide-mobile" aria-label="Instagram"
+          title="Follow on Instagram">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+        </a>
+        <a href="https://wa.me/917994385077" target="_blank" class="nav-icon-btn hide-mobile" aria-label="WhatsApp"
+          title="Chat on WhatsApp">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+          </svg>
+        </a>
+        <div id="nav-user-slot" style="display:flex;align-items:center;"></div>
+        <button class="nav-icon-btn" id="cart-btn" aria-label="Cart">
+          <i data-lucide="shopping-bag" style="width:18px;height:18px;"></i>
+          <span class="cart-count" id="cart-count">0</span>
+        </button>
+        <div class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="/" onclick="closeMobileMenu()">Home</a>
+    <a href="/#categories" onclick="closeMobileMenu()">Our Pickles</a>
+    <a href="#about" onclick="closeMobileMenu()">About</a>
+    <a href="https://www.instagram.com/kripav_.official" target="_blank">Instagram</a>
+    <a href="https://wa.me/917994385077" target="_blank" style="color:var(--gold);">WhatsApp Us</a>
+    <div id="mobile-user-slot" style="width:100%; display:flex; flex-direction:column; align-items:center; gap:20px; margin-top:20px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.05);"></div>
+  </div>
+
+  <!-- SEARCH OVERLAY -->
+  <div class="search-overlay" id="search-overlay" onclick="handleSearchOverlayClick(event)">
+    <div class="search-input-wrap">
+      <input type="text" id="search-input" placeholder="Search pickles..." autocomplete="off"
+        oninput="doSearch(this.value)" onkeydown="if(event.key==='Escape')closeSearch()" />
+      <button class="search-close-btn" onclick="closeSearch()">&times;</button>
+    </div>
+    <div class="search-results" id="search-results">
+      <p class="search-hint">Type to search products...</p>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-particles" id="hero-particles"></div>
+    <div class="hero-image-side" id="hero-img-side">
+      <img src="" alt="KRIPA Pickles" id="hero-side-img" />
+    </div>
+    <div class="container" style="position:relative;z-index:2;padding-top:var(--nav-height);">
+      <div class="hero-content">
+        <p class="hero-eyebrow">Since 15th July 2024</p>
+        <h1 class="hero-title gold-text"
+          style="font-size:clamp(60px,16vw,160px);letter-spacing:clamp(4px,2vw,12px);margin-bottom:12px;line-height:1;">
+          KRIPA
+        </h1>
+        <p
+          style="font-family:var(--font-heading);font-size:clamp(16px,2.2vw,26px);font-weight:600;font-style:italic;color:var(--gold);letter-spacing:clamp(2px,1vw,5px);margin-bottom:32px;animation:fadeUp 1s ease 0.65s both;text-align:center;">
+          Authentic Taste of Kerala
+        </p>
+        <p class="hero-subtitle" style="color:var(--text-muted);">
+          Experience the true flavors of tradition with Kripa's handcrafted Kerala pickles. 
+          Made with farm-fresh ingredients and timeless family recipes to bring back home-cooked memories.
+        </p>
+        <div class="hero-cta">
+          <a href="/#categories" class="btn btn-gold">
+            <i data-lucide="sparkles" style="width:16px;height:16px;"></i>
+            Shop Pickles
+          </a>
+          <a href="#about" class="btn btn-outline">Our Story</a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll-hint">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- MARQUEE TICKER -->
+  <div class="ticker-wrap"
+    style="background:var(--dark-2);border-top:1px solid rgba(201,169,110,0.1);border-bottom:1px solid rgba(201,169,110,0.1);padding:12px 0;overflow:hidden;white-space:nowrap;">
+    <div class="ticker-inner" style="display:inline-block;animation:ticker 25s linear infinite;">
+      <span style="font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);padding:0 40px;">24 karat gold layered pickles</span>
+      <span style="font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--text-muted);padding:0 40px;">Premium Anti-Tarnish Pickles</span>
+      <span style="font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);padding:0 40px;">New Arrivals Every Week</span>
+      <span style="font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--text-muted);padding:0 40px;">Crafted with Passion</span>
+      <span style="font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--text-muted);padding:0 40px;">Premium Anti-Tarnish Pickles</span>
+      <span style="font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);padding:0 40px;">24 karat gold layered pickles</span>
+      <span style="font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);padding:0 40px;">New Arrivals Every Week</span>
+      <span style="font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--text-muted);padding:0 40px;">Crafted with Passion</span>
+    </div>
+  </div>
+
+  <!-- CATEGORIES SECTION -->
+  <section class="categories-section" id="categories">
+    <div class="container">
+      <div class="categories-header reveal">
+        <p class="section-label">Our Pickles</p>
+        <h2 class="section-title">Shop by <span class="gold-text">Category</span></h2>
+        <div class="divider"></div>
+      </div>
+      <div class="categories-grid" id="categories-grid">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS -->
+  <section class="products-section" id="featured">
+    <div class="container">
+      <div class="products-header reveal">
+        <div>
+          <p class="section-label">Handpicked</p>
+          <h2 class="section-title">Featured <span class="gold-text">Pieces</span></h2>
+        </div>
+        <a href="/#categories" class="btn btn-outline">View All</a>
+      </div>
+      <div class="products-grid" id="featured-grid">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- PRE-ORDER BOOKINGS -->
+  <section id="preorder-section"
+    style="display:none;padding:100px 0;width:100%;max-width:100vw;box-sizing:border-box;overflow:hidden;
+    background:linear-gradient(180deg,transparent,rgba(138,43,226,0.04),rgba(201,169,110,0.03),transparent);
+    border-top:1px solid rgba(138,43,226,0.12);border-bottom:1px solid rgba(201,169,110,0.08);position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-120px;right:-120px;width:400px;max-width:100vw;height:400px;border-radius:50%;
+      background:radial-gradient(circle,rgba(138,43,226,0.06) 0%,transparent 70%);pointer-events:none;"></div>
+    <div class="container">
+      <div class="products-header reveal">
+        <div>
+          <p class="section-label" style="color:#b07aff;">Exclusive Access</p>
+          <h2 class="section-title">Pre-order <span
+              style="background:linear-gradient(135deg,#c084fc,#a855f7,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Bookings</span>
+          </h2>
+        </div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.35);letter-spacing:1px;text-align:right;line-height:1.8;">
+          Reserve yours before<br>stock is even made.
+        </div>
+      </div>
+      <div class="products-grid" id="preorder-grid"></div>
+    </div>
+  </section>
+
+  <!-- OFFERS / ON SALE SECTION -->
+  <section class="products-section" id="offers-section"
+    style="display:none; background: linear-gradient(180deg, transparent, rgba(201,169,110,0.04), transparent); border-top: 1px solid rgba(201,169,110,0.1); border-bottom: 1px solid rgba(201,169,110,0.1);">
+    <div class="container">
+      <div class="products-header reveal">
+        <div>
+          <p class="section-label" style="color:#e05555;">Limited Time</p>
+          <h2 class="section-title">On <span class="gold-text">Sale</span></h2>
+        </div>
+        <a href="/#categories" class="btn"
+          style="background:rgba(224,85,85,0.12);border:1px solid rgba(224,85,85,0.35);color:#e07070;letter-spacing:2px;font-size:11px;padding:10px 22px;border-radius:8px;">View
+          All</a>
+      </div>
+      <div class="products-grid" id="sale-grid">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT SECTION -->
+  <section class="about-section" id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div>
+          <p class="section-label about-eyebrow reveal">Our Story</p>
+          <h2 class="section-title about-title reveal">Welcome to <span class="gold-text">KRIPA</span></h2>
+          <p class="about-text reveal">
+            Welcome to KRIPA, your ultimate destination for authentic Kerala flavors.
+            At KRIPA, we pride ourselves on offering a diverse range of traditional pickles that cater to
+            every spice lover.
+          </p>
+          <p class="about-text reveal">
+            Whether you're seeking the classic spicy mango, tangy lemon, or unique garlic blends, KRIPA is your
+            go-to place for home-style pickles at prices that won't break the bank. Founded with a
+            passion for authentic taste and a commitment to quality.
+          </p>
+          <p class="about-text reveal">
+            Our mission is to bring the timeless culinary heritage of Kerala straight to your dining table
+            without compromising on quality or hygiene. From everyday meals to special occasions, each
+            jar is packed with care.
+          </p>
+          <div class="about-stats reveal">
+            <div>
+              <div class="stat-num counter" data-target="13">0</div>
+              <div class="stat-label">Our Pickles</div>
+            </div>
+            <div>
+              <div class="stat-num counter" data-target="500">0</div>
+              <div class="stat-label">Happy Customers</div>
+            </div>
+            <div>
+              <div class="stat-num counter" data-target="100">0</div>
+              <div class="stat-label">Products</div>
+            </div>
+          </div>
+        </div>
+        <div class="about-image-wrap reveal">
+          <img id="about-img" src="" alt="KRIPA Pickles Category" style="object-position:center;" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTAGRAM -->
+  <section class="instagram-section">
+    <div class="container">
+      <div class="insta-header reveal">
+        <p class="section-label">Follow Us</p>
+        <h2 class="section-title">On <span class="gold-text">Instagram</span></h2>
+        <a href="https://www.instagram.com/kripav_.official" target="_blank" class="insta-handle">
+          <i data-lucide="instagram" style="width:16px;height:16px;"></i>
+          @kripav_.official
+        </a>
+      </div>
+      <div class="insta-grid" id="insta-grid">
+        <!-- Injected by JS -->
+      </div>
+      <div style="text-align:center;margin-top:40px;" class="reveal">
+        <a href="https://www.instagram.com/kripav_.official" target="_blank" class="btn btn-outline">
+          <i data-lucide="instagram" style="width:16px;height:16px;"></i>
+          Follow @kripav_.official
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">KRIPA</div>
+          <p class="footer-tagline">Your ultimate pickles destination where timeless elegance meets modern style and
+            affordability.</p>
+          <div class="social-links" style="margin-top:28px;">
+            <a href="https://www.instagram.com/kripav_.official" target="_blank" aria-label="Instagram">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+            </a>
+            <a href="https://wa.me/917994385077" target="_blank" aria-label="WhatsApp">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Our Pickles</h4>
+          <ul id="footer-cats"></ul>
+        </div>
+        <div class="footer-col">
+          <h4>Info</h4>
+          <ul>
+            <li><a href="#about">About KRIPA</a></li>
+            <li><a href="#">Shipping Policy</a></li>
+            <li><a href="#">Returns</a></li>
+            <li><a href="#">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul>
+            <li><a href="https://www.instagram.com/kripav_.official" target="_blank">Instagram</a></li>
+            <li><a href="https://wa.me/917994385077" target="_blank">WhatsApp</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 KRIPA Pickles. All rights reserved.</p>
+        <p>Made with <span style="color:var(--gold);">passion</span> by KRIPA</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- CART DRAWER -->
+  <div class="cart-overlay" id="cart-overlay"></div>
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="cart-header">
+      <h3>CART</h3>
+      <button class="cart-close" id="cart-close"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+    </div>
+    <div class="cart-items" id="cart-items-list">
+      <div class="cart-empty">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <path d="M16 10a4 4 0 01-8 0" />
+        </svg>
+        <p>Your cart is empty</p>
+        <a href="/#categories" class="btn btn-gold" style="width:auto;" onclick="closeCart()">Shop Now</a>
+      </div>
+    </div>
+    <div class="cart-footer" id="cart-footer" style="display:none;">
+      <div class="cart-total">Total <span id="cart-total">₹0</span></div>
+      <a href="/checkout" onclick="closeCart()" class="btn btn-gold"
+        style="width:100%;justify-content:center;text-decoration:none;">
+        Proceed to Checkout →
+      </a>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- PRE-BOOK MODAL -->
+  <div id="prebook-modal" onclick="if(event.target===this)closePrebook()" style="
+    display:none;position:fixed;inset:0;z-index:1000;
+    background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);
+    align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--dark-2);border:1px solid rgba(138,43,226,0.3);
+      border-radius:24px;padding:36px;width:100%;max-width:420px;position:relative;
+      box-shadow:0 24px 80px rgba(124,58,237,0.3);">
+      <button onclick="closePrebook()" style="position:absolute;top:16px;right:18px;
+        background:none;border:none;color:rgba(255,255,255,0.4);font-size:22px;cursor:pointer;">&times;</button>
+      <p style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#a855f7;">Exclusive
+        Pre-booking</p>
+      <h3
+        style="font-family:var(--font-heading);font-size:22px;color:var(--gold);letter-spacing:2px;margin-bottom:6px;">
+        Confirm Booking</h3>
+      <p id="prebook-item-name"
+        style="font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:24px;letter-spacing:0.5px;"></p>
+      <div style="margin-bottom:24px;">
+        <label
+          style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:8px;">Quantity</label>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button onclick="const q=document.getElementById('prebook-qty');q.value=Math.max(1,parseInt(q.value)-1)"
+            style="width:36px;height:36px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#fff;font-size:18px;cursor:pointer;">-</button>
+          <input id="prebook-qty" type="number" min="1" max="10" value="1"
+            style="width:60px;text-align:center;border:1px solid rgba(201,169,110,0.2);background:rgba(255,255,255,0.04);color:var(--gold);font-size:16px;font-weight:600;padding:8px;border-radius:8px;outline:none;" />
+          <button onclick="const q=document.getElementById('prebook-qty');q.value=Math.min(10,parseInt(q.value)+1)"
+            style="width:36px;height:36px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#fff;font-size:18px;cursor:pointer;">+</button>
+        </div>
+      </div>
+      <p style="font-size:11px;color:rgba(255,255,255,0.3);line-height:1.7;margin-bottom:24px;">
+        No payment required now. We'll contact you via email when your item is ready for dispatch.
+      </p>
+      <button id="prebook-submit" onclick="submitPrebook()" style="
+        width:100%;padding:15px;border:none;border-radius:12px;cursor:pointer;
+        background:linear-gradient(135deg,#6d28d9,#a855f7,#c084fc);
+        color:#fff;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+        box-shadow:0 4px 24px rgba(124,58,237,0.45);transition:all 0.25s;"
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 36px rgba(124,58,237,0.6)'"
+        onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 24px rgba(124,58,237,0.45)'">
+        Confirm Pre-booking
+      </button>
+    </div>
+  </div>
+
+  <!-- BACK TO TOP -->
+  <button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">
+    <i data-lucide="chevron-up" style="width:20px;height:20px;"></i>
+  </button>
+
+  <style>
+    @keyframes ticker {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    /* Countdown units */
+    .cd-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .cd-num {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 6px;
+      padding: 3px 8px;
+      min-width: 34px;
+      text-align: center;
+    }
+
+    .cd-lbl {
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+    }
+  </style>
+
+  <script src="/js/main.js"></script>
+  <script>
+    // Initialize Lucide icons
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) lucide.createIcons();
+      initHomepage();
+    });
+
+    async function initHomepage() {
+      await Promise.all([loadCategories(), loadFeatured(), loadSale(), loadPreorders()]);
+      setupReveal();
+      setupParticles();
+      setupCounter();
+    }
+
+    async function loadCategories() {
+      const grid = document.getElementById('categories-grid');
+      const footerCats = document.getElementById('footer-cats');
+      try {
+        const cats = await fetch('/api/categories').then(r => r.json());
+        // Hero image — use the dedicated hero photo
+        document.getElementById('hero-side-img').src = '/images/hero/kerala_pickle.png';
+        document.getElementById('about-img').src = '/images/hero/kerala_pickle.png';
+        // Load insta grid from all categories
+        // Insta grid — use thumb URL endpoint (images field no longer in list API)
+        const allProds = await fetch('/api/products').then(r => r.json());
+        const instaImgs = allProds.map(p => p.thumb).filter(Boolean).slice(0, 8);
+        const instaGrid = document.getElementById('insta-grid');
+        instaGrid.innerHTML = instaImgs.map(img => `
+        <a class="insta-item" href="https://www.instagram.com/kripav_.official" target="_blank">
+          <img src="${img}" alt="KRIPA on Instagram" loading="lazy" />
+        </a>
+      `).join('');
+
+        // Render category cards — top-level only on homepage
+        const topLevelCats = cats.filter(c => !c.parent_id);
+        grid.innerHTML = topLevelCats.map(cat => `
+        <div class="category-card reveal" onclick="location.href='category.html?c=${encodeURIComponent(cat.name)}'">
+          <img class="card-img" src="${cat.cover || ''}" alt="${cat.name}" loading="lazy" />
+          <div class="card-overlay"></div>
+          <div class="card-border"></div>
+          <div class="card-content">
+            <p class="card-count">${cat.count} pieces</p>
+            <h3 class="card-name">${cat.name}</h3>
+            <span class="card-arrow">Explore <i data-lucide="arrow-right" style="width:14px;height:14px;display:inline;"></i></span>
+          </div>
+        </div>
+      `).join('');
+
+        // Footer links
+        footerCats.innerHTML = cats.slice(0, 6).map(cat =>
+          `<li><a href="category.html?c=${encodeURIComponent(cat.name)}">${cat.name}</a></li>`
+        ).join('');
+
+        if (window.lucide) lucide.createIcons();
+      } catch (e) {
+        grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;grid-column:1/-1;">Could not load categories.</p>';
+      }
+    }
+
+    async function loadFeatured() {
+      const grid = document.getElementById('featured-grid');
+      try {
+        const featured = await fetch('/api/featured').then(r => r.json());
+        if (!featured.length) { grid.closest('.products-section').style.display = 'none'; return; }
+        grid.innerHTML = featured.slice(0, 8).map(p => renderProductCard(p)).join('');
+        if (window.lucide) lucide.createIcons();
+      } catch (e) { console.error(e); }
+    }
+
+    // -- PRE-ORDERS --------------------------------------------------------------
+    let _currentUser = null;
+    let _allPreorderListings = [];
+
+    async function loadPreorders() {
+      const section = document.getElementById('preorder-section');
+      const grid = document.getElementById('preorder-grid');
+      try {
+        // fetch user + listings in parallel
+        const [listings, authData] = await Promise.all([
+          fetch('/api/preorders').then(r => r.json()).catch(() => []),
+          fetch('/auth/me').then(r => r.json()).catch(() => ({}))
+        ]);
+        _currentUser = authData.user || null;
+        _allPreorderListings = listings;
+        if (!listings.length) { section.style.display = 'none'; return; }
+        section.style.display = '';
+        grid.innerHTML = listings.map(p => renderPreorderCard(p)).join('');
+        // Kick off countdown timers
+        listings.forEach(p => { if (p.closes_at) startCountdown(p.id, p.closes_at); });
+        if (window.lucide) lucide.createIcons();
+        setupReveal();
+      } catch (e) { section.style.display = 'none'; }
+    }
+
+    function renderPreorderCard(p) {
+      const slotsLeft = p.max_slots !== null ? Math.max(0, p.max_slots - (p.booked_count || 0)) : null;
+      const isClosed = p.closes_at && new Date(p.closes_at) < new Date();
+      return `
+        <div class="product-card reveal" style="position:relative;cursor:pointer;"
+             onclick="openPreorderDetail('${p.id}')">
+          <div style="position:absolute;top:10px;left:10px;z-index:4;
+            background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;
+            font-size:9px;font-weight:700;letter-spacing:2px;padding:4px 10px;
+            border-radius:20px;text-transform:uppercase;">${isClosed ? 'Closed' : 'Pre-order'}</div>
+          <div class="product-img-wrap">
+            <img class="product-img" src="${p.thumb}" alt="${p.name}" loading="lazy"
+              onerror="this.style.display='none'" />
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,0.7));"></div>
+            ${p.closes_at && !isClosed ? `
+            <div id="cd-${p.id}" style="position:absolute;bottom:12px;left:12px;right:12px;z-index:3;
+              display:flex;gap:6px;justify-content:center;">
+              <div class="cd-unit"><span class="cd-num" id="cd-d-${p.id}">--</span><span class="cd-lbl">d</span></div>
+              <div class="cd-unit"><span class="cd-num" id="cd-h-${p.id}">--</span><span class="cd-lbl">h</span></div>
+              <div class="cd-unit"><span class="cd-num" id="cd-m-${p.id}">--</span><span class="cd-lbl">m</span></div>
+              <div class="cd-unit"><span class="cd-num" id="cd-s-${p.id}">--</span><span class="cd-lbl">s</span></div>
+            </div>` : ''}
+          </div>
+          <div class="product-info">
+            <p class="product-category">${p.category || 'Pre-order'}</p>
+            <h3 class="product-name">${p.name}</h3>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <p class="product-price" style="margin-bottom:0;">₹${parseFloat(p.price).toLocaleString('en-IN')}<span> est.</span></p>
+              ${p.expected_delivery ? `<span style="font-size:10px;color:rgba(192,132,252,0.8);letter-spacing:1px;">${p.expected_delivery}</span>` : ''}
+            </div>
+            ${slotsLeft !== null ? `<div style="margin-bottom:12px;">
+              <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;">
+                <div style="height:100%;width:${Math.min(100, Math.round((p.booked_count / p.max_slots) * 100))}%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:4px;transition:width 0.5s;"></div>
+              </div>
+              <p style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:4px;letter-spacing:0.5px;">${slotsLeft} slot${slotsLeft !== 1 ? 's' : ''} left</p>
+            </div>` : ''}
+            <button
+              onclick="event.stopPropagation(); openPrebook('${p.id}','${p.name.replace(/'/g, '&apos;')}')"
+              ${isClosed || (slotsLeft !== null && slotsLeft === 0) ? 'disabled' : ''}
+              style="width:100%;padding:12px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+                cursor:${isClosed || (slotsLeft !== null && slotsLeft === 0) ? 'not-allowed' : 'pointer'};
+                background:${isClosed || (slotsLeft !== null && slotsLeft === 0)
+          ? 'rgba(255,255,255,0.06)'
+          : 'linear-gradient(135deg,#6d28d9,#a855f7,#c084fc)'};
+                color:${isClosed || (slotsLeft !== null && slotsLeft === 0) ? 'rgba(255,255,255,0.3)' : '#fff'};
+                border:none;box-shadow:${isClosed || (slotsLeft !== null && slotsLeft === 0) ? 'none' : '0 4px 16px rgba(124,58,237,0.35)'};
+                transition:all 0.25s;"
+              onmouseover="if(!this.disabled){this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(124,58,237,0.55)'}"
+              onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 16px rgba(124,58,237,0.35)'"
+            >
+              ${isClosed ? 'Booking Closed' : (slotsLeft === 0 ? 'Fully Booked' : 'Pre-book Now')}
+            </button>
+          </div>
+        </div>`;
+    }
+
+    function openPreorderDetail(id) {
+      const p = _allPreorderListings.find(x => x.id === id);
+      if (!p) return;
+      const slotsLeft = p.max_slots !== null ? Math.max(0, p.max_slots - (p.booked_count || 0)) : null;
+      const isClosed = p.closes_at && new Date(p.closes_at) < new Date();
+      const sizes = Array.isArray(p.available_sizes) && p.available_sizes.length ? p.available_sizes : null;
+
+      document.getElementById('po-detail-inner').innerHTML = `
+        <img src="${p.thumb}" alt="${p.name}" style="width:100%;height:240px;object-fit:cover;border-radius:16px;
+            border:1px solid rgba(168,85,247,0.2);margin-bottom:22px;" onerror="this.style.display='none'" />
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px;">
+          <div>
+            <p style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(168,85,247,0.8);margin-bottom:4px;">${p.category || 'Pre-order'}</p>
+            <h2 style="font-family:var(--font-heading);font-size:22px;color:var(--text);line-height:1.3;margin-bottom:10px;">${p.name}</h2>
+          </div>
+          <span style="flex-shrink:0;padding:5px 14px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+              background:linear-gradient(135deg,rgba(109,40,217,0.3),rgba(168,85,247,0.3));color:#c084fc;border:1px solid rgba(168,85,247,0.3);">
+            ${isClosed ? 'Closed' : 'Pre-order'}</span>
+        </div>
+        <p style="font-size:22px;font-weight:700;color:var(--gold);margin-bottom:${p.description ? '16px' : '0'};">₹${parseFloat(p.price).toLocaleString('en-IN')} <span style="font-size:12px;font-weight:400;color:var(--text-muted);">estimated price</span></p>
+        ${p.description ? `<p style="font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:20px;">${p.description}</p>` : ''}
+        <div style="display:grid;grid-template-columns:${sizes ? '1fr 1fr' : '1fr'};gap:12px;margin-bottom:22px;">
+          ${p.expected_delivery ? `
+          <div style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);border-radius:12px;padding:14px;">
+            <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(168,85,247,0.6);margin-bottom:4px;">Expected Delivery</p>
+            <p style="font-size:14px;font-weight:600;color:var(--text);">${p.expected_delivery}</p>
+          </div>` : ''}
+          ${slotsLeft !== null ? `
+          <div style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);border-radius:12px;padding:14px;">
+            <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(168,85,247,0.6);margin-bottom:4px;">Slots</p>
+            <p style="font-size:14px;font-weight:600;color:var(--text);">${slotsLeft} remaining</p>
+            <div style="height:3px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;margin-top:8px;">
+              <div style="height:100%;width:${Math.min(100, Math.round((p.booked_count / p.max_slots) * 100))}%;background:linear-gradient(90deg,#7c3aed,#a855f7);"></div>
+            </div>
+          </div>` : ''}
+        </div>
+        ${sizes ? `
+        <div style="margin-bottom:22px;">
+          <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(168,85,247,0.6);margin-bottom:10px;">Available Sizes</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            ${sizes.map(s => `<span style="padding:6px 16px;border-radius:20px;font-size:12px;
+                background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);color:#c084fc;">${s}</span>`).join('')}
+          </div>
+        </div>` : ''}
+        ${p.closes_at && !isClosed ? `
+        <div style="margin-bottom:22px;">
+          <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(168,85,247,0.6);margin-bottom:10px;">Booking Closes In</p>
+          <div style="display:flex;gap:8px;">
+            <div class="cd-unit"><span class="cd-num" id="pod-d-${p.id}">--</span><span class="cd-lbl">d</span></div>
+            <div class="cd-unit"><span class="cd-num" id="pod-h-${p.id}">--</span><span class="cd-lbl">h</span></div>
+            <div class="cd-unit"><span class="cd-num" id="pod-m-${p.id}">--</span><span class="cd-lbl">m</span></div>
+            <div class="cd-unit"><span class="cd-num" id="pod-s-${p.id}">--</span><span class="cd-lbl">s</span></div>
+          </div>
+        </div>` : ''}
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px;margin-bottom:22px;">
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.6;"><strong style="color:var(--text);">No payment required now.</strong> Pre-booking is completely free — we'll contact you once the item is ready for purchase.</p>
+        </div>
+        <button onclick="document.getElementById('po-detail-modal').style.display='none'; openPrebook('${p.id}','${p.name.replace(/'/g, '&apos;')}')"
+          ${isClosed || (slotsLeft !== null && slotsLeft === 0) ? 'disabled' : ''}
+          style="width:100%;padding:16px;border-radius:10px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border:none;
+            background:${isClosed || (slotsLeft !== null && slotsLeft === 0) ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg,#6d28d9,#a855f7)'};
+            color:${isClosed || (slotsLeft !== null && slotsLeft === 0) ? 'rgba(255,255,255,0.3)' : '#fff'};
+            cursor:${isClosed || (slotsLeft !== null && slotsLeft === 0) ? 'not-allowed' : 'pointer'};
+            box-shadow:${isClosed || (slotsLeft !== null && slotsLeft === 0) ? 'none' : '0 6px 24px rgba(124,58,237,0.4)'};"
+        >${isClosed ? 'Booking Closed' : (slotsLeft === 0 ? 'Fully Booked' : 'Pre-book Now')}</button>
+      `;
+      document.getElementById('po-detail-modal').style.display = 'flex';
+      // Start countdown in the detail panel too
+      if (p.closes_at && !isClosed) {
+        (function tick() {
+          const diff = new Date(p.closes_at) - new Date();
+          const set = (u, v) => { const el = document.getElementById(`pod-${u}-${p.id}`); if (el) el.textContent = String(v).padStart(2, '0'); };
+          if (diff <= 0) { ['d', 'h', 'm', 's'].forEach(u => set(u, 0)); return; }
+          set('d', Math.floor(diff / 86400000)); set('h', Math.floor((diff % 86400000) / 3600000));
+          set('m', Math.floor((diff % 3600000) / 60000)); set('s', Math.floor((diff % 60000) / 1000));
+          setTimeout(tick, 1000);
+        })();
+      }
+    }
+
+    function closePreorderDetail() {
+      document.getElementById('po-detail-modal').style.display = 'none';
+    }
+
+
+    function startCountdown(id, closesAt) {
+      function tick() {
+        const diff = new Date(closesAt) - new Date();
+        if (diff <= 0) {
+          ['d', 'h', 'm', 's'].forEach(u => { const el = document.getElementById(`cd-${u}-${id}`); if (el) el.textContent = '0'; });
+          return;
+        }
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        const set = (u, v) => { const el = document.getElementById(`cd-${u}-${id}`); if (el) el.textContent = String(v).padStart(2, '0'); };
+        set('d', d); set('h', h); set('m', m); set('s', s);
+      }
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    let _prebookId = null;
+    function openPrebook(id, name) {
+      if (!_currentUser) {
+        window.location.href = '/login?redirect=/';
+        return;
+      }
+      _prebookId = id;
+      document.getElementById('prebook-item-name').textContent = name;
+      document.getElementById('prebook-qty').value = 1;
+      document.getElementById('prebook-modal').style.display = 'flex';
+    }
+    function closePrebook() {
+      document.getElementById('prebook-modal').style.display = 'none';
+    }
+    async function submitPrebook() {
+      const qty = parseInt(document.getElementById('prebook-qty').value) || 1;
+      const btn = document.getElementById('prebook-submit');
+      btn.disabled = true; btn.textContent = 'Booking�';
+      try {
+        const res = await fetch(`/api/preorders/${_prebookId}/book`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quantity: qty })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          closePrebook();
+          showToast(data.message || '✅ Pre-booking confirmed!');
+          loadPreorders(); // refresh slots
+        } else {
+          showToast('❌ ' + (data.error || 'Could not pre-book.'));
+        }
+      } catch (e) { showToast('❌ Network error. Try again.'); }
+      btn.disabled = false; btn.textContent = 'Confirm Pre-booking';
+    }
+
+    async function loadSale() {
+      const section = document.getElementById('offers-section');
+      const grid = document.getElementById('sale-grid');
+      try {
+        const sale = await fetch('/api/sale').then(r => r.json());
+        if (!sale || !sale.length) { section.style.display = 'none'; return; }
+        section.style.display = '';
+        grid.innerHTML = sale.slice(0, 8).map(p => {
+          const priceHtml = p.is_on_sale && p.sale_price
+            ? `<div style="display:flex;align-items:center;gap:8px;">
+                <span style="color:#e07070;font-weight:700;font-size:16px;">&#8377;${parseFloat(p.sale_price).toLocaleString('en-IN')}</span>
+                <span style="text-decoration:line-through;color:var(--text-muted);font-size:13px;">&#8377;${parseFloat(p.price).toLocaleString('en-IN')}</span>
+               </div>`
+            : `<div style="color:var(--gold);font-weight:600;">&#8377;${parseFloat(p.price).toLocaleString('en-IN')}</div>`;
+          const discount = p.is_on_sale && p.sale_price ? Math.round((1 - p.sale_price / p.price) * 100) : 0;
+          return `<div class="product-card reveal" onclick="location.href='product.html?id=${p.id}'" style="cursor:pointer;position:relative;">
+              ${p.stock_status === 'out_of_stock' ? `<div style="position:absolute;top:10px;right:10px;z-index:3;background:#d9534f;color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:4px 10px;border-radius:20px;text-transform:uppercase;">SOLD OUT</div>` : ''}
+              ${discount > 0 ? `<div style="position:absolute;top:10px;left:10px;z-index:3;background:#e05555;color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:4px 10px;border-radius:20px;text-transform:uppercase;">${discount}% OFF</div>` : ''}
+              <div class="product-img-wrap">
+                <img src="${p.thumb}" alt="${p.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='/images/placeholder.png'" />
+              </div>
+              <div class="product-info">
+                <p class="product-category">${p.category}</p>
+                <h3 class="product-name">${p.name}</h3>
+                ${priceHtml}
+              </div>
+            </div>`;
+        }).join('');
+        if (window.lucide) lucide.createIcons();
+      } catch (e) { section.style.display = 'none'; }
+    }
+
+    function setupReveal() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    }
+
+    function setupParticles() {
+      const container = document.getElementById('hero-particles');
+      // Create 50 particles instead of 30, with a bias towards the left (margin area)
+      for (let i = 0; i < 50; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        // More particles on the left side (0-50%)
+        const leftBase = i < 35 ? Math.random() * 50 : Math.random() * 100;
+        const size = 1 + Math.random() * 3;
+        p.style.cssText = `left:${leftBase}%;top:${Math.random() * 100}%;width:${size}px;height:${size}px;animation-delay:${Math.random() * 5}s;animation-duration:${4 + Math.random() * 6}s;`;
+        container.appendChild(p);
+      }
+    }
+
+    function setupCounter() {
+      const counters = document.querySelectorAll('.counter');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            const el = e.target;
+            const target = parseInt(el.dataset.target);
+            let count = 0;
+            const step = target / 60;
+            const timer = setInterval(() => {
+              count = Math.min(count + step, target);
+              el.textContent = Math.floor(count) + (target >= 100 ? '+' : '');
+              if (count >= target) clearInterval(timer);
+            }, 30);
+            observer.unobserve(el);
+          }
+        });
+      }, { threshold: 0.5 });
+      counters.forEach(c => observer.observe(c));
+    }
+  </script>
+
+  <!-- PRE-ORDER DETAIL SLIDE PANEL -->
+  <div id="po-detail-modal"
+    onclick="if(event.target===this)closePreorderDetail()"
+    style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);align-items:flex-start;justify-content:flex-end;">
+    <div style="width:100%;max-width:480px;height:100vh;overflow-y:auto;background:#0e0e0e;border-left:1px solid rgba(168,85,247,0.2);padding:32px;box-shadow:-20px 0 80px rgba(109,40,217,0.18);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <span style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(168,85,247,0.7);">&#x2728; Pre-order Details</span>
+        <button onclick="closePreorderDetail()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px 14px;color:#aaa;cursor:pointer;font-size:20px;line-height:1;">&#x2715;</button>
+      </div>
+      <div id="po-detail-inner"></div>
+    </div>
+  </div>
+  <style>
+    @keyframes poSlideIn { from { transform:translateX(60px);opacity:0; } to { transform:translateX(0);opacity:1; } }
+    #po-detail-modal > div { animation: poSlideIn 0.26s cubic-bezier(.4,0,.2,1); }
+  </style>
+</body>
+
+</html>

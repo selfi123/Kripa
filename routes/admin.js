@@ -1,0 +1,375 @@
+const express = require('express');
+const router = express.Router();
+const crypto = require('crypto');
+const pool = require('../db/pool');
+const pushRouter = require('./push');
+
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+async function uploadToCloudinary(base64Str, folder = 'kripa') {
+    if (!base64Str || typeof base64Str !== 'string' || !base64Str.startsWith('data:image')) return base64Str;
+    if (!process.env.CLOUDINARY_CLOUD_NAME) {
+        console.warn('CLOUDINARY_CLOUD_NAME not set. Falling back to DB storage.');
+        return base64Str;
+    }
+    try {
+        const result = await cloudinary.uploader.upload(base64Str, { folder });
+        return result.secure_url;
+    } catch (err) {
+        console.error('Cloudinary upload error:', err);
+        return base64Str;
+    }
+}
+
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
+
+// ── Token store ───────────────────────────────────────────────────────────────
+const validTokens = new Map();
+
+// ── Auth middleware ───────────────────────────────────────────────────────────
+function auth(req, res, next) {
+    const token = req.headers['x-admin-token'] || req.query.token;
+    if (!token) return res.status(401).json({ error: 'No token' });
+    if (validTokens.has(token)) return next();
+    if (req.session?.adminToken && req.session.adminToken === token) return next();
+    if (req.session?.isAdmin) return next();
+    if (req.isAuthenticated?.() && ADMIN_EMAILS.includes((req.user?.email || '').toLowerCase())) return next();
+    return res.status(401).json({ error: 'Unauthorized' });
+}
+
+// ── GET /api/admin/orders – all orders with items + address ───────────────────
+router.get('/orders', auth, async (req, res) => {
+    try {
+        const { rows } = await pool.query(
+            `SELECT id, user_id, guest_email, items, address, subtotal, delivery_charge, total, 
+              status, razorpay_order_id, razorpay_payment_id, courier_name, tracking_id, created_at
+       FROM orders ORDER BY created_at DESC`
+        );
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── PATCH /api/admin/orders/:id/status – update delivery status ───────────────
+router.patch('/orders/:id/status', auth, express.json(), async (req, res) => {
+    const allowed = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunding', 'refunded'];
+    const { status, tracking_id } = req.body;
+    if (!allowed.includes(status)) return res.status(400).json({ error: 'Invalid status' });
+    try {
+        let queryStr = `UPDATE orders SET status=$1, updated_at=NOW() WHERE id=$2 RETURNING *`;
+        let queryParams = [status, req.params.id];
+
+        if (req.body.hasOwnProperty('tracking_id')) {
+            if (!tracking_id) {
+                // Wipe tracking ID and existing tracking data
+                queryStr = `UPDATE orders SET status=$1, tracking_id=NULL, tracking_data=NULL, tracking_updated_at=NULL, updated_at=NOW() WHERE id=$2 RETURNING *`;
+                queryParams = [status, req.params.id];
+            } else {
+                queryStr = `UPDATE orders SET status=$1, tracking_id=$2, updated_at=NOW() WHERE id=$3 RETURNING *`;
+                queryParams = [status, tracking_id, req.params.id];
+            }
+        }
+
+        const { rows } = await pool.query(queryStr, queryParams);
+        if (!rows.length) return res.status(404).json({ error: 'Order not found' });
+
+        // Auto-sync with ParcelsApp immediately upon admin save
+        const finalTrackingId = tracking_id || rows[0].tracking_id;
+        const apiKey = process.env.PARCELSAPP_API_KEY;
+        if (finalTrackingId && apiKey) {
+            try {
+                const resp = await fetch('https://parcelsapp.com/api/v3/shipments/tracking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        shipments: [{ trackingId: finalTrackingId, destinationCountry: 'India' }],
+                        language: 'en',
+                        apiKey
+                    })
+                });
+                const data = await resp.json();
+                const shipment = data.shipments && data.shipments[0];
+                const states = shipment && shipment.states ? shipment.states : null;
+
+                if (shipment && shipment.status === 'delivered') {
+                    await pool.query("UPDATE orders SET status='delivered' WHERE id=$1", [req.params.id]);
+                    rows[0].status = 'delivered';
+                }
+
+                await pool.query(
+                    `UPDATE orders SET tracking_data=$1, tracking_updated_at=NOW() WHERE id=$2`,
+                    [JSON.stringify(states), req.params.id]
+                );
+            } catch (err) {
+                console.error('Admin tracking sync error:', err.message);
+            }
+        }
+
+        res.json({ message: 'Status updated', order: rows[0] });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── POST /api/admin/login ─────────────────────────────────────────────────────
+router.post('/login', (req, res) => {
+    const { password } = req.body;
+    if (password === (process.env.ADMIN_PASSWORD || 'kripa2024')) {
+        const token = crypto.randomUUID();
+        validTokens.set(token, 'admin');
+        return res.json({ token });
+    }
+    res.status(401).json({ error: 'Invalid password' });
+});
+
+// ── POST /api/admin/logout ────────────────────────────────────────────────────
+router.post('/logout', auth, (req, res) => {
+    const token = req.headers['x-admin-token'];
+    if (token) validTokens.delete(token);
+    if (req.session) {
+        req.session.isAdmin = false;
+        req.session.adminToken = null;
+    }
+    res.json({ message: 'Logged out' });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CATEGORIES
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── GET /api/admin/categories ─────────────────────────────────────────────────
+router.get('/categories', auth, async (req, res) => {
+    try {
+        const { rows } = await pool.query(`SELECT id, name, description, cover_name, parent_id, created_at FROM categories ORDER BY parent_id NULLS FIRST, name`);
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── GET /api/admin/categories/:id/cover ──────────────────────────────────────
+router.get('/categories/:id/cover', async (req, res) => {
+    try {
+        const { rows } = await pool.query(`SELECT cover_data, cover_name FROM categories WHERE id=$1`, [req.params.id]);
+        if (!rows.length || !rows[0].cover_data) return res.status(404).send('');
+        const data = rows[0].cover_data.split(',');
+        const mime = data[0].split(':')[1].split(';')[0];
+        const buf = Buffer.from(data[1], 'base64');
+        res.set('Content-Type', mime).send(buf);
+    } catch (err) { res.status(500).send(''); }
+});
+
+// ── POST /api/admin/categories ────────────────────────────────────────────────
+router.post('/categories', auth, express.json({ limit: '25mb' }), async (req, res) => {
+    try {
+        const { name, description, cover_data, cover_name, parent_id } = req.body;
+        if (!name) return res.status(400).json({ error: 'Name required' });
+        
+        let finalCoverData = cover_data || null;
+        if (finalCoverData && finalCoverData.startsWith('data:image')) {
+            finalCoverData = await uploadToCloudinary(finalCoverData, 'kripa/categories');
+        }
+
+        const { rows } = await pool.query(
+            `INSERT INTO categories (name, description, cover_data, cover_name, parent_id)
+       VALUES ($1,$2,$3,$4,$5) RETURNING id, name, description, cover_name, parent_id, created_at`,
+            [name.trim(), description || '', finalCoverData, cover_name || null, parent_id || null]
+        );
+        res.json(rows[0]);
+    } catch (err) {
+        if (err.code === '23505') return res.status(400).json({ error: 'Category already exists' });
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ── PUT /api/admin/categories/:id ────────────────────────────────────────────
+router.put('/categories/:id', auth, express.json({ limit: '25mb' }), async (req, res) => {
+    try {
+        const { name, description, cover_data, cover_name, parent_id } = req.body;
+        const updates = [];
+        const vals = [];
+        if (name) { updates.push(`name=$${vals.push(name)}`); }
+        if (description !== undefined) { updates.push(`description=$${vals.push(description)}`); }
+        if (cover_data) { 
+            const finalCoverData = await uploadToCloudinary(cover_data, 'kripa/categories');
+            updates.push(`cover_data=$${vals.push(finalCoverData)}`); 
+            updates.push(`cover_name=$${vals.push(cover_name || '')}`); 
+        }
+        // Always update parent_id (allow setting to null for top-level)
+        updates.push(`parent_id=$${vals.push(parent_id || null)}`);
+        if (!updates.length) return res.status(400).json({ error: 'Nothing to update' });
+        vals.push(req.params.id);
+        const { rows } = await pool.query(
+            `UPDATE categories SET ${updates.join(',')} WHERE id=$${vals.length} RETURNING id, name, description, cover_name`,
+            vals
+        );
+        res.json(rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── DELETE /api/admin/categories/:id ─────────────────────────────────────────
+router.delete('/categories/:id', auth, async (req, res) => {
+    try {
+        const { rows } = await pool.query(`SELECT name FROM categories WHERE id=$1`, [req.params.id]);
+        if (!rows.length) return res.status(404).json({ error: 'Not found' });
+        await pool.query(`DELETE FROM categories WHERE id=$1`, [req.params.id]);
+        res.json({ message: 'Deleted' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PRODUCTS
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── GET /api/admin/products ───────────────────────────────────────────────────
+router.get('/products', auth, async (req, res) => {
+    try {
+        const { rows } = await pool.query(`SELECT id, name, category, price, description, featured, stock, stock_status, is_on_sale, sale_price, available_sizes, weight_prices, available_colors, created_at FROM products ORDER BY created_at DESC`);
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── GET /api/admin/products/:id/images ───────────────────────────────────────
+// Returns just the images array (base64) for a product
+router.get('/products/:id/images', auth, async (req, res) => {
+    try {
+        const { rows } = await pool.query(`SELECT images FROM products WHERE id=$1`, [req.params.id]);
+        if (!rows.length) return res.status(404).json({ error: 'Not found' });
+        res.json({ images: rows[0].images || [] });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── POST /api/admin/products – base64 JSON body ───────────────────────────────
+router.post('/products', auth, express.json({ limit: '50mb' }), async (req, res) => {
+    try {
+        const { name, category, price, description, featured, images, stock, stock_status, is_on_sale, sale_price, available_sizes, weight_prices, available_colors } = req.body;
+        if (!name || !category) return res.status(400).json({ error: 'Name and category are required' });
+        const stockVal = stock !== undefined && stock !== '' ? parseInt(stock) : null;
+        let finalStatus = stock_status || 'in_stock';
+        if (stockVal === 0) finalStatus = 'out_of_stock';
+        else if (stockVal > 0 && finalStatus === 'out_of_stock') finalStatus = 'in_stock';
+
+        const sizesArr = Array.isArray(available_sizes) && available_sizes.length ? available_sizes : null;
+        const weightPricesObj = (weight_prices && Object.keys(weight_prices).length > 0) ? weight_prices : null;
+        const colorsArr = Array.isArray(available_colors) && available_colors.length ? available_colors : null;
+        
+        const finalImages = [];
+        for (const img of (images || [])) {
+            finalImages.push(await uploadToCloudinary(img, 'kripa/products'));
+        }
+
+        const { rows } = await pool.query(
+            `INSERT INTO products (name, category, price, description, images, featured, stock, stock_status, is_on_sale, sale_price, available_sizes, weight_prices, available_colors)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
+            [name, category, parseFloat(price) || 0, description || '', JSON.stringify(finalImages),
+                featured === true || featured === 'true',
+                stockVal,
+                finalStatus,
+                is_on_sale === true || is_on_sale === 'true',
+                sale_price !== undefined && sale_price !== '' ? parseFloat(sale_price) : null,
+                sizesArr, weightPricesObj, colorsArr]
+        );
+        await pool.query(`INSERT INTO categories (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`, [category]);
+        res.json(rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── PUT /api/admin/products/:id ───────────────────────────────────────────────
+router.put('/products/:id', auth, express.json({ limit: '50mb' }), async (req, res) => {
+    try {
+        const { name, category, price, description, featured, images, stock, stock_status, is_on_sale, sale_price, available_sizes, weight_prices, available_colors } = req.body;
+        const stockVal = (stock !== undefined && stock !== '') ? parseInt(stock) : null;
+        const salePriceVal = (sale_price !== undefined && sale_price !== '') ? parseFloat(sale_price) : null;
+        const sizesArr = Array.isArray(available_sizes) ? available_sizes : null;
+        const weightPricesObj = (weight_prices && Object.keys(weight_prices).length > 0) ? weight_prices : null;
+        const colorsArr = Array.isArray(available_colors) ? available_colors : null;
+        let finalStatus = stock_status || null;
+        if (stockVal === 0) finalStatus = 'out_of_stock';
+        else if (stockVal > 0 && finalStatus === 'out_of_stock') finalStatus = 'in_stock';
+
+        let finalImages = null;
+        if (images) {
+            finalImages = [];
+            for (const img of images) {
+                finalImages.push(await uploadToCloudinary(img, 'kripa/products'));
+            }
+        }
+
+        const { rows } = await pool.query(
+            `UPDATE products SET
+        name        = COALESCE($1, name),
+        category    = COALESCE($2, category),
+        price       = COALESCE($3, price),
+        description = COALESCE($4, description),
+        images      = COALESCE($5::jsonb, images),
+        featured    = COALESCE($6, featured),
+        stock       = $7,
+        stock_status = COALESCE($8, stock_status),
+        is_on_sale  = $9,
+        sale_price  = COALESCE($10, sale_price),
+        available_sizes = $11,
+        available_colors = $12,
+        weight_prices = $13,
+        updated_at  = NOW()
+       WHERE id = $14 RETURNING *`,
+            [name || null, category || null, price ? parseFloat(price) : null, description || null,
+            finalImages ? JSON.stringify(finalImages) : null,
+            featured !== undefined ? (featured === true || featured === 'true') : null,
+                stockVal, finalStatus,
+            is_on_sale !== undefined ? (is_on_sale === true || is_on_sale === 'true') : null,
+                salePriceVal,
+                sizesArr, colorsArr, weightPricesObj,
+            req.params.id]
+        );
+        if (!rows.length) return res.status(404).json({ error: 'Not found' });
+        res.json(rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── PATCH /api/admin/products/:id/stock – quick stock update ──────────────────
+router.patch('/products/:id/stock', auth, express.json(), async (req, res) => {
+    try {
+        const { stock, stock_status } = req.body;
+        const stockVal = (stock !== undefined && stock !== '') ? parseInt(stock) : null;
+        const allowed = ['in_stock', 'low_stock', 'out_of_stock'];
+        const status = allowed.includes(stock_status) ? stock_status : 'in_stock';
+        const { rows } = await pool.query(
+            `UPDATE products SET stock=$1, stock_status=$2, updated_at=NOW() WHERE id=$3 RETURNING id, name, stock, stock_status`,
+            [stockVal, status, req.params.id]
+        );
+        if (!rows.length) return res.status(404).json({ error: 'Not found' });
+        res.json(rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+router.delete('/products/:id', auth, async (req, res) => {
+    try {
+        const result = await pool.query(`DELETE FROM products WHERE id=$1`, [req.params.id]);
+        if (!result.rowCount) return res.status(404).json({ error: 'Not found' });
+        res.json({ message: 'Deleted' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── GET /api/admin/users ──────────────────────────────────────────────────────
+router.get('/users', auth, async (req, res) => {
+    try {
+        const { rows } = await pool.query(`SELECT id, email, name, role, created_at FROM users ORDER BY created_at DESC`);
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── POST /api/admin/push/send ─────────────────────────────────────────────────
+router.post('/push/send', auth, express.json(), async (req, res) => {
+    try {
+        const payload = req.body;
+        if (!payload.title || !payload.body) {
+            return res.status(400).json({ error: 'Title and body are required' });
+        }
+        const successCount = await pushRouter.broadcast(payload);
+        res.json({ message: `Push sent successfully to ${successCount} devices`, count: successCount });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+module.exports = router;
+module.exports.validTokens = validTokens;

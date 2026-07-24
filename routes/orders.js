@@ -1,0 +1,272 @@
+/**
+ * routes/orders.js  – Cart checkout & Razorpay payment flow
+ */
+const express = require('express');
+const router = express.Router();
+const crypto = require('crypto');
+const Razorpay = require('razorpay');
+const pool = require('../db/pool');
+
+// ── Razorpay instance ─────────────────────────────────────────────────────────
+const rzp = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || '',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || ''
+});
+
+const KERALA_BASE        = 70;   // ₹70 base delivery for Kerala
+const NATIONAL_BASE      = 120;  // ₹120 base delivery outside Kerala
+const EXTRA_ITEM_RATE    = 10;   // ₹10 per additional item (volumetric offset)
+
+// ── POST /api/orders/create ───────────────────────────────────────────────────
+// Body: { items: [{id,name,price,qty,thumb}], address: {name,phone,line1,city,state,pincode}, email? }
+router.post('/create', express.json(), async (req, res) => {
+    try {
+        const { items, address, email } = req.body;
+        if (!items?.length) return res.status(400).json({ error: 'Cart is empty' });
+        if (!address?.name || !address?.phone || !address?.line1 || !address?.pincode)
+            return res.status(400).json({ error: 'Incomplete address' });
+
+        // Validate items against DB prices (prevent price tampering)
+        const ids = items.map(i => i.id);
+        const { rows: dbProducts } = await pool.query(
+            `SELECT id::text, price, weight_prices FROM products WHERE id = ANY($1::uuid[])`, [ids]
+        );
+        const priceMap = Object.fromEntries(dbProducts.map(p => [p.id, p]));
+
+        let subtotal = 0;
+        const validatedItems = items.map(item => {
+            const dbProduct = priceMap[item.id];
+            let dbPrice = parseFloat(item.price); // fallback
+            if (dbProduct) {
+                dbPrice = parseFloat(dbProduct.price);
+                let weightData = (item.selectedSize && dbProduct.weight_prices) ? dbProduct.weight_prices[item.selectedSize] : undefined;
+                if (weightData !== undefined) {
+                    if (typeof weightData === 'number') {
+                        dbPrice = parseFloat(weightData);
+                    } else if (typeof weightData === 'object' && weightData !== null) {
+                        dbPrice = parseFloat(weightData.is_on_sale && weightData.sale_price ? weightData.sale_price : weightData.price);
+                    }
+                }
+            }
+            const qty = Math.max(1, parseInt(item.qty) || 1);
+            subtotal += dbPrice * qty;
+            return { ...item, price: dbPrice, qty };
+        });
+
+        // Zone-based + volumetric delivery charge
+        const totalItems    = validatedItems.reduce((s, i) => s + i.qty, 0);
+        const isKerala      = (address?.state || '').trim() === 'Kerala';
+        const baseCharge    = isKerala ? KERALA_BASE : NATIONAL_BASE;
+        const deliveryCharge = baseCharge + Math.max(0, totalItems - 1) * EXTRA_ITEM_RATE;
+        const total = subtotal + deliveryCharge;
+        const totalPaise = Math.round(total * 100); // Razorpay uses paise
+
+        // Create Razorpay order
+        const rzpOrder = await rzp.orders.create({
+            amount: totalPaise,
+            currency: 'INR',
+            receipt: `kripa_${Date.now()}`,
+            notes: { customer: address.name, phone: address.phone }
+        });
+
+        // Save pending order to DB
+        const userId = req.user?.id || null;
+        const { rows } = await pool.query(
+            `INSERT INTO orders (user_id, guest_email, items, address, subtotal, delivery_charge, total, razorpay_order_id, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'pending') RETURNING id`,
+            [userId, email || null, JSON.stringify(validatedItems), JSON.stringify(address),
+                subtotal, deliveryCharge, total, rzpOrder.id]
+        );
+
+        res.json({
+            orderId: rows[0].id,
+            razorpayOrderId: rzpOrder.id,
+            amount: totalPaise,
+            currency: 'INR',
+            keyId: process.env.RAZORPAY_KEY_ID,
+            prefill: {
+                name: address.name,
+                email: email || req.user?.email || '',
+                contact: address.phone
+            }
+        });
+    } catch (err) {
+        console.error('Order create error:', err.message);
+        if (err.message?.includes('key_id') || err.message?.includes('key_secret')) {
+            return res.status(500).json({ error: 'Razorpay not configured. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.' });
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ── POST /api/orders/verify ───────────────────────────────────────────────────
+// Called after successful Razorpay payment to verify signature and mark paid
+router.post('/verify', express.json(), async (req, res) => {
+    try {
+        const { orderId, razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+
+        // Verify HMAC signature
+        const body = razorpayOrderId + '|' + razorpayPaymentId;
+        const expected = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+            .update(body)
+            .digest('hex');
+
+        if (expected !== razorpaySignature) {
+            return res.status(400).json({ error: 'Payment verification failed. Invalid signature.' });
+        }
+
+        // Mark order as paid
+        const { rows } = await pool.query(
+            `UPDATE orders SET status='paid', razorpay_payment_id=$1, razorpay_signature=$2, updated_at=NOW()
+       WHERE id=$3 RETURNING *`,
+            [razorpayPaymentId, razorpaySignature, orderId]
+        );
+
+        // Deduct variant stock
+        if (rows[0] && rows[0].items) {
+            try {
+                const items = typeof rows[0].items === 'string' ? JSON.parse(rows[0].items) : rows[0].items;
+                for (const item of items) {
+                    if (!item.id || !item.selectedSize) continue;
+                    const { rows: prodRows } = await pool.query(`SELECT weight_prices FROM products WHERE id = $1`, [item.id]);
+                    if (prodRows.length && prodRows[0].weight_prices) {
+                        let wp = prodRows[0].weight_prices;
+                        if (wp[item.selectedSize] && typeof wp[item.selectedSize] === 'object') {
+                            if (wp[item.selectedSize].stock !== null && wp[item.selectedSize].stock !== undefined) {
+                                wp[item.selectedSize].stock = Math.max(0, parseInt(wp[item.selectedSize].stock) - (parseInt(item.qty) || 1));
+                                await pool.query(`UPDATE products SET weight_prices = $1 WHERE id = $2`, [wp, item.id]);
+                            }
+                        }
+                    }
+                }
+            } catch(stockErr) {
+                console.error('Stock deduction error:', stockErr);
+            }
+        }
+
+        // Send confirmation emails (non-blocking)
+        if (rows[0]) {
+            const { sendOrderConfirmation, sendAdminOrderAlert } = require('../utils/mailer');
+            sendOrderConfirmation(rows[0]).catch(e => console.warn('Email error:', e.message));
+            sendAdminOrderAlert(rows[0]).catch(e => console.warn('Admin email error:', e.message));
+        }
+
+        res.json({ success: true, orderId });
+    } catch (err) {
+        console.error('Order verify error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+// ── GET /api/orders/my ────────────────────────────────────────────────────────
+router.get('/my', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Sign in to view orders' });
+    try {
+        const { rows } = await pool.query(
+            `SELECT id, items, address, subtotal, delivery_charge, total, status, razorpay_payment_id, created_at
+       FROM orders WHERE user_id=$1 ORDER BY created_at DESC`,
+            [req.user.id]
+        );
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── GET /api/orders/:id ───────────────────────────────────────────────────────
+router.get('/:id', async (req, res) => {
+    try {
+        const { rows } = await pool.query(`SELECT * FROM orders WHERE id=$1`, [req.params.id]);
+        if (!rows.length) return res.status(404).json({ error: 'Order not found' });
+        res.json(rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── GET /api/orders/:id/tracking ──────────────────────────────────────────────
+router.get('/:id/tracking', async (req, res) => {
+    try {
+        const { rows } = await pool.query(`SELECT tracking_id, tracking_data, tracking_updated_at FROM orders WHERE id=$1`, [req.params.id]);
+        if (!rows.length) return res.status(404).json({ error: 'Order not found' });
+        
+        const { tracking_id, tracking_data, tracking_updated_at } = rows[0];
+        if (!tracking_id) return res.json({ states: null });
+
+        const isFresh = tracking_updated_at && (new Date() - new Date(tracking_updated_at)) < 3 * 60 * 60 * 1000;
+        
+        if (tracking_data && isFresh) {
+            return res.json({ states: tracking_data });
+        }
+
+        const apiKey = process.env.PARCELSAPP_API_KEY;
+        if (!apiKey) return res.status(500).json({ error: 'Missing ParcelsApp API Key' });
+
+        const resp = await fetch('https://parcelsapp.com/api/v3/shipments/tracking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                shipments: [{ trackingId: tracking_id, destinationCountry: 'India' }],
+                language: 'en',
+                apiKey
+            })
+        });
+        const data = await resp.json();
+        
+        if (data.error) {
+            return res.json({ states: tracking_data || null, error: data.error });
+        }
+
+        const shipment = data.shipments && data.shipments[0];
+        const states = shipment && shipment.states ? shipment.states : null;
+
+        if (shipment && shipment.status === 'delivered') {
+            await pool.query("UPDATE orders SET status='delivered' WHERE id=$1 AND status != 'delivered'", [req.params.id]);
+        }
+
+        await pool.query(
+            `UPDATE orders SET tracking_data=$1, tracking_updated_at=NOW() WHERE id=$2`,
+            [JSON.stringify(states), req.params.id]
+        );
+
+        res.json({ states });
+    } catch (err) { 
+        res.status(500).json({ error: err.message }); 
+    }
+});
+
+// ── GET /api/orders/:id/invoice ───────────────────────────────────────────────
+router.get('/:id/invoice', async (req, res) => {
+    try {
+        const { rows } = await pool.query(`SELECT * FROM orders WHERE id=$1`, [req.params.id]);
+        if (!rows.length) return res.status(404).send('Invoice not found');
+        
+        const { generateInvoicePdf } = require('../utils/invoice');
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=KRIPA_Invoice_${req.params.id}.pdf`);
+        
+        generateInvoicePdf(rows[0], res);
+    } catch (err) { 
+        console.error('Invoice error:', err);
+        res.status(500).send('Error generating invoice'); 
+    }
+});
+
+// ── POST /api/orders/:id/cancel ───────────────────────────────────────────────
+router.post('/:id/cancel', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Sign in to cancel orders' });
+    try {
+        const { rows } = await pool.query(
+            `UPDATE orders SET status = 'cancelled', updated_at = NOW()
+             WHERE id = $1 AND user_id = $2 AND status IN ('pending', 'paid', 'processing')
+             RETURNING id, status`,
+            [req.params.id, req.user.id]
+        );
+        if (!rows.length) {
+            return res.status(400).json({ error: 'Order cannot be cancelled. It may have already shipped or been cancelled.' });
+        }
+        res.json({ message: 'Order successfully cancelled', order: rows[0] });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to cancel order' });
+    }
+});
+
+module.exports = router;
