@@ -75,6 +75,9 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
+// Trust reverse proxy (required for secure cookies on Render/Railway/Heroku)
+app.set('trust proxy', 1);
+
 // Session (DB-backed, required for Render)
 app.use(session({
     store: new PgSession({
