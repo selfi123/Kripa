@@ -443,7 +443,7 @@ function renderCategoriesTable(cats) {
     if (!cats.length) { tbody.innerHTML = `<tr><td colspan="4" style="padding:50px;text-align:center;color:var(--text-muted)">No categories yet. Add your first!</td></tr>`; return; }
     tbody.innerHTML = cats.map(c => `
     <tr>
-      <td><img src="/api/admin/categories/${c.id}/cover" style="width:48px;height:48px;object-fit:cover;border-radius:8px;background:#222;" onerror="this.style.display='none'" /></td>
+      <td><img src="${c.cover_data || ''}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;background:#222;" onerror="this.style.display='none'" /></td>
       <td style="font-weight:500;">${c.parent_id ? '<span style="color:var(--text-muted);font-size:11px;margin-right:6px;">↳</span>' : ''}${c.name}</td>
       <td style="color:var(--text-muted);font-size:13px;">${c.description || '—'}</td>
       <td>
@@ -474,8 +474,8 @@ function openEditCatModal(cat) {
     document.getElementById('edit-cat-id').value = cat.id;
     document.getElementById('cat-name').value = cat.name;
     document.getElementById('cat-description').value = cat.description || '';
-    document.getElementById('cat-img-preview').innerHTML = cat.cover_name
-        ? `<img src="/api/admin/categories/${cat.id}/cover" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(201,169,110,0.2);" />`
+    document.getElementById('cat-img-preview').innerHTML = cat.cover_data
+        ? `<img src="${cat.cover_data}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(201,169,110,0.2);" />`
         : '';
     populateParentCatSelect(cat.parent_id, cat.id);
     document.getElementById('cat-modal').classList.add('open');

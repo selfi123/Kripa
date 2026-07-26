@@ -142,7 +142,7 @@ router.post('/logout', auth, (req, res) => {
 // ── GET /api/admin/categories ─────────────────────────────────────────────────
 router.get('/categories', auth, async (req, res) => {
     try {
-        const { rows } = await pool.query(`SELECT id, name, description, cover_name, parent_id, created_at FROM categories ORDER BY parent_id NULLS FIRST, name`);
+        const { rows } = await pool.query(`SELECT id, name, description, cover_name, cover_data, parent_id, created_at FROM categories ORDER BY parent_id NULLS FIRST, name`);
         res.json(rows);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
