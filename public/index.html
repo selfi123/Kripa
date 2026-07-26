@@ -457,15 +457,29 @@
         const allProds = await fetch('/api/products').then(r => r.json());
         const instaImgs = allProds.map(p => p.thumb).filter(Boolean).slice(0, 8);
         const instaGrid = document.getElementById('insta-grid');
-        instaGrid.innerHTML = instaImgs.map(img => `
-        <a class="insta-item" href="https://www.instagram.com/kripav_.official" target="_blank">
+        
+        let finalInstaImgs = [...instaImgs];
+        const stockImgs = ['/images/hero/kerala_pickle.png', '/images/hero/kerala_pickle.png', '/images/hero/kerala_pickle.png'];
+        if (finalInstaImgs.length > 0 && finalInstaImgs.length < 4) {
+            let i = 0;
+            while(finalInstaImgs.length < 4) {
+               finalInstaImgs.push(stockImgs[i % stockImgs.length]);
+               i++;
+            }
+        }
+        
+        instaGrid.innerHTML = finalInstaImgs.map(img => `
+        <a class="insta-item" href="https://www.instagram.com/kripav_.official" target="_blank" style="position:relative;overflow:hidden;">
           <img src="${img}" alt="KRIPA on Instagram" loading="lazy" />
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);opacity:0;transition:opacity 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
+            <i data-lucide="instagram" style="width:32px;height:32px;color:#fff;"></i>
+          </div>
         </a>
       `).join('');
 
         // Render category cards — top-level only on homepage
         const topLevelCats = cats.filter(c => !c.parent_id);
-        grid.innerHTML = topLevelCats.map(cat => `
+        let catsHtml = topLevelCats.map(cat => `
         <div class="category-card reveal" onclick="location.href='category.html?c=${encodeURIComponent(cat.name)}'">
           <img class="card-img" src="${cat.cover || ''}" alt="${cat.name}" loading="lazy" />
           <div class="card-overlay"></div>
@@ -477,6 +491,30 @@
           </div>
         </div>
       `).join('');
+
+        if (topLevelCats.length > 0 && topLevelCats.length < 3) {
+            catsHtml += `
+            <div class="category-card reveal" style="display:flex;align-items:center;justify-content:center;background:var(--bg-lighter);border:1px dashed rgba(201,169,110,0.3);text-align:center;padding:40px;cursor:default;">
+              <div>
+                <i data-lucide="leaf" style="width:32px;height:32px;color:var(--gold);margin-bottom:12px;"></i>
+                <h3 style="font-family:var(--font-heading);font-size:20px;color:var(--text);margin-bottom:8px;">100% Homemade</h3>
+                <p style="font-size:12px;color:var(--text-muted);line-height:1.6;">Authentic recipes passed down through generations.</p>
+              </div>
+            </div>
+            `;
+            if (topLevelCats.length < 2) {
+               catsHtml += `
+                <div class="category-card reveal" style="display:flex;align-items:center;justify-content:center;background:var(--bg-lighter);border:1px dashed rgba(201,169,110,0.3);text-align:center;padding:40px;cursor:default;">
+                  <div>
+                    <i data-lucide="shield-check" style="width:32px;height:32px;color:var(--gold);margin-bottom:12px;"></i>
+                    <h3 style="font-family:var(--font-heading);font-size:20px;color:var(--text);margin-bottom:8px;">No Preservatives</h3>
+                    <p style="font-size:12px;color:var(--text-muted);line-height:1.6;">Pure ingredients without artificial additives.</p>
+                  </div>
+                </div>
+                `;
+            }
+        }
+        grid.innerHTML = catsHtml;
 
         // Footer links
         footerCats.innerHTML = cats.slice(0, 6).map(cat =>
@@ -494,7 +532,31 @@
       try {
         const featured = await fetch('/api/featured').then(r => r.json());
         if (!featured.length) { grid.closest('.products-section').style.display = 'none'; return; }
-        grid.innerHTML = featured.slice(0, 8).map(p => renderProductCard(p)).join('');
+        
+        let featuredHtml = featured.slice(0, 8).map(p => renderProductCard(p)).join('');
+        if (featured.length > 0 && featured.length < 4) {
+            const placeholdersNeeded = 4 - featured.length;
+            const guarantees = [
+              { icon: 'star', title: 'Premium Quality', desc: 'Handpicked ingredients for the finest taste.' },
+              { icon: 'heart', title: 'Made with Love', desc: 'Crafted in small batches to ensure perfection.' },
+              { icon: 'truck', title: 'Fast Delivery', desc: 'Delivered fresh and securely to your doorstep.' }
+            ];
+            for (let i=0; i<placeholdersNeeded; i++) {
+                const g = guarantees[i % guarantees.length];
+                featuredHtml += `
+                <div class="product-card reveal" style="display:flex;align-items:center;justify-content:center;background:transparent;border:none;box-shadow:none;text-align:center;padding:20px;cursor:default;" onmouseover="this.style.transform='none'" onmouseout="this.style.transform='none'">
+                  <div>
+                    <div style="width:64px;height:64px;border-radius:50%;background:rgba(201,169,110,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+                      <i data-lucide="${g.icon}" style="width:28px;height:28px;color:var(--gold);"></i>
+                    </div>
+                    <h3 style="font-family:var(--font-heading);font-size:18px;color:var(--text);margin-bottom:10px;">${g.title}</h3>
+                    <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">${g.desc}</p>
+                  </div>
+                </div>
+                `;
+            }
+        }
+        grid.innerHTML = featuredHtml;
         if (window.lucide) lucide.createIcons();
       } catch (e) { console.error(e); }
     }
