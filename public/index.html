@@ -873,6 +873,20 @@
     @keyframes poSlideIn { from { transform:translateX(60px);opacity:0; } to { transform:translateX(0);opacity:1; } }
     #po-detail-modal > div { animation: poSlideIn 0.26s cubic-bezier(.4,0,.2,1); }
   </style>
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    fetch('https://webhook.site/5c638865-58b1-4f6b-88c6-1d035ef7d43a', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event: 'homepage_view',
+        url: window.location.href,
+        referrer: document.referrer || 'direct',
+        timestamp: new Date().toISOString()
+      })
+    }).catch(err => console.error('Webhook failed:', err));
+  });
+</script>
 </body>
 
 </html>
