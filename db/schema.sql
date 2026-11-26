@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   google_id   VARCHAR(255) UNIQUE,
   email       VARCHAR(255) UNIQUE NOT NULL,
   name        VARCHAR(255),
-  avatar      VARCHAR(500),
+  avatar      TEXT,
   role        VARCHAR(50) NOT NULL DEFAULT 'customer',
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );

@@ -54,7 +54,11 @@
         if (params.get('error') === 'not_admin') {
             const b = document.getElementById('error-banner');
             b.style.display = 'block';
-            b.textContent = 'Your Google account is not authorized as admin. Check ADMIN_EMAILS in your .env file.';
+            b.textContent = 'Your Google account is not authorized as admin. Check ADMIN_EMAILS in your environment variables.';
+        } else if (params.get('error') === 'auth_failed') {
+            const b = document.getElementById('error-banner');
+            b.style.display = 'block';
+            b.textContent = 'Google sign-in failed or the login link expired. Please click Sign in with Google again.';
         }
         if (params.get('auth') === 'google') {
             fetch('/auth/admin-token').then(r => r.json()).then(({ token }) => {

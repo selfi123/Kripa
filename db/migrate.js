@@ -16,6 +16,7 @@ async function migrate() {
 
     // 2. Add any new columns that may be missing from older DB instances
     const alterations = [
+      `ALTER TABLE users ALTER COLUMN avatar TYPE TEXT`,
       `ALTER TABLE products ADD COLUMN IF NOT EXISTS sale_price DECIMAL(10,2)`,
       `ALTER TABLE products ADD COLUMN IF NOT EXISTS available_sizes TEXT[]`,
       `ALTER TABLE products ADD COLUMN IF NOT EXISTS weight_prices JSONB DEFAULT NULL`,

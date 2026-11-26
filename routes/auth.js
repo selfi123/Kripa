@@ -16,32 +16,37 @@ router.get('/google', (req, res, next) => {
 });
 
 // GET /auth/google/callback
-router.get('/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login?error=auth_failed' }),
-    async (req, res) => {
-        const redirect = req.query.state || 'home';
-        const email = req.user?.email?.toLowerCase() || '';
+router.get('/google/callback', (req, res, next) => {
+    const redirect = req.query.state || 'home';
+    passport.authenticate('google', (err, user) => {
+        if (err || !user) {
+            if (err) console.error('Google OAuth callback error:', err.message || err);
+            return res.redirect(redirect === 'admin' ? '/admin/?error=auth_failed' : '/login?error=auth_failed');
+        }
+        req.logIn(user, (loginErr) => {
+            if (loginErr) {
+                console.error('Session login error:', loginErr.message || loginErr);
+                return res.redirect(redirect === 'admin' ? '/admin/?error=auth_failed' : '/login?error=auth_failed');
+            }
+            const email = user.email?.toLowerCase() || '';
 
-        if (redirect === 'admin') {
-            if (ADMIN_EMAILS.includes(email)) {
-                // Issue an admin session token stored in the session
-                req.session.adminToken = require('crypto').randomBytes(32).toString('hex');
-                req.session.isAdmin = true;
-                return res.redirect('/admin/?auth=google');
-            } else {
+            if (redirect === 'admin') {
+                if (ADMIN_EMAILS.includes(email)) {
+                    req.session.adminToken = require('crypto').randomBytes(32).toString('hex');
+                    req.session.isAdmin = true;
+                    return res.redirect('/admin/?auth=google');
+                }
                 return res.redirect('/admin/?error=not_admin');
             }
-        }
 
-        // Checkout redirect – send user back to checkout after login
-        if (redirect === 'checkout') {
-            return res.redirect('/checkout');
-        }
+            if (redirect === 'checkout') {
+                return res.redirect('/checkout');
+            }
 
-        // Regular user – go to home
-        res.redirect('/');
-    }
-);
+            return res.redirect('/');
+        });
+    })(req, res, next);
+});
 
 // GET /auth/logout
 router.get('/logout', (req, res, next) => {

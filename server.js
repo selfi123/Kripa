@@ -20,6 +20,7 @@ async function runMigration() {
     const sql = fs.readFileSync(schemaPath, 'utf-8');
     try {
         await pool.query(sql);
+        await pool.query('ALTER TABLE users ALTER COLUMN avatar TYPE TEXT').catch(() => {});
         console.log('✅ DB migration complete.');
     } catch (err) {
         console.warn('⚠️  DB migration warning (may already exist):', err.message);
@@ -34,10 +35,10 @@ passport.use(new GoogleStrategy({
     scope: ['profile', 'email']
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        const email = profile.emails?.[0]?.value || '';
-        const name = profile.displayName || '';
+        const email = (profile.emails?.[0]?.value || '').slice(0, 255);
+        const name = (profile.displayName || '').slice(0, 255);
         const avatar = profile.photos?.[0]?.value || '';
-        const googleId = profile.id;
+        const googleId = String(profile.id || '').slice(0, 255);
 
         const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
         const role = ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'customer';
