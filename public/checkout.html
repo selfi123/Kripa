@@ -1,507 +1,253 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ml">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout – KRIPA Pickles</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap"
-        rel="stylesheet" />
-    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/styles.css?v=3.2" />
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
     <style>
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background: var(--dark);
-            color: var(--text);
-            font-family: var(--font-body);
-            min-height: 100vh;
-        }
-
         .checkout-wrap {
-            max-width: 1100px;
+            max-width: 1120px;
             margin: 0 auto;
-            padding: calc(var(--nav-height) + 40px) 24px 80px;
+            padding: 40px 24px 80px;
         }
-
         h1.page-title {
             font-family: var(--font-heading);
             font-size: clamp(28px, 4vw, 42px);
-            letter-spacing: 4px;
-            color: var(--gold);
-            margin-bottom: 8px;
+            color: var(--leaf-deep);
+            margin-bottom: 6px;
         }
-
         .page-sub {
             font-size: 12px;
+            font-weight: 700;
             letter-spacing: 2px;
-            color: var(--text-muted);
+            color: var(--kasavu);
             text-transform: uppercase;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
-
         .checkout-grid {
             display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 32px;
+            grid-template-columns: 1fr 400px;
+            gap: 28px;
+            align-items: start;
         }
-
-        @media(max-width:860px) {
-            .checkout-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ─── Cards ─── */
+        @media(max-width:880px) { .checkout-grid { grid-template-columns: 1fr; } }
         .card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(201, 169, 110, 0.12);
-            border-radius: 18px;
+            background: var(--surface);
+            border: 1px solid var(--border-kasavu);
+            border-radius: 20px;
             padding: 28px;
+            box-shadow: var(--shadow-sm);
         }
-
         .card-title {
             font-family: var(--font-heading);
-            font-size: 18px;
-            letter-spacing: 2px;
-            color: var(--gold);
+            font-size: 20px;
+            color: var(--leaf-deep);
             margin-bottom: 22px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
-
-        .card-title svg {
-            opacity: 0.7;
+        .step-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--leaf);
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        /* ─── Form ─── */
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
-        @media(max-width:500px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media(max-width:520px) { .form-row { grid-template-columns: 1fr; } }
+        .form-group { margin-bottom: 16px; }
         .form-group label {
             display: block;
-            font-size: 10px;
-            letter-spacing: 2px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
             text-transform: uppercase;
             color: var(--text-muted);
             margin-bottom: 7px;
         }
-
-        .form-group input,
-        .form-group select {
+        .form-group input, .form-group select {
             width: 100%;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(201, 169, 110, 0.3);
-            border-radius: 10px;
-            padding: 13px 16px;
-            color: #E8E0D0;
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: var(--text);
             font-size: 14px;
             font-family: var(--font-body);
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-            -webkit-appearance: none;
-            appearance: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-
-        .form-group input::placeholder {
-            color: rgba(232, 224, 208, 0.38);
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--leaf);
+            box-shadow: 0 0 0 3px rgba(31, 81, 53, 0.1);
+            background: var(--surface);
         }
-
-        .form-group select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C9A96E' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            background-size: 14px;
-            padding-right: 40px;
-            cursor: pointer;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: rgba(201, 169, 110, 0.7);
-            box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.1);
-            background: rgba(255, 255, 255, 0.11);
-        }
-
-        .form-group select option {
-            background: #1c1c1c;
-            color: #E8E0D0;
-        }
-
-        /* ─── Order Summary ─── */
-        .order-items {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .order-item {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .order-item img {
-            width: 56px;
-            height: 56px;
-            border-radius: 10px;
-            object-fit: cover;
-            background: #1a1a1a;
-            border: 1px solid rgba(201, 169, 110, 0.1);
-        }
-
-        .order-item-info {
-            flex: 1;
-        }
-
-        .order-item-name {
-            font-size: 13px;
-            color: var(--text);
-            font-weight: 500;
-            line-height: 1.3;
-        }
-
-        .order-item-cat {
-            font-size: 11px;
-            color: var(--text-muted);
-            letter-spacing: 0.5px;
-        }
-
-        .order-item-price {
-            font-size: 13px;
-            color: var(--gold);
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .order-item-qty {
-            font-size: 11px;
-            color: var(--text-muted);
-            background: rgba(255, 255, 255, 0.05);
-            padding: 2px 7px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 3px;
-        }
-
-        .divider {
-            height: 1px;
-            background: rgba(201, 169, 110, 0.08);
-            margin: 16px 0;
-        }
-
-        .price-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
-        .price-row.total {
-            font-size: 17px;
-            color: var(--gold);
-            font-weight: 600;
-            margin-bottom: 0;
-        }
-
-        .price-row.total span:last-child {
-            font-family: var(--font-heading);
-            font-size: 22px;
-        }
-
-        .free-delivery {
-            font-size: 11px;
-            color: #5cb85c;
-            letter-spacing: 0.5px;
-        }
-
-        /* ─── Pay Button ─── */
+        .order-items { display: flex; flex-direction: column; gap: 12px; max-height: 280px; overflow-y: auto; }
+        .order-item { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+        .order-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .order-item img { width: 54px; height: 54px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border-kasavu); flex-shrink: 0; }
+        .order-item-info { flex: 1; min-width: 0; }
+        .order-item-name { font-weight: 600; font-size: 13.5px; color: var(--leaf-deep); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .order-item-cat { font-size: 11px; color: var(--text-muted); }
+        .order-item-qty { font-size: 11.5px; color: var(--text-muted); font-weight: 500; }
+        .order-item-price { font-weight: 700; font-size: 14px; color: var(--leaf); }
+        .price-row { display: flex; justify-content: space-between; font-size: 14px; color: var(--text-muted); margin-bottom: 10px; }
+        .price-row.total { font-size: 18px; font-weight: 700; color: var(--leaf-deep); margin-top: 8px; margin-bottom: 0; }
         .pay-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #9E7A40, var(--gold), #E8C98A);
-            color: #0a0a0a;
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            cursor: pointer;
-            margin-top: 18px;
-            transition: all 0.25s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 20px rgba(201, 169, 110, 0.2);
+            width: 100%; margin-top: 20px; padding: 15px; border-radius: 999px;
+            background: var(--leaf); color: #fff; font-size: 13px; font-weight: 700;
+            letter-spacing: 0.8px; text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 8px 24px rgba(31, 81, 53, 0.25); transition: var(--transition-fast);
         }
-
-        .pay-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(201, 169, 110, 0.35);
-        }
-
-        .pay-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .pay-btn svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        .secure-note {
-            text-align: center;
-            font-size: 10px;
-            color: var(--text-muted);
-            letter-spacing: 1px;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-
-        .step-badge {
-            width: 22px;
-            height: 22px;
-            background: rgba(201, 169, 110, 0.15);
-            border: 1px solid rgba(201, 169, 110, 0.3);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: var(--gold);
-            flex-shrink: 0;
-        }
-
-        .empty-cart {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
+        .pay-btn:hover { background: var(--leaf-deep); transform: translateY(-2px); }
+        .pay-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .pay-btn svg { width: 16px; height: 16px; }
+        .secure-note { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; color: var(--text-subtle); margin-top: 12px; }
+        @media(max-width:640px) {
+            .checkout-wrap { padding: 20px 14px 56px; }
+            .card { padding: 20px 16px; border-radius: 16px; position: static !important; }
+            .form-group input, .form-group select, #coupon-input { font-size: 16px !important; }
+            .page-sub { margin-bottom: 18px; }
+            .nav-actions .btn-outline { padding: 6px 10px !important; font-size: 11px !important; }
         }
     </style>
 </head>
 
 <body>
-    <!-- NAV -->
     <nav id="navbar" class="scrolled">
         <div class="nav-inner">
-            <a href="/" class="nav-logo">KRIPA</a>
+            <a href="/" class="nav-logo"><span>KRIPA</span><span class="nav-logo-ml">കൃപ</span></a>
             <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/#categories">Our Pickles</a></li>
+                <li><a href="/" data-i18n="nav_home">Home</a></li>
+                <li><a href="/#categories" data-i18n="nav_shop">Our Pickles</a></li>
             </ul>
             <div class="nav-actions">
+                <button type="button" class="lang-toggle-btn" onclick="toggleLanguage()" aria-label="Switch language"><span class="lang-active">ML</span> <span class="lang-sep">|</span> <span>EN</span></button>
                 <div id="nav-user-slot" style="display:flex;align-items:center;"></div>
+                <a href="/" class="btn btn-outline" style="padding:8px 16px;font-size:12px;" data-i18n="nav_back_store">← Back to Store</a>
             </div>
         </div>
     </nav>
 
     <div class="checkout-wrap">
-        <h1 class="page-title">Checkout</h1>
-        <p class="page-sub">Secure • Fast • Trusted</p>
+        <p class="page-sub" data-i18n="co_sub">✦ Secure Checkout</p>
+        <h1 class="page-title" data-i18n="co_title">Complete Your Order</h1>
 
-        <div id="empty-cart" class="empty-cart" style="display:none;">
-            <p style="font-size:40px;margin-bottom:16px;">🛍️</p>
-            <h3 style="font-family:var(--font-heading);font-size:24px;color:var(--gold);margin-bottom:10px;">Your cart
-                is empty</h3>
-            <p style="margin-bottom:24px;">Add some beautiful pickles first!</p>
-            <a href="/" class="btn btn-gold">Shop Pickles</a>
+        <div id="empty-cart" class="empty-state" style="display:none;margin-top:24px;">
+            <h3 data-i18n="co_empty_title">Your basket is empty</h3>
+            <p style="color:var(--text-muted);margin-bottom:24px;" data-i18n="co_empty_desc">Add some delicious homemade Kerala pickles before checking out.</p>
+            <a href="/#categories" class="btn btn-gold" data-i18n="co_browse_btn">Browse Pickles</a>
         </div>
 
         <div class="checkout-grid" id="checkout-grid">
-            <!-- LEFT: Delivery Details -->
-            <div>
-                <div class="card">
-                    <div class="card-title">
-                        <div class="step-badge">1</div>
-                        Delivery Details
+            <!-- LEFT: Address -->
+            <div class="card">
+                <div class="card-title"><div class="step-badge">1</div><span data-i18n="co_step1">Delivery Address</span></div>
+                <div class="form-row">
+                    <div class="form-group"><label data-i18n="co_fullname">Full Name *</label><input type="text" id="f-name" data-i18n-ph="co_fullname" placeholder="Full Name" required /></div>
+                    <div class="form-group"><label data-i18n="co_phone">Phone Number *</label><input type="tel" id="f-phone" placeholder="10-digit mobile number" maxlength="10" required /></div>
+                </div>
+                <div class="form-group"><label data-i18n="co_email">Email (for order receipt &amp; invoice)</label><input type="email" id="f-email" placeholder="you@example.com" /></div>
+                <div class="form-group"><label data-i18n="co_addr1">Address Line 1 *</label><input type="text" id="f-line1" placeholder="House / Flat / Building name" required /></div>
+                <div class="form-group"><label data-i18n="co_addr2">Address Line 2 (Optional)</label><input type="text" id="f-line2" placeholder="Street, Landmark, Area" /></div>
+                <div class="form-row">
+                    <div class="form-group"><label data-i18n="co_city">City *</label><input type="text" id="f-city" placeholder="City / Town" required /></div>
+                    <div class="form-group">
+                        <label data-i18n="co_state">State *</label>
+                        <select id="f-state" required>
+                            <option value="" data-i18n="co_select_state">Select state…</option>
+                            <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option>
+                            <option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option>
+                            <option>Delhi</option><option>Goa</option><option>Gujarat</option><option>Haryana</option>
+                            <option>Himachal Pradesh</option><option>Jammu &amp; Kashmir</option><option>Jharkhand</option>
+                            <option>Karnataka</option><option>Kerala</option><option>Ladakh</option>
+                            <option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
+                            <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option>
+                            <option>Odisha</option><option>Puducherry</option><option>Punjab</option>
+                            <option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option>
+                            <option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
+                            <option>Uttarakhand</option><option>West Bengal</option>
+                        </select>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group"><label>Full Name *</label><input type="text" id="f-name"
-                                placeholder="Your full name" required /></div>
-                        <div class="form-group"><label>Phone *</label><input type="tel" id="f-phone"
-                                placeholder="10-digit mobile number" required /></div>
-                    </div>
-                    <div class="form-group"><label>Email</label><input type="email" id="f-email"
-                            placeholder="for order confirmation" /></div>
-                    <div class="form-group"><label>Address Line 1 *</label><input type="text" id="f-line1"
-                            placeholder="House/Flat no, Street, Area" required /></div>
-                    <div class="form-group"><label>Address Line 2</label><input type="text" id="f-line2"
-                            placeholder="Landmark (optional)" /></div>
-                    <div class="form-row">
-                        <div class="form-group"><label>City *</label><input type="text" id="f-city" placeholder="City"
-                                required /></div>
-                        <div class="form-group"><label>State *</label>
-                            <select id="f-state">
-                                <option value="">Select State</option>
-                                <option>Andhra Pradesh</option>
-                                <option>Arunachal Pradesh</option>
-                                <option>Assam</option>
-                                <option>Bihar</option>
-                                <option>Chhattisgarh</option>
-                                <option>Delhi</option>
-                                <option>Goa</option>
-                                <option>Gujarat</option>
-                                <option>Haryana</option>
-                                <option>Himachal Pradesh</option>
-                                <option>Jammu &amp; Kashmir</option>
-                                <option>Jharkhand</option>
-                                <option>Karnataka</option>
-                                <option>Kerala</option>
-                                <option>Ladakh</option>
-                                <option>Madhya Pradesh</option>
-                                <option>Maharashtra</option>
-                                <option>Manipur</option>
-                                <option>Meghalaya</option>
-                                <option>Mizoram</option>
-                                <option>Nagaland</option>
-                                <option>Odisha</option>
-                                <option>Puducherry</option>
-                                <option>Punjab</option>
-                                <option>Rajasthan</option>
-                                <option>Sikkim</option>
-                                <option>Tamil Nadu</option>
-                                <option>Telangana</option>
-                                <option>Tripura</option>
-                                <option>Uttar Pradesh</option>
-                                <option>Uttarakhand</option>
-                                <option>West Bengal</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group"><label>Pincode *</label><input type="text" id="f-pincode"
-                                placeholder="6-digit pincode" maxlength="6" required /></div>
-                        <div class="form-group"><label>Country</label><input type="text" value="India" readonly
-                                style="opacity:0.5;cursor:default;" /></div>
-                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label data-i18n="co_pincode">Pincode *</label><input type="text" id="f-pincode" placeholder="6-digit pincode" maxlength="6" required /></div>
+                    <div class="form-group"><label data-i18n="co_country">Country</label><input type="text" value="India" readonly style="opacity:0.65;cursor:default;" /></div>
                 </div>
             </div>
 
-            <!-- RIGHT: Order Summary -->
-            <div>
-                <div class="card" style="position:sticky;top:calc(var(--nav-height) + 20px);">
-                    <div class="card-title">
-                        <div class="step-badge">2</div>
-                        Order Summary
-                    </div>
-                    <div class="order-items" id="summary-items"></div>
-                    <div class="divider"></div>
-                    <div class="price-row"><span>Subtotal</span><span id="sum-subtotal">₹0</span></div>
-                    <div class="price-row"><span>Delivery</span><span id="sum-delivery">₹99</span></div>
-                    <div id="free-delivery-note" class="free-delivery" style="margin-bottom:8px;display:none;">🎉 Free
-                        delivery on this order!</div>
-                    <div class="price-row" id="box-row" style="display:none;">
-                        <span id="box-row-label">Box</span>
-                        <span id="sum-box" style="color:var(--gold);">+₹0</span>
-                    </div>
-                    <!-- Coupon input -->
-                    <div style="display:flex;gap:8px;margin:14px 0 8px;">
-                        <input id="coupon-input" type="text" placeholder="Coupon code" autocomplete="off"
-                            style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(201,169,110,0.2);border-radius:8px;padding:10px 12px;color:#fff;font-size:12px;font-family:var(--font-body);outline:none;letter-spacing:1px;text-transform:uppercase;transition:border-color 0.2s;"
-                            onfocus="this.style.borderColor='var(--gold)'"
-                            onblur="this.style.borderColor='rgba(201,169,110,0.2)'" />
-                        <button onclick="applyCoupon()" id="coupon-btn"
-                            style="padding:10px 16px;background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.25);color:var(--gold);border-radius:8px;font-size:11px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:all 0.2s;white-space:nowrap;"
-                            onmouseover="this.style.background='rgba(201,169,110,0.18)'"
-                            onmouseout="this.style.background='rgba(201,169,110,0.1)'">Apply</button>
-                    </div>
-                    <div id="coupon-msg" style="font-size:11px;min-height:16px;margin-bottom:6px;"></div>
-                    <div class="price-row" id="discount-row" style="display:none;">
-                        <span style="color:#5cb85c;">Discount</span>
-                        <span id="sum-discount" style="color:#5cb85c;">-₹0</span>
-                    </div>
-                    <div class="divider"></div>
-                    <div class="price-row total"><span>Total</span><span id="sum-total">₹0</span></div>
+            <!-- RIGHT: Summary -->
+            <div class="card" style="position:sticky;top:calc(var(--nav-height) + 20px);">
+                <div class="card-title"><div class="step-badge">2</div><span data-i18n="co_step2">Order Summary</span></div>
+                <div class="order-items" id="summary-items"></div>
+                <div class="divider-h"></div>
+                <div class="price-row"><span data-i18n="co_subtotal">Subtotal</span><span id="sum-subtotal" style="font-weight:600;color:var(--text);">₹0</span></div>
+                <div class="price-row"><span data-i18n="co_shipping_lbl">Shipping (Kerala ₹70 / India ₹120)</span><span id="sum-delivery" data-i18n="co_select_state">Select state</span></div>
 
-                    <button class="pay-btn" id="pay-btn" onclick="initiatePayment()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="1" y="4" width="22" height="16" rx="2" />
-                            <line x1="1" y1="10" x2="23" y2="10" />
-                        </svg>
-                        Pay Securely
-                    </button>
-                    <p class="secure-note">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <rect x="3" y="11" width="18" height="11" rx="2" />
-                            <path d="M7 11V7a5 5 0 0110 0v4" />
-                        </svg>
-                        256-bit SSL secured · Powered by Razorpay
-                    </p>
+                <div style="display:flex;gap:8px;margin:16px 0 8px;">
+                    <input id="coupon-input" type="text" data-i18n-ph="co_coupon_ph" placeholder="Coupon code" autocomplete="off"
+                        style="flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:12.5px;outline:none;text-transform:uppercase;" />
+                    <button onclick="applyCoupon()" id="coupon-btn" class="btn btn-outline" style="padding:10px 18px;font-size:12px;" data-i18n="co_coupon_apply">Apply</button>
                 </div>
+                <div id="coupon-msg" style="font-size:12px;min-height:16px;margin-bottom:8px;"></div>
+                <div class="price-row" id="discount-row" style="display:none;">
+                    <span style="color:var(--leaf);font-weight:600;" data-i18n="co_discount">Coupon Discount</span>
+                    <span id="sum-discount" style="color:var(--leaf);font-weight:700;">-₹0</span>
+                </div>
+                <div class="divider-h"></div>
+                <div class="price-row total"><span data-i18n="co_grand_total">Grand Total</span><span id="sum-total" style="color:var(--leaf);">₹0</span></div>
+
+                <button class="pay-btn" id="pay-btn" onclick="initiatePayment()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    <span id="pay-btn-label" data-i18n="co_pay_btn">Pay Securely</span>
+                </button>
+                <p class="secure-note">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                    <span data-i18n="co_ssl_note">256-bit SSL secured · Powered by Razorpay</span>
+                </p>
             </div>
         </div>
     </div>
 
+    <script src="/js/i18n.js"></script>
     <script src="/js/main.js"></script>
     <script>
-        // ── Delivery charge constants (Kerala ₹70 base / National ₹120 base + ₹10/extra item)
-        const KERALA_BASE     = 70;
-        const NATIONAL_BASE   = 120;
+        const KERALA_BASE = 70;
+        const NATIONAL_BASE = 120;
         const EXTRA_ITEM_RATE = 10;
         let cartItems = [];
         let _appliedCoupon = null;
-        let _boxChoice = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Auth guard – redirect to login if not signed in, then come back here
             const { user } = await fetch('/auth/me').then(r => r.json()).catch(() => ({ user: null }));
             if (!user) {
                 window.location.href = '/login?redirect=checkout';
                 return;
             }
-
             cartItems = loadCart();
             if (!cartItems.length) {
                 document.getElementById('checkout-grid').style.display = 'none';
                 document.getElementById('empty-cart').style.display = 'block';
                 return;
             }
-
-            // Read box choice from cart
-            _boxChoice = JSON.parse(localStorage.getItem('kripa_box_choice') || 'null');
-
             renderSummary();
             prefillUser();
-            loadUserState();
-
-            // Live delivery update when state is selected
             document.getElementById('f-state').addEventListener('change', recalcSummary);
+            window.addEventListener('kripa:langchange', () => {
+                if (cartItems.length) renderSummary();
+            });
         });
 
         function loadCart() {
@@ -509,26 +255,25 @@
         }
 
         function renderSummary() {
-            const container = document.getElementById('summary-items');
-            container.innerHTML = cartItems.map(item => `
-        <div class="order-item">
-          <img src="${item.thumb || ''}" alt="${item.name}" onerror="this.style.display='none'"/>
-          <div class="order-item-info">
-            <div class="order-item-name">${item.name}</div>
-            <div class="order-item-cat">${item.category}</div>
-            ${item.selectedSize ? `<div style="font-size:10px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Size: ${item.selectedSize}</div>` : ''}
-            ${item.selectedColor ? `<div style="font-size:10px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Color: ${item.selectedColor}</div>` : ''}
-            <span class="order-item-qty">Qty: ${item.qty || 1}</span>
-          </div>
-          <div class="order-item-price">₹${(parseFloat(item.price) * (item.qty || 1)).toLocaleString('en-IN')}</div>
-        </div>
-      `).join('');
+            const weightLabel = typeof t === 'function' ? t('cart_weight') : 'Weight';
+            document.getElementById('summary-items').innerHTML = cartItems.map(item => `
+                <div class="order-item">
+                    <img src="${item.thumb || ''}" alt="${item.name}" onerror="this.style.display='none'"/>
+                    <div class="order-item-info">
+                        <div class="order-item-name">${item.name}</div>
+                        <div class="order-item-cat">${item.category || ''}</div>
+                        ${item.selectedSize ? `<div style="font-size:10.5px;color:var(--kasavu);font-weight:700;text-transform:uppercase;">${weightLabel}: ${item.selectedSize}</div>` : ''}
+                        <span class="order-item-qty">Qty: ${item.qty || 1}</span>
+                    </div>
+                    <div class="order-item-price">₹${(parseFloat(item.price) * (item.qty || 1)).toLocaleString('en-IN')}</div>
+                </div>
+            `).join('');
             recalcSummary();
         }
 
         function getDeliveryCharge() {
             const state = document.getElementById('f-state').value;
-            if (!state) return null; // unknown until state is selected
+            if (!state) return null;
             const totalItems = cartItems.reduce((s, i) => s + (i.qty || 1), 0);
             const base = (state === 'Kerala') ? KERALA_BASE : NATIONAL_BASE;
             return base + Math.max(0, totalItems - 1) * EXTRA_ITEM_RATE;
@@ -538,44 +283,20 @@
             const subtotal = cartItems.reduce((s, i) => s + parseFloat(i.price) * (i.qty || 1), 0);
             const delivery = getDeliveryCharge();
             const discount = _appliedCoupon ? _appliedCoupon.discount : 0;
-            const skipBoxUpsell = false;
-            const boxPrice = (!skipBoxUpsell && _boxChoice) ? (_boxChoice.price || 0) : 0;
-            const total = Math.max(0, subtotal + (delivery || 0) + boxPrice - discount);
+            const total = Math.max(0, subtotal + (delivery || 0) - discount);
 
             document.getElementById('sum-subtotal').textContent = '₹' + subtotal.toLocaleString('en-IN');
-
-            // Delivery display
             const deliveryEl = document.getElementById('sum-delivery');
             if (delivery === null) {
-                deliveryEl.textContent = 'Select state';
-                deliveryEl.style.color = 'rgba(255,255,255,0.25)';
+                deliveryEl.textContent = typeof t === 'function' ? t('co_select_state') : 'Select state';
+                deliveryEl.style.color = 'var(--text-subtle)';
                 deliveryEl.style.fontStyle = 'italic';
-                deliveryEl.style.fontSize = '11px';
-            } else if (delivery === 0) {
-                deliveryEl.textContent = 'FREE';
-                deliveryEl.style.color = '#5cb85c';
-                deliveryEl.style.fontStyle = '';
-                deliveryEl.style.fontSize = '';
             } else {
                 deliveryEl.textContent = '₹' + delivery.toLocaleString('en-IN');
-                deliveryEl.style.color = '';
-                deliveryEl.style.fontStyle = '';
-                deliveryEl.style.fontSize = '';
+                deliveryEl.style.color = 'var(--text)';
+                deliveryEl.style.fontStyle = 'normal';
             }
-
             document.getElementById('sum-total').textContent = '₹' + total.toLocaleString('en-IN');
-            document.getElementById('free-delivery-note').style.display = 'none'; // no free delivery anymore
-
-            // Box row
-            const boxRow = document.getElementById('box-row');
-            if (!allBangles && _boxChoice) {
-                boxRow.style.display = 'flex';
-                document.getElementById('box-row-label').textContent = _boxChoice.label || 'Box';
-                document.getElementById('sum-box').textContent = _boxChoice.price > 0 ? '+₹' + _boxChoice.price : 'Free';
-                document.getElementById('sum-box').style.color = _boxChoice.price > 0 ? 'var(--gold)' : '#5cb85c';
-            } else {
-                boxRow.style.display = 'none';
-            }
 
             if (_appliedCoupon) {
                 document.getElementById('discount-row').style.display = 'flex';
@@ -599,15 +320,15 @@
                 const data = await res.json();
                 if (res.ok) {
                     _appliedCoupon = data;
-                    msgEl.style.color = '#5cb85c';
+                    msgEl.style.color = 'var(--leaf)';
                     msgEl.textContent = `✅ "${data.code}" applied — ${data.description}`;
                 } else {
                     _appliedCoupon = null;
-                    msgEl.style.color = '#e57373';
+                    msgEl.style.color = 'var(--spice)';
                     msgEl.textContent = '❌ ' + (data.error || 'Invalid coupon');
                 }
-            } catch { msgEl.style.color = '#e57373'; msgEl.textContent = '❌ Network error'; }
-            document.getElementById('coupon-btn').textContent = 'Apply';
+            } catch { msgEl.style.color = 'var(--spice)'; msgEl.textContent = '❌ Network error'; }
+            document.getElementById('coupon-btn').textContent = typeof t === 'function' ? t('co_coupon_apply') : 'Apply';
             recalcSummary();
         }
 
@@ -636,57 +357,34 @@
             if (!/^\d{6}$/.test(pincode)) { alert('Enter a valid 6-digit pincode.'); return; }
 
             const btn = document.getElementById('pay-btn');
-            btn.disabled = true; btn.textContent = 'Creating order…';
-            const delivery = getDeliveryCharge();
-            if (delivery === null) {
-                alert('Please select your state to calculate delivery charges.');
-                btn.disabled = false; btn.textContent = 'Pay Securely';
-                document.getElementById('f-state').focus();
-                return;
-            }
-            const discount = _appliedCoupon ? _appliedCoupon.discount : 0;
-            const skipBoxUpsell = false;
-            const boxPrice = (!skipBoxUpsell && _boxChoice) ? (_boxChoice.price || 0) : 0;
-
+            const btnLabel = document.getElementById('pay-btn-label');
+            const payText = () => (typeof t === 'function' ? t('co_pay_btn') : 'Pay Securely');
+            btn.disabled = true; btnLabel.textContent = 'Creating order…';
 
             try {
                 const res = await fetch('/api/orders/create', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         items: cartItems.map(i => ({
-                            id: i.id,
-                            name: i.name,
-                            price: i.price,
-                            qty: i.qty || 1,
-                            thumb: i.thumb,
-                            category: i.category,
-                            selectedSize: i.selectedSize || i.size,
-                            selectedColor: i.selectedColor || null
+                            id: i.id, name: i.name, price: i.price, qty: i.qty || 1,
+                            thumb: i.thumb, category: i.category, selectedSize: i.selectedSize || i.size
                         })),
                         address: { name, phone, line1, line2, city, state, pincode, country: 'India', email },
                         email,
                         couponId: _appliedCoupon?.couponId || null,
-                        discount,
-                        box: _boxChoice ? { label: _boxChoice.label, size: _boxChoice.size, price: boxPrice } : null,
-                        boxCharge: boxPrice
+                        discount: _appliedCoupon ? _appliedCoupon.discount : 0
                     })
                 });
                 const data = await res.json();
-                if (!res.ok) { alert(data.error || 'Failed to create order'); btn.disabled = false; btn.textContent = 'Pay Securely'; return; }
+                if (!res.ok) { alert(data.error || 'Failed to create order'); btn.disabled = false; btnLabel.textContent = payText(); return; }
 
                 const options = {
-                    key: data.keyId,
-                    amount: data.amount,
-                    currency: data.currency,
-                    order_id: data.razorpayOrderId,
-                    name: 'KRIPA Pickles',
+                    key: data.keyId, amount: data.amount, currency: data.currency,
+                    order_id: data.razorpayOrderId, name: 'KRIPA Pickles',
                     description: `Order – ${cartItems.length} item(s)`,
-                    image: '/images/favicon.png',
-                    prefill: data.prefill,
-                    theme: { color: '#C9A96E' },
-                    modal: { backdropclose: false },
+                    prefill: data.prefill, theme: { color: '#1F5135' },
                     handler: async function (response) {
-                        btn.textContent = 'Verifying payment…';
+                        btnLabel.textContent = 'Verifying payment…';
                         const verify = await fetch('/api/orders/verify', {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -698,15 +396,17 @@
                         });
                         const vData = await verify.json();
                         if (verify.ok && vData.success) {
+                            if (_appliedCoupon?.couponId) {
+                                fetch(`/api/coupons/used/${_appliedCoupon.couponId}`, { method: 'POST' }).catch(() => {});
+                            }
                             localStorage.removeItem('kripa_cart');
                             window.location.href = `/order-success?id=${vData.orderId}`;
-                        } else { alert('Payment verification failed. Contact support.'); btn.disabled = false; btn.textContent = 'Pay Securely'; }
+                        } else { alert('Payment verification failed.'); btn.disabled = false; btnLabel.textContent = payText(); }
                     },
-                    modal: { ondismiss: () => { btn.disabled = false; btn.textContent = 'Pay Securely'; } }
+                    modal: { ondismiss: () => { btn.disabled = false; btnLabel.textContent = payText(); } }
                 };
-                const rzp = new Razorpay(options);
-                rzp.open();
-            } catch (e) { alert('Something went wrong: ' + e.message); btn.disabled = false; btn.textContent = 'Pay Securely'; }
+                new Razorpay(options).open();
+            } catch (e) { alert('Something went wrong: ' + e.message); btn.disabled = false; btnLabel.textContent = payText(); }
         }
     </script>
 </body>

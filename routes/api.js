@@ -90,7 +90,9 @@ router.get('/products', async (req, res) => {
         const cat = category ? decodeURIComponent(category) : null;
         const { rows } = await pool.query(
             `SELECT p.id, p.name, p.category, p.price, p.description, p.featured, p.is_on_sale, p.sale_price, p.stock, p.stock_status, p.available_sizes, p.weight_prices, p.available_colors, p.created_at,
-              CASE WHEN p.images->>0 LIKE 'http%' THEN p.images->>0 ELSE '/api/products/' || p.id || '/thumb' END AS thumb
+              CASE WHEN p.images->>0 LIKE 'http%' OR p.images->>0 LIKE '/%' THEN p.images->>0
+                   WHEN jsonb_array_length(p.images) > 0 THEN '/api/products/' || p.id || '/thumb'
+                   ELSE '/images/hero/kerala_pickle.png' END AS thumb
        FROM products p
        LEFT JOIN categories c ON TRIM(LOWER(p.category)) = TRIM(LOWER(c.name))
        LEFT JOIN categories parent ON c.parent_id = parent.id
@@ -114,8 +116,8 @@ router.get('/products/:id/thumb', async (req, res) => {
         const raw = rows[0]?.img;
         // raw might be a JSON string (e.g. "\"data:image/...\"") — unquote it
         const data = typeof raw === 'string' ? raw.replace(/^"|"$/g, '') : null;
-        if (!data) return res.status(404).end();
-        if (data.startsWith('http')) return res.redirect(302, data);
+        if (!data) return res.redirect(302, '/images/hero/kerala_pickle.png');
+        if (data.startsWith('http') || data.startsWith('/')) return res.redirect(302, data);
         sendBase64Image(res, data);
     } catch (err) { res.status(500).end(); }
 });
@@ -128,9 +130,10 @@ router.get('/products/:id', async (req, res) => {
         const p = rows[0];
         // Build image URLs instead of returning raw base64
         const imageUrls = (p.images || []).map((img, i) => {
-            if (typeof img === 'string' && img.startsWith('http')) return img;
+            if (typeof img === 'string' && (img.startsWith('http') || img.startsWith('/'))) return img;
             return `/api/products/${p.id}/image/${i}`;
         });
+        if (!imageUrls.length) imageUrls.push('/images/hero/kerala_pickle.png');
         res.json({ ...p, imageUrls, images: undefined });
     } catch (err) { res.status(500).json({ error: 'Database error' }); }
 });
@@ -144,8 +147,8 @@ router.get('/products/:id/image/:idx', async (req, res) => {
         );
         const raw = rows[0]?.img;
         const data = typeof raw === 'string' ? raw.replace(/^"|"$/g, '') : null;
-        if (!data) return res.status(404).end();
-        if (data.startsWith('http')) return res.redirect(302, data);
+        if (!data) return res.redirect(302, '/images/hero/kerala_pickle.png');
+        if (data.startsWith('http') || data.startsWith('/')) return res.redirect(302, data);
         sendBase64Image(res, data);
     } catch (err) { res.status(500).end(); }
 });
@@ -155,7 +158,9 @@ router.get('/featured', async (req, res) => {
     try {
         const { rows } = await pool.query(
             `SELECT id, name, category, price, description, featured, stock_status, created_at,
-              CASE WHEN images->>0 LIKE 'http%' THEN images->>0 ELSE '/api/products/' || id || '/thumb' END AS thumb
+              CASE WHEN images->>0 LIKE 'http%' OR images->>0 LIKE '/%' THEN images->>0
+                   WHEN jsonb_array_length(images) > 0 THEN '/api/products/' || id || '/thumb'
+                   ELSE '/images/hero/kerala_pickle.png' END AS thumb
        FROM products WHERE featured=true ORDER BY created_at DESC`
         );
         res.json(rows);
@@ -167,7 +172,9 @@ router.get('/sale', async (req, res) => {
     try {
         const { rows } = await pool.query(
             `SELECT id, name, category, price, sale_price, is_on_sale, description, stock_status, created_at,
-              CASE WHEN images->>0 LIKE 'http%' THEN images->>0 ELSE '/api/products/' || id || '/thumb' END AS thumb
+              CASE WHEN images->>0 LIKE 'http%' OR images->>0 LIKE '/%' THEN images->>0
+                   WHEN jsonb_array_length(images) > 0 THEN '/api/products/' || id || '/thumb'
+                   ELSE '/images/hero/kerala_pickle.png' END AS thumb
        FROM products WHERE is_on_sale=true ORDER BY created_at DESC`
         );
         res.json(rows);

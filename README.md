@@ -1,6 +1,6 @@
 # KRIPA Pickles – E-Commerce Website
 
-A modern, luxury pickles e-commerce website for the **KRIPA** brand with an admin dashboard and Render.com deployment.
+A modern, authentic homemade Kerala pickles e-commerce website for the **KRIPA** brand with an admin dashboard and Render.com deployment.
 
 ---
 
@@ -56,7 +56,7 @@ pickles_shop/
 │   ├── category.html  # Category page
 │   ├── product.html   # Product detail page
 │   ├── css/
-│   │   └── styles.css # Luxury gold design system
+│   │   └── styles.css # KRIPA Pickles design system
 │   ├── js/
 │   │   └── main.js    # Shared JS (cart, nav, helpers)
 │   └── admin/

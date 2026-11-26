@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/pool');
+const adminRouter = require('./admin');
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
 
@@ -11,6 +12,9 @@ function requireAuth(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
+    const token = req.headers['x-admin-token'] || req.query.token;
+    if (token && adminRouter.validTokens?.has(token)) return next();
+    if (token && req.session?.adminToken && req.session.adminToken === token) return next();
     if (req.isAuthenticated?.() && ADMIN_EMAILS.includes((req.user?.email || '').toLowerCase())) return next();
     if (req.session?.isAdmin) return next();
     return res.status(401).json({ error: 'Unauthorized' });
@@ -50,7 +54,10 @@ router.get('/', async (req, res) => {
 router.get('/:id/thumb', async (req, res) => {
     try {
         const { rows } = await pool.query(`SELECT image FROM preorder_listings WHERE id=$1`, [req.params.id]);
-        sendBase64Image(res, rows[0]?.image);
+        const img = rows[0]?.image;
+        if (!img) return res.redirect(302, '/images/hero/kerala_pickle.png');
+        if (img.startsWith('http') || img.startsWith('/')) return res.redirect(302, img);
+        sendBase64Image(res, img);
     } catch (err) { res.status(500).end(); }
 });
 

@@ -1,0 +1,761 @@
+  /* ================================================
+    KRIPA Pickles – Malayalam, Manglish & English i18n Engine
+    Default language: Malayalam ('ml')
+    ================================================ */
+
+  (function () {
+    const STORAGE_KEY = 'kripa_lang';
+    const VALID_LANGS = ['ml', 'manglish', 'en'];
+    const saved = localStorage.getItem(STORAGE_KEY);
+    let currentLang = VALID_LANGS.includes(saved) ? saved : 'ml';
+
+    const TRANSLATIONS = {
+      ml: {
+        // Ribbon & Nav
+        ribbon: '✦ ചെറിയ ബാച്ചുകളിൽ തയ്യാറാക്കുന്ന നാടൻ കേരള അച്ചാറുകൾ · കേരളത്തിൽ ഡെലിവറി ₹70 · ഇന്ത്യയിലുടനീളം സുരക്ഷിത ഗ്ലാസ് ജാർ ഡെലിവറി ✦',
+        nav_home: 'ഹോം',
+        nav_shop: 'അച്ചാറുകൾ',
+        nav_categories: 'വിഭാഗങ്ങൾ',
+        nav_story: 'ഞങ്ങളുടെ കഥ',
+        nav_signin: 'സൈൻ ഇൻ',
+        nav_signout: 'ലോഗ് ഔട്ട്',
+        nav_orders: 'ഓർഡറുകൾ',
+        nav_my_orders: 'എന്റെ ഓർഡറുകൾ',
+        nav_alerts: '🔔 അലേർട്ടുകൾ',
+        nav_enable_alerts: '🔔 പുതിയ ബാച്ച് അലേർട്ടുകൾ',
+        nav_admin: 'അഡ്മിൻ',
+        nav_admin_dash: 'അഡ്മിൻ ഡാഷ്‌ബോർഡ്',
+        nav_welcome: 'സ്വാഗതം,',
+        nav_whatsapp_us: 'വാട്സ്ആപ്പ് ചെയ്യൂ',
+        nav_back_store: '← കടയിലേക്ക് മടങ്ങുക',
+
+        // Search
+        search_placeholder: 'മാങ്ങ, വെളുത്തുള്ളി, ചെമ്മീൻ, കാന്താരി അച്ചാറുകൾ തിരയുക…',
+        search_hint: 'അച്ചാറുകൾ തിരയാൻ ടൈപ്പ് ചെയ്യുക…',
+        search_none: '"{q}" എന്നതിന് അച്ചാറുകൾ ഒന്നും കണ്ടെത്തിയില്ല',
+
+        // Hero
+        hero_kicker: 'കൃപ · നാടൻ കേരള അടുക്കള',
+        hero_headline: 'രുചിയും വെയിലും<br /><em>പാരമ്പര്യവും.</em>',
+        hero_desc: 'വെയിലിൽ ഉണക്കിയ സുഗന്ധവ്യഞ്ജനങ്ങളും ശുദ്ധമായ എള്ളെണ്ണയും തനതായ കുടുംബ പാചകക്കുറിപ്പുകളും ചേർത്ത് ചെറിയ ബാച്ചുകളായി തയ്യാറാക്കുന്ന നാടൻ കേരള അച്ചാറുകൾ.',
+        hero_cta_shop: 'അച്ചാറുകൾ കാണാം',
+        hero_cta_cats: 'വിഭാഗങ്ങൾ',
+        hero_pill_1: '🥭 നാടൻ ചേരുവകൾ',
+        hero_pill_2: '🫙 ഗ്ലാസ് ജാറിൽ',
+        hero_pill_3: '🌿 പ്രിസർവേറ്റീവുകളില്ല',
+
+        // Craft Strip
+        craft_1_title: 'നാടൻ കായ്കനികൾ',
+        craft_1_desc: 'കണ്ണിമാങ്ങ, നാടൻ വെളുത്തുള്ളി, എരിവുള്ള കാന്താരി മുളക്.',
+        craft_2_title: 'വറുത്തെടുത്ത മസാല',
+        craft_2_desc: 'ഓരോ ബാച്ചിനും ഫ്രഷായി വറുത്ത കടുക്, ഉലുവ, കാശ്മീരി മുളക്.',
+        craft_3_title: 'ശുദ്ധമായ പാചകം',
+        craft_3_desc: 'ചെറിയ ബാച്ചുകളായി തയ്യാറാക്കി അണുവിമുക്തമായ ഗ്ലാസ് ജാറുകളിൽ.',
+        craft_4_title: 'സുരക്ഷിത ഡെലിവറി',
+        craft_4_desc: 'കേരളത്തിലും ഇന്ത്യയിലുടനീളവും സുരക്ഷിതമായ ഗ്ലാസ് ജാർ ഡെലിവറി.',
+
+        // Pantry Section
+        pantry_label: '✦ അടുക്കളയിൽ നിന്ന് നേരിട്ട്',
+        pantry_title: 'കൃപ <span class="gold-text">അച്ചാർ കലവറ</span>',
+        pantry_view_cats: 'എല്ലാ വിഭാഗങ്ങളും',
+        pantry_all: 'എല്ലാ അച്ചാറുകളും',
+        pantry_empty: 'ഈ വിഭാഗത്തിൽ അച്ചാറുകൾ ഉടൻ വരുന്നതാണ്.',
+        pantry_error: 'അച്ചാറുകൾ ലോഡ് ചെയ്യാനായില്ല.',
+
+        // Pre-orders
+        po_label: '✦ അടുത്ത ബാച്ച് ബുക്കിംഗ്',
+        po_title: 'പുതിയ ബാച്ചുകൾ <span style="color:var(--spice);">പ്രീ-ബുക്ക് ചെയ്യാം</span>',
+        po_sub: 'അടുത്ത ബാച്ച് തയ്യാറാക്കുന്നതിന് മുൻപേ നിങ്ങളുടെ ജാർ ബുക്ക് ചെയ്യാം — ഇപ്പോൾ പണം നൽകേണ്ടതില്ല.',
+        po_badge_open: 'പ്രീ-ഓർഡർ',
+        po_badge_closed: 'അവസാനിച്ചു',
+        po_slots_left: '{n} സ്ലോട്ടുകൾ ബാക്കി',
+        po_btn_book: 'ഇപ്പോൾ ബുക്ക് ചെയ്യുക',
+        po_btn_closed: 'ബുക്കിംഗ് അവസാനിച്ചു',
+        po_btn_full: 'സ്ലോട്ടുകൾ തീർന്നു',
+        po_modal_tag: 'പുതിയ ബാച്ച് പ്രീ-ബുക്കിംഗ്',
+        po_modal_title: 'ബുക്കിംഗ് ഉറപ്പാക്കുക',
+        po_modal_qty: 'എണ്ണം',
+        po_modal_note: 'ഇപ്പോൾ പണം നൽകേണ്ടതില്ല. പുതിയ ബാച്ച് തയ്യാറാകുമ്പോൾ ഇമെയിൽ വഴി അറിയിക്കുന്നതാണ്.',
+        po_modal_confirm: 'പ്രീ-ബുക്കിംഗ് ഉറപ്പാക്കുക',
+        po_detail_tag: '✦ പ്രീ-ഓർഡർ വിവരങ്ങൾ',
+        po_est_price: 'ഏകദേശ വില',
+        po_expected_del: 'ലഭ്യമാകുന്ന സമയം',
+        po_avail_weights: 'ലഭ്യമായ അളവുകൾ',
+        po_free_note: 'ഇപ്പോൾ പണം നൽകേണ്ടതില്ല. പുതിയ ബാച്ച് തയ്യാറാകുമ്പോൾ ഇമെയിൽ വഴി അറിയിക്കും.',
+        po_remaining: 'ബാക്കിയുള്ളവ',
+
+        // Offers
+        offers_label: '✦ പരിമിതകാല ഓഫർ',
+        offers_title: 'പ്രത്യേക <span style="color:var(--spice);">വിലക്കിഴിവുകൾ</span>',
+
+        // Categories
+        cats_label: '✦ വൈവിധ്യങ്ങൾ',
+        cats_title: 'വിഭാഗം അനുസരിച്ച് <span class="gold-text">തിരഞ്ഞെടുക്കാം</span>',
+        cats_coming_soon: 'പുതിയ വിഭാഗങ്ങൾ ഉടൻ വരുന്നതാണ്.',
+        cat_explore: 'കാണുക',
+        cat_pickle_one: 'അച്ചാർ',
+        cat_pickle_many: 'അച്ചാറുകൾ',
+
+        // Story Bento
+        story_photo_title: 'പാരമ്പര്യ ഭരണി രുചി',
+        story_photo_sub: 'പ്രഭാത വെയിലും വറുത്ത മസാലകളും വാഴയിലയും',
+        story_est: 'സ്ഥാപിതം 2024',
+        story_label: '✦ ഞങ്ങളുടെ ഭരണി കഥ',
+        story_title: 'അമ്മയുടെ അടുക്കളയിൽ നിന്ന് നിങ്ങളുടെ തീൻമേശയിലേക്ക്',
+        story_body: '2024 ജൂലൈയിൽ ഒരു കേരള വീട്ടടുക്കളയിൽ നിന്ന് പിറന്ന കൃപ, നാടൻ അച്ചാറുകളുടെ തനത് രുചി കാത്തുസൂക്ഷിക്കാനാണ് തുടങ്ങിയത്. യാതൊരു കൃത്രിമ പ്രിസർവേറ്റീവുകളും ചേർക്കാതെ, നാടൻ ചേരുവകൾ ശുദ്ധമായ എള്ളെണ്ണയിൽ സാവധാനം പാകം ചെയ്താണ് ഓരോ ജാറും തയ്യാറാക്കുന്നത്.',
+        story_card1_title: 'ശുദ്ധവും തനതും',
+        story_card1_desc: 'വെയിലിൽ ഉണക്കിയ മുളകും നാടൻ കറിവേപ്പിലയും സ്വാഭാവിക പാകപ്പെടുത്തലും.',
+        story_card2_title: 'എല്ലാ ഭക്ഷണത്തിനുമൊപ്പം',
+        story_card2_desc: 'ചൂടുള്ള കഞ്ഞിക്കൊപ്പവും വിഭവസമൃദ്ധമായ സദ്യയ്ക്കൊപ്പവും ഒരുപോലെ രുചികരം.',
+
+        // Instagram & Footer
+        insta_label: '✦ ഇൻസ്റ്റാഗ്രാം',
+        insta_title: 'ഇൻസ്റ്റാഗ്രാമിലെ <span class="gold-text">വിശേഷങ്ങൾ</span>',
+        footer_tagline: 'നാടൻ കേരള രുചികൾ, ചെറിയ ബാച്ചുകളിൽ സ്നേഹത്തോടെ തയ്യാറാക്കിയത്.',
+        footer_col_pickles: 'അച്ചാറുകൾ',
+        footer_col_help: 'സഹായവും ഓർഡറുകളും',
+        footer_col_connect: 'ബന്ധപ്പെടുക',
+        footer_shipping_q: 'ഡെലിവറി സംശയങ്ങൾ',
+        footer_support: 'ഓർഡർ സഹായം',
+        footer_rights: '© 2026 കൃപ അച്ചാറുകൾ (KRIPA Pickles). എല്ലാ അവകാശങ്ങളും നിക്ഷിപ്തം.',
+        footer_made: 'കേരളത്തിൽ ❤️ സ്നേഹത്തോടെ തയ്യാറാക്കിയത്',
+
+        // Product Card & Cart
+        badge_featured: 'പ്രത്യേകം',
+        badge_soldout: 'സ്റ്റോക്ക് തീർന്നു',
+        badge_off: '% കിഴിവ്',
+        btn_select_weight: 'അളവ് തിരഞ്ഞെടുക്കുക',
+        btn_add_cart: 'കൂടയിൽ ചേർക്കുക',
+        incl_taxes: 'നികുതി ഉൾപ്പെടെ',
+        cart_title: 'നിങ്ങളുടെ കൂട',
+        cart_empty: 'നിങ്ങളുടെ അച്ചാർ കൂട ശൂന്യമാണ്',
+        cart_explore: 'അച്ചാറുകൾ കാണുക',
+        cart_weight: 'അളവ്:',
+        cart_subtotal: 'ആകെ തുക',
+        cart_shipping: 'ഡെലിവറി ചാർജ്',
+        cart_calc_checkout: 'ചെക്ക്ഔട്ടിൽ കണക്കാക്കും',
+        cart_total: 'മൊത്തം',
+        cart_checkout_btn: 'ചെക്ക്ഔട്ടിലേക്ക് പോകുക →',
+        cart_razorpay_note: '🔒 സുരക്ഷിത റേസർപേ ചെക്ക്ഔട്ട്',
+        toast_added: '"{name}" കൂടയിലേക്ക് ചേർത്തു!',
+
+        // Category Page
+        cat_all_title: 'എല്ലാ അച്ചാറുകളും',
+        cat_loading: 'അച്ചാറുകൾ ലോഡ് ചെയ്യുന്നു…',
+        sort_featured: 'പ്രത്യേകതകൾ ആദ്യം',
+        sort_price_asc: 'വില: കുറഞ്ഞതിൽ നിന്ന് കൂടിയതിലേക്ക്',
+        sort_price_desc: 'വില: കൂടിയതിൽ നിന്ന് കുറഞ്ഞതിലേക്ക്',
+        sort_name_asc: 'പേര്: A–Z',
+        cat_empty_title: 'അച്ചാറുകൾ കണ്ടെത്തിയില്ല',
+        cat_empty_desc: 'ഈ വിഭാഗത്തിലേക്കുള്ള പുതിയ ബാച്ച് തയ്യാറാകുകയാണ്. ഉടൻ വീണ്ടും സന്ദർശിക്കുക!',
+        btn_back_home: 'ഹോമിലേക്ക് മടങ്ങുക',
+        more_pickles_label: '✦ കൂടുതൽ കാണുക',
+        more_pickles_title: 'മറ്റ് <span class="gold-text">അച്ചാറുകൾ</span>',
+
+        // Product Detail Page
+        prod_avail_prompt: 'ലഭ്യത അറിയാൻ അളവ് തിരഞ്ഞെടുക്കുക',
+        prod_in_stock: 'സ്റ്റോക്കുണ്ട്',
+        prod_avail_count: 'ലഭ്യത: {n} എണ്ണം സ്റ്റോക്കുണ്ട്',
+        prod_avail_instock: 'ലഭ്യത: സ്റ്റോക്കുണ്ട്',
+        prod_avail_soldout: 'ലഭ്യത: സ്റ്റോക്ക് തീർന്നു',
+        prod_select_weight: 'അളവ് തിരഞ്ഞെടുക്കുക',
+        prod_size_err: '⚠ കൂടയിൽ ചേർക്കുന്നതിന് മുമ്പ് അളവ് തിരഞ്ഞെടുക്കുക',
+        prod_popular: 'പ്രിയപ്പെട്ടത്',
+        prod_meta_cat: 'വിഭാഗം:',
+        prod_meta_pack: 'പാക്കിംഗ്:',
+        prod_meta_pack_val: 'അണുവിമുക്തമായ ഗ്ലാസ് ജാർ',
+        prod_meta_care: 'സൂക്ഷിക്കേണ്ട വിധം:',
+        prod_meta_care_val: 'തണുപ്പുള്ളതും ഉണങ്ങിയതുമായ സ്ഥലത്ത് സൂക്ഷിക്കുക. എപ്പോഴും ഉണങ്ങിയ സ്പൂൺ ഉപയോഗിക്കുക.',
+        related_label: '✦ നിങ്ങൾക്ക് ഇഷ്ടമായേക്കാവുന്നവ',
+        related_title: 'സമാന <span class="gold-text">അച്ചാറുകൾ</span>',
+        reviews_label: '✦ ഉപഭോക്തൃ അഭിപ്രായങ്ങൾ',
+        reviews_title: 'ഉപഭോക്താക്കൾ <span class="gold-text">പറയുന്നത്</span>',
+        reviews_none: 'അഭിപ്രായങ്ങളൊന്നും ഇതുവരെയില്ല. ആദ്യം എഴുതൂ!',
+        review_write_title: 'നിങ്ങളുടെ അഭിപ്രായം എഴുതുക',
+        review_name_lbl: 'നിങ്ങളുടെ പേര് *',
+        review_name_ph: 'പേര് നൽകുക',
+        review_rating_lbl: 'റേറ്റിംഗ് *',
+        review_comment_lbl: 'അഭിപ്രായം',
+        review_comment_ph: 'രുചി അനുഭവം പങ്കുവെക്കുക…',
+        review_post_btn: 'അഭിപ്രായം പോസ്റ്റ് ചെയ്യുക',
+
+        // Checkout Page
+        co_sub: '✦ സുരക്ഷിത ചെക്ക്ഔട്ട്',
+        co_title: 'ഓർഡർ പൂർത്തിയാക്കുക',
+        co_empty_title: 'നിങ്ങളുടെ കൂട ശൂന്യമാണ്',
+        co_empty_desc: 'ചെക്ക്ഔട്ട് ചെയ്യുന്നതിന് മുമ്പ് നാടൻ കേരള അച്ചാറുകൾ കൂടയിൽ ചേർക്കുക.',
+        co_browse_btn: 'അച്ചാറുകൾ കാണാം',
+        co_step1: 'ഡെലിവറി വിലാസം',
+        co_fullname: 'പൂർണ്ണമായ പേര് *',
+        co_phone: 'ഫോൺ നമ്പർ *',
+        co_email: 'ഇമെയിൽ (ബില്ലും ഇൻവോയ്സും ലഭിക്കാൻ)',
+        co_addr1: 'വിലാസം ലൈൻ 1 *',
+        co_addr2: 'വിലാസം ലൈൻ 2 (ഐച്ഛികം)',
+        co_city: 'നഗരം / പട്ടണം *',
+        co_state: 'സംസ്ഥാനം *',
+        co_select_state: 'സംസ്ഥാനം തിരഞ്ഞെടുക്കുക…',
+        co_pincode: 'പിൻകോഡ് *',
+        co_country: 'രാജ്യം',
+        co_step2: 'ഓർഡർ ചുരുക്കം',
+        co_subtotal: 'ആകെ തുക',
+        co_shipping_lbl: 'ഷിപ്പിംഗ് (കേരളം ₹70 / മറ്റു സംസ്ഥാനങ്ങൾ ₹120)',
+        co_coupon_ph: 'കൂപ്പൺ കോഡ്',
+        co_coupon_apply: 'പ്രയോഗിക്കുക',
+        co_discount: 'കൂപ്പൺ കിഴിവ്',
+        co_grand_total: 'ആകെ നൽകേണ്ടത്',
+        co_pay_btn: 'സുരക്ഷിതമായി പണമടയ്ക്കുക',
+        co_ssl_note: '256-bit SSL സുരക്ഷിതം · Razorpay വഴി',
+
+        // Orders & Tracking
+        orders_sub: '✦ അക്കൗണ്ട്',
+        orders_title: 'എന്റെ ഓർഡറുകൾ',
+        orders_signin_title: 'ഓർഡറുകൾ കാണാൻ സൈൻ ഇൻ ചെയ്യുക',
+        orders_signin_desc: 'നിങ്ങളുടെ ഓർഡർ ചരിത്രവും ട്രാക്കിംഗും കാണുന്നതിന് സൈൻ ഇൻ ചെയ്യുക.',
+        orders_none_title: 'ഓർഡറുകൾ ഒന്നും ഇല്ല',
+        orders_none_desc: 'ഞങ്ങളുടെ നാടൻ കേരള അച്ചാറുകൾ ഓർഡർ ചെയ്തു തുടങ്ങൂ!',
+        orders_shop_now: 'ഇപ്പോൾ വാങ്ങാം',
+        orders_total_paid: 'ആകെ തുക',
+        orders_track_btn: 'ട്രാക്ക് &amp; വിവരങ്ങൾ',
+        orders_cancel_btn: 'റദ്ദാക്കുക',
+        order_details_title: 'ഓർഡർ വിവരങ്ങൾ',
+        order_shipping_addr: 'ഡെലിവറി വിലാസം',
+        order_summary_title: 'ഓർഡർ ചുരുക്കം',
+        order_items_title: 'ഓർഡർ ചെയ്തവ',
+        order_invoice_btn: 'ഇൻവോയ്സ് ഡൗൺലോഡ്',
+        order_cancel_btn: 'ഓർഡർ റദ്ദാക്കുക',
+        order_live_updates: 'തത്സമയ കൊറിയർ വിവരങ്ങൾ',
+        step_ordered: 'ഓർഡർ ചെയ്തു',
+        step_processing: 'തയ്യാറാക്കുന്നു',
+        step_shipped: 'അയച്ചു',
+        step_delivered: 'എത്തിച്ചു',
+        step_cancelled: 'റദ്ദാക്കി',
+        step_refunding: 'റീഫണ്ട് പ്രക്രിയ',
+        step_refunded: 'റീഫണ്ട് ചെയ്തു',
+
+        // Order Success, Login & 404
+        succ_title: 'ഓർഡർ ഉറപ്പാക്കി!',
+        succ_sub: 'കൃപ അച്ചാറുകൾ തിരഞ്ഞെടുത്തതിന് നന്ദി.<br />നിങ്ങളുടെ അച്ചാർ ജാറുകൾ അടുക്കളയിൽ നിന്ന് ഫ്രഷായി പാക്ക് ചെയ്യുകയാണ്.',
+        succ_ref: 'ഓർഡർ നമ്പർ',
+        succ_cont: 'ഷോപ്പിംഗ് തുടരുക',
+        succ_view: 'എന്റെ ഓർഡറുകൾ',
+        login_tag: 'കേരളത്തിന്റെ തനത് രുചി',
+        login_desc: 'ഓർഡറുകൾ ട്രാക്ക് ചെയ്യാനും പുതിയ ബാച്ചുകൾ പ്രീ-ബുക്ക് ചെയ്യാനും വേഗത്തിൽ ചെക്ക്ഔട്ട് ചെയ്യാനും ഗൂഗിൾ വഴി സൈൻ ഇൻ ചെയ്യുക.',
+        login_google: 'Google ഉപയോഗിച്ച് തുടരുക',
+        login_cont: '✦ ഷോപ്പിംഗ് തുടരുക',
+        err404_title: 'പേജ് കണ്ടെത്തിയില്ല',
+        err404_desc: 'നിങ്ങൾ തിരയുന്ന പേജ് നിലവിലില്ല. ഞങ്ങളുടെ നാടൻ അച്ചാറുകളിലേക്ക് മടങ്ങാം.'
+      },
+
+      en: {
+        ribbon: '✦ Small-Batch Kerala Kitchen · Kerala Shipping ₹70 · Pan-India Glass Jar Delivery ✦',
+        nav_home: 'Home',
+        nav_shop: 'Shop Pickles',
+        nav_categories: 'Categories',
+        nav_story: 'Bharani Story',
+        nav_signin: 'Sign in',
+        nav_signout: 'Sign Out',
+        nav_orders: 'Orders',
+        nav_my_orders: 'My Orders',
+        nav_alerts: '🔔 Alerts',
+        nav_enable_alerts: '🔔 Enable Drop Alerts',
+        nav_admin: 'Admin',
+        nav_admin_dash: 'Admin Dashboard',
+        nav_welcome: 'Welcome,',
+        nav_whatsapp_us: 'WhatsApp Us',
+        nav_back_store: '← Back to Store',
+
+        search_placeholder: 'Search mango, garlic, prawn, kanthari pickles…',
+        search_hint: 'Type to search pickles…',
+        search_none: 'No pickles found for "{q}"',
+
+        hero_kicker: 'കൃപ · Kerala Homemade Kitchen',
+        hero_headline: 'Spice, Sunlight<br />&amp; <em>Tradition.</em>',
+        hero_desc: 'Small-batch Kerala pickles cured with sun-dried whole spices, cold-pressed gingelly oil, and heirloom family recipes — jarred fresh without shortcuts.',
+        hero_cta_shop: 'Browse Our Pantry',
+        hero_cta_cats: 'Explore Categories',
+        hero_pill_1: '🥭 Native Produce',
+        hero_pill_2: '🫙 Glass Jar Sealed',
+        hero_pill_3: '🌿 Zero Preservatives',
+
+        craft_1_title: 'Farm-Picked Produce',
+        craft_1_desc: 'Crisp local mangoes, tender garlic & fiery kanthari chillies.',
+        craft_2_title: 'Slow-Roasted Spices',
+        craft_2_desc: 'Mustard, fenugreek & Kashmiri chilli roasted fresh per batch.',
+        craft_3_title: 'Small-Batch Hygiene',
+        craft_3_desc: 'Prepared fresh in small batches and packed in sterilized glass jars.',
+        craft_4_title: 'Safe Pan-India Delivery',
+        craft_4_desc: 'Bubble-wrapped jars shipped across Kerala and all Indian states.',
+
+        pantry_label: '✦ Fresh From Our Kitchen',
+        pantry_title: 'The KRIPA <span class="gold-text">Pickle Pantry</span>',
+        pantry_view_cats: 'View All Categories',
+        pantry_all: 'All Pickles',
+        pantry_empty: 'No pickles available in this category yet.',
+        pantry_error: 'Could not load pickles right now.',
+
+        po_label: '✦ Upcoming Kitchen Batches',
+        po_title: 'Reserve <span style="color:var(--spice);">Pre-order Batches</span>',
+        po_sub: 'Book your jar slot before we cook the next batch — no upfront payment required.',
+        po_badge_open: 'Pre-order',
+        po_badge_closed: 'Closed',
+        po_slots_left: '{n} jar slot(s) left',
+        po_btn_book: 'Pre-book Now',
+      po_btn_closed: 'Booking Closed',
+      po_btn_full: 'Fully Booked',
+      po_modal_tag: 'Fresh Batch Pre-booking',
+      po_modal_title: 'Confirm Reservation',
+      po_modal_qty: 'Quantity',
+      po_modal_note: 'No payment required now. We\'ll notify you when your batch is jarred and ready.',
+      po_modal_confirm: 'Confirm Pre-booking',
+      po_detail_tag: '✦ Pre-order Details',
+      po_est_price: 'estimated price',
+      po_expected_del: 'Expected Delivery',
+      po_avail_weights: 'Available Weights',
+      po_free_note: 'No payment required now. Reserve your slot for free — we\'ll email you when the fresh batch is ready.',
+      po_remaining: 'remaining',
+
+      offers_label: '✦ Limited Time',
+      offers_title: 'Seasonal <span style="color:var(--spice);">Pickle Offers</span>',
+
+      cats_label: '✦ Explore Varieties',
+      cats_title: 'Shop by <span class="gold-text">Category</span>',
+      cats_coming_soon: 'Fresh pickle categories coming soon.',
+      cat_explore: 'Explore',
+      cat_pickle_one: 'pickle',
+      cat_pickle_many: 'pickles',
+
+      story_photo_title: 'Traditional Bharani Craft',
+      story_photo_sub: 'Morning sunlight, roasted spices & banana leaf',
+      story_est: 'EST. 2024',
+      story_label: '✦ Our Bharani Story',
+      story_title: 'From Amma\'s Kitchen to Your Table',
+      story_body: 'Born in July 2024 out of a Kerala home kitchen, KRIPA was created to preserve the unmistakable warmth of homemade achaar. No industrial shortcuts, no synthetic preservatives — just farm-fresh local ingredients simmered patiently in pure gingelly oil.',
+      story_card1_title: 'Pure & Honest',
+      story_card1_desc: 'Sun-dried chillies, hand-picked curry leaves, and natural curing methods.',
+      story_card2_title: 'Made for Every Meal',
+      story_card2_desc: 'Equally at home beside steaming evening kanji or a grand festive Sadhya.',
+
+      insta_label: '✦ Community',
+      insta_title: 'Fresh Moments on <span class="gold-text">Instagram</span>',
+      footer_tagline: 'Authentic homemade Kerala pickles crafted with heirloom recipes in small batches.',
+      footer_col_pickles: 'Our Pickles',
+      footer_col_help: 'Help & Orders',
+      footer_col_connect: 'Connect',
+      footer_shipping_q: 'Shipping Questions',
+      footer_support: 'Order Support',
+      footer_rights: '© 2026 KRIPA Pickles. All rights reserved.',
+      footer_made: 'Handcrafted with ❤️ in Kerala',
+
+      badge_featured: 'Featured',
+      badge_soldout: 'Sold Out',
+      badge_off: '% OFF',
+      btn_select_weight: 'Select Weight',
+      btn_add_cart: 'Add to Cart',
+      incl_taxes: 'incl. taxes',
+      cart_title: 'YOUR BASKET',
+      cart_empty: 'Your pickle basket is empty',
+      cart_explore: 'Explore Pickles',
+      cart_weight: 'Weight:',
+      cart_subtotal: 'Subtotal',
+      cart_shipping: 'Shipping',
+      cart_calc_checkout: 'Calculated at checkout',
+      cart_total: 'Total',
+      cart_checkout_btn: 'Proceed to Checkout →',
+      cart_razorpay_note: '🔒 Secure Razorpay Checkout',
+      toast_added: 'Added "{name}" to cart!',
+
+      cat_all_title: 'All Our Pickles',
+      cat_loading: 'Loading pickles…',
+      sort_featured: 'Featured First',
+      sort_price_asc: 'Price: Low to High',
+      sort_price_desc: 'Price: High to Low',
+      sort_name_asc: 'Name: A–Z',
+      cat_empty_title: 'No Pickles Found',
+      cat_empty_desc: 'This category is being updated with a fresh batch. Check back soon!',
+      btn_back_home: 'Back to Home',
+      more_pickles_label: '✦ Explore More',
+      more_pickles_title: 'Explore <span class="gold-text">More Pickles</span>',
+
+      prod_avail_prompt: 'Select a jar weight to view availability',
+      prod_in_stock: 'In Stock',
+      prod_avail_count: 'Availability: {n} in stock',
+      prod_avail_instock: 'Availability: In Stock',
+      prod_avail_soldout: 'Availability: Sold Out',
+      prod_select_weight: 'Select Weight',
+      prod_size_err: '⚠ Please select a weight before adding to cart',
+      prod_popular: 'Popular',
+      prod_meta_cat: 'Category:',
+      prod_meta_pack: 'Packaging:',
+      prod_meta_pack_val: 'Hygienically Sealed Glass Jar',
+      prod_meta_care: 'Storage Care:',
+      prod_meta_care_val: 'Store in a cool, dry place. Always use a dry spoon.',
+      related_label: '✦ You Might Also Like',
+      related_title: 'Related <span class="gold-text">Pickles</span>',
+      reviews_label: '✦ Customer Love',
+      reviews_title: 'What Our Customers <span class="gold-text">Say</span>',
+      reviews_none: 'No reviews yet. Be the first to review!',
+      review_write_title: 'Write a Review',
+      review_name_lbl: 'Your Name *',
+      review_name_ph: 'Your name',
+      review_rating_lbl: 'Rating *',
+      review_comment_lbl: 'Your Review',
+      review_comment_ph: 'Share your taste experience…',
+      review_post_btn: 'Post Review',
+
+      co_sub: '✦ Secure Checkout',
+      co_title: 'Complete Your Order',
+      co_empty_title: 'Your basket is empty',
+      co_empty_desc: 'Add some delicious homemade Kerala pickles before checking out.',
+      co_browse_btn: 'Browse Pickles',
+      co_step1: 'Delivery Address',
+      co_fullname: 'Full Name *',
+      co_phone: 'Phone Number *',
+      co_email: 'Email (for order receipt & invoice)',
+      co_addr1: 'Address Line 1 *',
+      co_addr2: 'Address Line 2 (Optional)',
+      co_city: 'City *',
+      co_state: 'State *',
+      co_select_state: 'Select state…',
+      co_pincode: 'Pincode *',
+      co_country: 'Country',
+      co_step2: 'Order Summary',
+      co_subtotal: 'Subtotal',
+      co_shipping_lbl: 'Shipping (Kerala ₹70 / India ₹120)',
+      co_coupon_ph: 'Coupon code',
+      co_coupon_apply: 'Apply',
+      co_discount: 'Coupon Discount',
+      co_grand_total: 'Grand Total',
+      co_pay_btn: 'Pay Securely',
+      co_ssl_note: '256-bit SSL secured · Powered by Razorpay',
+
+      orders_sub: '✦ Account',
+      orders_title: 'My Orders',
+      orders_signin_title: 'Sign In to View Orders',
+      orders_signin_desc: 'Please sign in to see your order history and track shipments.',
+      orders_none_title: 'No Orders Yet',
+      orders_none_desc: 'Start exploring our homemade Kerala pickles!',
+      orders_shop_now: 'Shop Now',
+      orders_total_paid: 'Total Paid',
+      orders_track_btn: 'Track & Details',
+      orders_cancel_btn: 'Cancel',
+      order_details_title: 'Order Details',
+      order_shipping_addr: 'Shipping Address',
+      order_summary_title: 'Order Summary',
+      order_items_title: 'Order Items',
+      order_invoice_btn: 'Download Invoice',
+      order_cancel_btn: 'Cancel Order',
+      order_live_updates: 'Live Courier Updates',
+      step_ordered: 'Ordered',
+      step_processing: 'Processing',
+      step_shipped: 'Shipped',
+      step_delivered: 'Delivered',
+      step_cancelled: 'Cancelled',
+      step_refunding: 'Refunding',
+      step_refunded: 'Refunded',
+
+      succ_title: 'Order Confirmed!',
+      succ_sub: 'Thank you for choosing KRIPA Pickles.<br />Your jars are being packed fresh with care in our Kerala kitchen.',
+      succ_ref: 'Order Reference',
+      succ_cont: 'Continue Shopping',
+      succ_view: 'View My Orders',
+      login_tag: 'Authentic Taste of Kerala',
+      login_desc: 'Sign in with Google to track your pickle orders, reserve upcoming batches, and checkout faster.',
+      login_google: 'Continue with Google',
+      login_cont: '✦ Continue Shopping',
+      err404_title: 'Page Not Found',
+      err404_desc: 'The page you\'re looking for doesn\'t exist. Let\'s bring you back to our fresh Kerala pickles.'
+    },
+
+    manglish: {
+      ribbon: '✦ Small-Batch Nadan Kerala Pickles · Kerala Delivery ₹70 · Pan-India Safe Glass Jar Delivery ✦',
+      nav_home: 'Home',
+      nav_shop: 'Acharukal',
+      nav_categories: 'Categories',
+      nav_story: 'Nammude Story',
+      nav_signin: 'Sign In',
+      nav_signout: 'Log Out',
+      nav_orders: 'Orders',
+      nav_my_orders: 'Ente Orders',
+      nav_alerts: '🔔 Alerts',
+      nav_enable_alerts: '🔔 New Batch Alerts',
+      nav_admin: 'Admin',
+      nav_admin_dash: 'Admin Dashboard',
+      nav_welcome: 'Swagatham,',
+      nav_whatsapp_us: 'WhatsApp Cheyyoo',
+      nav_back_store: '← Store-ilekku Thirike',
+
+      search_placeholder: 'Mango, Garlic, Prawns, Kanthari achar search cheyyuka…',
+      search_hint: 'Achar search cheyyan type cheyyuka…',
+      search_none: '"{q}" enna achar onnum kandilla',
+
+      hero_kicker: 'കൃപ · Nadan Kerala Kitchen',
+      hero_headline: 'Ruchiyum Veyilum<br /><em>Paramparyavum.</em>',
+      hero_desc: 'Veyilil unakkiya spices-um shuddhamaya ellennayum Ammayude recipe-yum cherkkunna authentic Nadan Kerala pickles — zero preservatives.',
+      hero_cta_shop: 'Acharukal Kaanam',
+      hero_cta_cats: 'Categories',
+      hero_pill_1: '🥭 Nadan Ingredients',
+      hero_pill_2: '🫙 Glass Jar Sealed',
+      hero_pill_3: '🌿 Zero Preservatives',
+
+      craft_1_title: 'Nadan Kaayakanikal',
+      craft_1_desc: 'Kannimanga, nadan veluthulli & erivulla kanthari mulaku.',
+      craft_2_title: 'Varutha Masala',
+      craft_2_desc: 'Oro batch-inum fresh ayi varutha kaduku, uluva & Kashmiri mulaku.',
+      craft_3_title: 'Shuddha Pachakam',
+      craft_3_desc: 'Cheriya batch-ukalayi undakki sterile glass jar-il pack cheyyunnu.',
+      craft_4_title: 'Safe Delivery',
+      craft_4_desc: 'Kerala-yilum India-yilum safe bubble-wrapped glass jar delivery.',
+
+      pantry_label: '✦ Kitchen-il Ninnu Nerittu',
+      pantry_title: 'KRIPA <span class="gold-text">Achar Kalavara</span>',
+      pantry_view_cats: 'Ellam Categories',
+      pantry_all: 'Ellam Acharukalum',
+      pantry_empty: 'Ee category-il acharukal udane varum.',
+      pantry_error: 'Pickles load cheyyan sadhichilla.',
+
+      po_label: '✦ Adutha Batch Booking',
+      po_title: 'Puthia Batch <span style="color:var(--spice);">Pre-book Cheyyam</span>',
+      po_sub: 'Adutha batch ready aakunnathinu munne ningalude jar book cheyyam — ippol payment vendilla.',
+      po_badge_open: 'Pre-order',
+      po_badge_closed: 'Closed',
+      po_slots_left: '{n} jar slot(s) baakki',
+      po_btn_book: 'Ippol Book Cheyyuka',
+      po_btn_closed: 'Booking Closed',
+      po_btn_full: 'Slots Theernnu',
+      po_modal_tag: 'Fresh Batch Pre-booking',
+      po_modal_title: 'Booking Confirm Cheyyuka',
+      po_modal_qty: 'Quantity (Ennam)',
+      po_modal_note: 'Ippol payment vendilla. Puthia batch ready aakumbol email vazhi ariyikkum.',
+      po_modal_confirm: 'Pre-booking Confirm Cheyyuka',
+      po_detail_tag: '✦ Pre-order Details',
+      po_est_price: 'approx price',
+      po_expected_del: 'Expected Delivery',
+      po_avail_weights: 'Available Weights',
+      po_free_note: 'Ippol payment vendilla. Free ayi book cheyyam — batch ready aakumbol email ayakkum.',
+      po_remaining: 'baakki',
+
+      offers_label: '✦ Limited Offer',
+      offers_title: 'Special <span style="color:var(--spice);">Vilakizhivu Offers</span>',
+
+      cats_label: '✦ Varieties',
+      cats_title: 'Category Anusarichu <span class="gold-text">Vangam</span>',
+      cats_coming_soon: 'Puthia pickle categories udane varum.',
+      cat_explore: 'Kaanuka',
+      cat_pickle_one: 'achar',
+      cat_pickle_many: 'acharukal',
+
+      story_photo_title: 'Paramparya Bharani Ruchi',
+      story_photo_sub: 'Prabhatha veyilum varutha masalayum vaazhayilayum',
+      story_est: 'EST. 2024',
+      story_label: '✦ Nammude Bharani Story',
+      story_title: 'Ammayude Kitchen-il Ninnu Ningalude Dining Table-ilekku',
+      story_body: '2024 July-il oru Kerala veettadukkalayil ninnu thudangiya KRIPA, nadan acharukalude thanathu ruchi kaathusookshikkan vendiyanu. Artificial preservatives onnumillaathe, nadan ingredients shuddhamaya ellennayil savadhanam cook cheythanu oro jar-um undakkunnathu.',
+      story_card1_title: 'Shuddham & Thanathu',
+      story_card1_desc: 'Veyilil unakkiya mulakum nadan curry leaves-um natural curing-um.',
+      story_card2_title: 'Ella Meals-inum Super',
+      story_card2_desc: 'Choodulla kanji-kkoppavum grand Sadhya-kkoppavum orupole ruchikaram.',
+
+      insta_label: '✦ Instagram',
+      insta_title: 'Instagram-ile <span class="gold-text">Fresh Moments</span>',
+      footer_tagline: 'Nadan Kerala tastes, small batches-il snehathode thayyarakkiyathu.',
+      footer_col_pickles: 'Acharukal',
+      footer_col_help: 'Help & Orders',
+      footer_col_connect: 'Contact Cheyyuka',
+      footer_shipping_q: 'Delivery Questions',
+      footer_support: 'Order Support',
+      footer_rights: '© 2026 KRIPA Pickles (കൃപ). Ellaa rights-um reserved.',
+      footer_made: 'Keralathil ❤️ Snehathode Undakkiyathu',
+
+      badge_featured: 'Special',
+      badge_soldout: 'Stock Theernnu',
+      badge_off: '% OFF',
+      btn_select_weight: 'Weight Select Cheyyuka',
+      btn_add_cart: 'Basket-il Cherkkuka',
+      incl_taxes: 'tax ulppede',
+      cart_title: 'Ningalude Basket',
+      cart_empty: 'Ningalude achar basket empty aanu',
+      cart_explore: 'Acharukal Kaanuka',
+      cart_weight: 'Weight:',
+      cart_subtotal: 'Subtotal',
+      cart_shipping: 'Delivery Charge',
+      cart_calc_checkout: 'Checkout-il kanakkakkum',
+      cart_total: 'Mottham Total',
+      cart_checkout_btn: 'Checkout-ilekku Pokuka →',
+      cart_razorpay_note: '🔒 Safe Razorpay Checkout',
+      toast_added: '"{name}" basket-il add cheythu!',
+
+      cat_all_title: 'Ellam Acharukalum',
+      cat_loading: 'Acharukal load cheyyunnu…',
+      sort_featured: 'Special Items First',
+      sort_price_asc: 'Price: Kuravathil Ninnu Koodiyathilekku',
+      sort_price_desc: 'Price: Koodiyathil Ninnu Kuravathilekku',
+      sort_name_asc: 'Name: A–Z',
+      cat_empty_title: 'Acharukal Kandilla',
+      cat_empty_desc: 'Ee category-kkulla puthia batch thayyarakukayanu. Udane veendum nokkuka!',
+      btn_back_home: 'Home-ilekku Thirike',
+      more_pickles_label: '✦ Kooduthal Kaanuka',
+      more_pickles_title: 'Matthu <span class="gold-text">Acharukal</span>',
+
+      prod_avail_prompt: 'Stock ariyan jar weight select cheyyuka',
+      prod_in_stock: 'Stock Undu',
+      prod_avail_count: 'Availability: {n} ennam stock undu',
+      prod_avail_instock: 'Availability: Stock Undu',
+      prod_avail_soldout: 'Availability: Stock Theernnu',
+      prod_select_weight: 'Weight Select Cheyyuka',
+      prod_size_err: '⚠ Basket-il add cheyyunnathinu munne weight select cheyyuka',
+      prod_popular: 'Popular',
+      prod_meta_cat: 'Category:',
+      prod_meta_pack: 'Packing:',
+      prod_meta_pack_val: 'Sterilized Hygienic Glass Jar',
+      prod_meta_care: 'Sookshikkenda Vidham:',
+      prod_meta_care_val: 'Cool dry place-il sookshikkuka. Eppozhum dry spoon upayogikkuka.',
+      related_label: '✦ Ningalkku Ishtappedavunna',
+      related_title: 'Similar <span class="gold-text">Acharukal</span>',
+      reviews_label: '✦ Customer Reviews',
+      reviews_title: 'Customers <span class="gold-text">Parayunnathu</span>',
+      reviews_none: 'Reviews onnum ithuvare illa. Aadyam ezhuthoo!',
+      review_write_title: 'Ningalude Review Ezhuthuka',
+      review_name_lbl: 'Ningalude Peru *',
+      review_name_ph: 'Peru nalkuka',
+      review_rating_lbl: 'Rating *',
+      review_comment_lbl: 'Abhiprayam / Review',
+      review_comment_ph: 'Ruchi anubhavam share cheyyuka…',
+      review_post_btn: 'Review Post Cheyyuka',
+
+      co_sub: '✦ Secure Checkout',
+      co_title: 'Order Complete Cheyyuka',
+      co_empty_title: 'Ningalude basket empty aanu',
+      co_empty_desc: 'Checkout cheyyunnathinu munne nadan Kerala pickles add cheyyuka.',
+      co_browse_btn: 'Acharukal Kaanam',
+      co_step1: 'Delivery Address',
+      co_fullname: 'Full Name *',
+      co_phone: 'Phone Number *',
+      co_email: 'Email (Bill & Invoice kittan)',
+      co_addr1: 'Address Line 1 *',
+      co_addr2: 'Address Line 2 (Optional)',
+      co_city: 'City / Town *',
+      co_state: 'State *',
+      co_select_state: 'State select cheyyuka…',
+      co_pincode: 'Pincode *',
+      co_country: 'Country',
+      co_step2: 'Order Summary',
+      co_subtotal: 'Subtotal',
+      co_shipping_lbl: 'Shipping (Kerala ₹70 / India ₹120)',
+      co_coupon_ph: 'Coupon code',
+      co_coupon_apply: 'Apply Cheyyuka',
+      co_discount: 'Coupon Discount',
+      co_grand_total: 'Mottham Grand Total',
+      co_pay_btn: 'Surakshitamayi Pay Cheyyuka',
+      co_ssl_note: '256-bit SSL Safe · Razorpay Vazhi',
+
+      orders_sub: '✦ Account',
+      orders_title: 'Ente Orders',
+      orders_signin_title: 'Orders Kaanan Sign In Cheyyuka',
+      orders_signin_desc: 'Ningalude order history-um tracking-um kaanan Google vazhi sign in cheyyuka.',
+      orders_none_title: 'Orders Onnum Illa',
+      orders_none_desc: 'Nammude nadan Kerala pickles order cheythu thudangoo!',
+      orders_shop_now: 'Ippol Vangam',
+      orders_total_paid: 'Total Paid',
+      orders_track_btn: 'Track & Details',
+      orders_cancel_btn: 'Cancel',
+      order_details_title: 'Order Details',
+      order_shipping_addr: 'Delivery Address',
+      order_summary_title: 'Order Summary',
+      order_items_title: 'Order Items',
+      order_invoice_btn: 'Download Invoice',
+      order_cancel_btn: 'Order Cancel Cheyyuka',
+      order_live_updates: 'Live Courier Updates',
+      step_ordered: 'Order Cheythu',
+      step_processing: 'Thayyarakkunnu',
+      step_shipped: 'Ayachu',
+      step_delivered: 'Etthichu',
+      step_cancelled: 'Cancel Aayi',
+      step_refunding: 'Refund Process',
+      step_refunded: 'Refund Aayi',
+
+      succ_title: 'Order Confirm Aayi!',
+      succ_sub: 'KRIPA Pickles select cheythathinu nanni.<br />Ningalude jars kitchen-il ninnu fresh ayi pack cheyyukayanu.',
+      succ_ref: 'Order Reference',
+      succ_cont: 'Shopping Thudaruka',
+      succ_view: 'Ente Orders Kaanuka',
+      login_tag: 'Keralathinte Thanathu Ruchi',
+      login_desc: 'Orders track cheyyanum puthia batches pre-book cheyyanum vegathil checkout cheyyanum Google vazhi sign in cheyyuka.',
+      login_google: 'Google Vazhi Thudaruka',
+      login_cont: '✦ Shopping Thudaruka',
+      err404_title: 'Page Kandilla',
+      err404_desc: 'Ningal thappunna page nilavililla. Nammude fresh Kerala pickles-ilekku thirike pokam.'
+    }
+  };
+
+  function getLang() {
+    return currentLang;
+  }
+
+  function t(key, vars = {}) {
+    const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.ml;
+    let str = dict[key] !== undefined ? dict[key] : (TRANSLATIONS.en[key] || key);
+    Object.keys(vars).forEach(k => {
+      str = str.replace(new RegExp(`\\{${k}\\}`, 'g'), vars[k]);
+    });
+    return str;
+  }
+
+  function applyTranslations() {
+    document.documentElement.lang = currentLang === 'ml' ? 'ml' : 'en';
+    document.body.classList.toggle('lang-ml', currentLang === 'ml');
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const val = t(key);
+      if (val !== undefined) el.textContent = val;
+    });
+
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const key = el.getAttribute('data-i18n-html');
+      const val = t(key);
+      if (val !== undefined) el.innerHTML = val;
+    });
+
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      const key = el.getAttribute('data-i18n-ph');
+      const val = t(key);
+      if (val !== undefined) el.setAttribute('placeholder', val);
+    });
+
+    // Update 3-way language toggle pills (Malayalam | Manglish Mix | English)
+    document.querySelectorAll('.lang-toggle-btn').forEach(btn => {
+      const opts = [
+        { code: 'ml', label: 'ML', title: 'Malayalam (മലയാളം)' },
+        { code: 'manglish', label: 'Mix', title: 'Manglish (Malayalam + English)' },
+        { code: 'en', label: 'EN', title: 'English' }
+      ];
+      btn.innerHTML = opts.map((o, idx) =>
+        `<span class="lang-opt ${currentLang === o.code ? 'lang-active' : ''}" title="${o.title}" onclick="event.stopPropagation();setLanguage('${o.code}')">${o.label}</span>` +
+        (idx < opts.length - 1 ? '<span class="lang-sep">|</span>' : '')
+      ).join(' ');
+      btn.setAttribute('aria-label', 'Switch language: Malayalam, Manglish Mix, or English');
+    });
+  }
+
+  function setLanguage(lang) {
+    currentLang = VALID_LANGS.includes(lang) ? lang : 'ml';
+    localStorage.setItem(STORAGE_KEY, currentLang);
+    applyTranslations();
+    window.dispatchEvent(new CustomEvent('kripa:langchange', { detail: { lang: currentLang } }));
+  }
+
+  function toggleLanguage() {
+    const idx = VALID_LANGS.indexOf(currentLang);
+    setLanguage(VALID_LANGS[(idx + 1) % VALID_LANGS.length]);
+  }
+
+  window.getLang = getLang;
+  window.t = t;
+  window.setLanguage = setLanguage;
+  window.toggleLanguage = toggleLanguage;
+  window.applyTranslations = applyTranslations;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    applyTranslations();
+  });
+})();

@@ -4,9 +4,9 @@ self.addEventListener('push', function(event) {
             const data = event.data.json();
             const options = {
                 body: data.body,
-                icon: data.icon || '/images/favicon.png', // Add a default icon if missing
-                image: data.image || null, // Optional heroic image
-                badge: data.badge || '/images/favicon.png',
+                icon: data.icon || '/images/hero/kerala_pickle.png',
+                image: data.image || null,
+                badge: data.badge || '/images/hero/kerala_pickle.png',
                 data: {
                     url: data.url || '/'
                 }
@@ -19,7 +19,7 @@ self.addEventListener('push', function(event) {
             event.waitUntil(
                 self.registration.showNotification('KRIPA Pickles', {
                     body: event.data.text(),
-                    icon: '/images/favicon.png'
+                    icon: '/images/hero/kerala_pickle.png'
                 })
             );
         }

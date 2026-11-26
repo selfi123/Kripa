@@ -8,10 +8,17 @@ const Razorpay = require('razorpay');
 const pool = require('../db/pool');
 
 // ── Razorpay instance ─────────────────────────────────────────────────────────
-const rzp = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || '',
-    key_secret: process.env.RAZORPAY_KEY_SECRET || ''
-});
+let rzp = null;
+if (process.env.RAZORPAY_KEY_ID) {
+    try {
+        rzp = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET || ''
+        });
+    } catch (e) {
+        console.warn('⚠️ Razorpay initialization warning:', e.message);
+    }
+}
 
 const KERALA_BASE        = 70;   // ₹70 base delivery for Kerala
 const NATIONAL_BASE      = 120;  // ₹120 base delivery outside Kerala
@@ -62,6 +69,9 @@ router.post('/create', express.json(), async (req, res) => {
         const totalPaise = Math.round(total * 100); // Razorpay uses paise
 
         // Create Razorpay order
+        if (!rzp) {
+            return res.status(500).json({ error: 'Razorpay not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env' });
+        }
         const rzpOrder = await rzp.orders.create({
             amount: totalPaise,
             currency: 'INR',

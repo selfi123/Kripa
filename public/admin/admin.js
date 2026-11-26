@@ -122,7 +122,7 @@ function renderProductsTable(products) {
         const res = await apiFetch(`/api/admin/products/${img.dataset.pid}/images`).catch(() => null);
         if (!res) return;
         const { images } = await res.json().catch(() => ({ images: [] }));
-        if (images && images[0]) img.src = images[0];
+        img.src = (images && images[0]) ? images[0] : '/images/hero/kerala_pickle.png';
     });
 }
 
@@ -161,7 +161,6 @@ async function openEditProductModal(id) {
     document.getElementById('modal-title').textContent = 'Edit Product';
     document.getElementById('edit-id').value = id;
     document.getElementById('p-name').value = p.name;
-    document.getElementById('p-description').value = p.description || '';
     document.getElementById('p-description').value = p.description || '';
     isFeatured = p.featured || false; updateToggle();
     isPushOn = false; updatePushToggle();
@@ -212,34 +211,34 @@ function addVariantRow(weight = '', price = '', salePrice = '', stock = '', isOn
     const row = document.createElement('div');
     row.id = uid;
     row.className = 'variant-row';
-    row.style.cssText = 'display:flex; gap:12px; align-items:center; background:var(--dark-2); padding:16px; border:1px solid rgba(201,169,110,0.15); border-radius:12px; flex-wrap:wrap;';
+    row.style.cssText = 'display:flex; gap:12px; align-items:center; background:var(--dark-3); padding:14px; border:1px solid var(--border); border-radius:12px; flex-wrap:wrap;';
     
     row.innerHTML = `
-        <div style="flex:1; min-width:120px;">
+        <div style="flex:1; min-width:110px;">
             <label style="font-size:10px; color:var(--text-muted); margin-bottom:4px; display:block;">Weight *</label>
-            <input type="text" class="v-weight" value="${weight}" placeholder="e.g. 250g" style="width:100%; padding:8px; border-radius:6px; background:var(--dark-3); border:1px solid rgba(255,255,255,0.05); color:#fff;">
+            <input type="text" class="v-weight" value="${weight}" placeholder="e.g. 250g" style="width:100%; padding:8px; border-radius:8px; background:var(--dark-2); border:1px solid var(--border); color:var(--text);">
         </div>
-        <div style="flex:1; min-width:100px;">
+        <div style="flex:1; min-width:95px;">
             <label style="font-size:10px; color:var(--text-muted); margin-bottom:4px; display:block;">Price (₹) *</label>
-            <input type="number" class="v-price" value="${price}" placeholder="150" min="0" style="width:100%; padding:8px; border-radius:6px; background:var(--dark-3); border:1px solid rgba(255,255,255,0.05); color:#fff;">
+            <input type="number" class="v-price" value="${price}" placeholder="150" min="0" style="width:100%; padding:8px; border-radius:8px; background:var(--dark-2); border:1px solid var(--border); color:var(--text);">
         </div>
-        <div style="flex:1; min-width:100px;">
+        <div style="flex:1; min-width:95px;">
             <label style="font-size:10px; color:var(--text-muted); margin-bottom:4px; display:block;">Sale Price</label>
-            <input type="number" class="v-sale-price" value="${salePrice}" placeholder="120" min="0" style="width:100%; padding:8px; border-radius:6px; background:var(--dark-3); border:1px solid rgba(255,255,255,0.05); color:#fff;">
+            <input type="number" class="v-sale-price" value="${salePrice}" placeholder="120" min="0" style="width:100%; padding:8px; border-radius:8px; background:var(--dark-2); border:1px solid var(--border); color:var(--text);">
         </div>
-        <div style="flex:1; min-width:100px;">
+        <div style="flex:1; min-width:95px;">
             <label style="font-size:10px; color:var(--text-muted); margin-bottom:4px; display:block;">Stock Qty</label>
-            <input type="number" class="v-stock" value="${stock}" placeholder="e.g. 50" min="0" style="width:100%; padding:8px; border-radius:6px; background:var(--dark-3); border:1px solid rgba(255,255,255,0.05); color:#fff;">
+            <input type="number" class="v-stock" value="${stock}" placeholder="e.g. 50" min="0" style="width:100%; padding:8px; border-radius:8px; background:var(--dark-2); border:1px solid var(--border); color:var(--text);">
         </div>
         <div style="display:flex; align-items:center; gap:6px; min-width:80px; margin-top:16px;">
             <input type="checkbox" class="v-on-sale" ${isOnSale ? 'checked' : ''} style="accent-color:var(--gold);">
-            <label style="font-size:11px; margin:0;">On Sale</label>
+            <label style="font-size:11px; margin:0; color:var(--text);">On Sale</label>
         </div>
         <div style="display:flex; align-items:center; gap:6px; min-width:80px; margin-top:16px;">
             <input type="checkbox" class="v-featured" ${featured ? 'checked' : ''} style="accent-color:var(--gold);">
-            <label style="font-size:11px; margin:0;">Popular</label>
+            <label style="font-size:11px; margin:0; color:var(--text);">Popular</label>
         </div>
-        <button type="button" onclick="document.getElementById('${uid}').remove()" style="margin-top:16px; background:none; border:none; color:#d9534f; cursor:pointer; font-size:16px; padding:4px;">✕</button>
+        <button type="button" onclick="document.getElementById('${uid}').remove()" style="margin-top:16px; background:none; border:none; color:#B93822; cursor:pointer; font-size:16px; padding:4px;">✕</button>
     `;
     container.appendChild(row);
 }
@@ -399,7 +398,7 @@ async function submitProduct() {
                         headers: { 'Content-Type': 'application/json', 'x-admin-token': getToken() },
                         body: JSON.stringify({
                             title: `✨ New: ${name}`,
-                            body: `${category} · ₹${parseFloat(price).toLocaleString('en-IN')} — Tap to view!`,
+                            body: `${category} · ₹${parseFloat(basePrice).toLocaleString('en-IN')} — Tap to view!`,
                             url: `/product.html?id=${actualId}`
                         })
                     });
