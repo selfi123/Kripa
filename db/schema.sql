@@ -55,6 +55,8 @@ CREATE TABLE IF NOT EXISTS orders (
   address             JSONB NOT NULL DEFAULT '{}',
   subtotal            DECIMAL(10,2) NOT NULL DEFAULT 0,
   delivery_charge     DECIMAL(10,2) NOT NULL DEFAULT 0,
+  discount            DECIMAL(10,2) NOT NULL DEFAULT 0,
+  coupon_id           INTEGER,
   total               DECIMAL(10,2) NOT NULL DEFAULT 0,
   status              VARCHAR(50) NOT NULL DEFAULT 'pending',
   razorpay_order_id   VARCHAR(255),

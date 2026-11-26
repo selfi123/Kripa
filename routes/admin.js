@@ -33,12 +33,10 @@ const validTokens = new Map();
 
 // ── Auth middleware ───────────────────────────────────────────────────────────
 function auth(req, res, next) {
-    const token = req.headers['x-admin-token'] || req.query.token;
-    if (!token) return res.status(401).json({ error: 'No token' });
-    if (validTokens.has(token)) return next();
-    if (req.session?.adminToken && req.session.adminToken === token) return next();
     if (req.session?.isAdmin) return next();
     if (req.isAuthenticated?.() && ADMIN_EMAILS.includes((req.user?.email || '').toLowerCase())) return next();
+    const token = req.headers['x-admin-token'] || req.query.token;
+    if (token && (validTokens.has(token) || (req.session?.adminToken && req.session.adminToken === token))) return next();
     return res.status(401).json({ error: 'Unauthorized' });
 }
 
@@ -369,6 +367,27 @@ router.post('/push/send', auth, express.json(), async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});
+
+// ── GET /api/admin/stats (admin revenue & metrics dashboard) ──────────────────
+router.get('/stats', auth, async (req, res) => {
+    try {
+        const [orders, products, users, revenue] = await Promise.all([
+            pool.query(`SELECT COUNT(*), status FROM orders GROUP BY status`),
+            pool.query(`SELECT COUNT(*) FROM products`),
+            pool.query(`SELECT COUNT(*) FROM users`),
+            pool.query(`SELECT COALESCE(SUM(total),0) AS revenue FROM orders WHERE status IN ('paid','delivered','shipped')`)
+        ]);
+        const statusMap = {};
+        orders.rows.forEach(r => statusMap[r.status] = parseInt(r.count));
+        res.json({
+            totalOrders: Object.values(statusMap).reduce((a, b) => a + b, 0),
+            pending: statusMap.pending || 0,
+            revenue: parseFloat(revenue.rows[0].revenue),
+            products: parseInt(products.rows[0].count),
+            users: parseInt(users.rows[0].count)
+        });
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 module.exports = router;

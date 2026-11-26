@@ -372,6 +372,7 @@
                         address: { name, phone, line1, line2, city, state, pincode, country: 'India', email },
                         email,
                         couponId: _appliedCoupon?.couponId || null,
+                        couponCode: _appliedCoupon?.code || null,
                         discount: _appliedCoupon ? _appliedCoupon.discount : 0
                     })
                 });
@@ -396,9 +397,6 @@
                         });
                         const vData = await verify.json();
                         if (verify.ok && vData.success) {
-                            if (_appliedCoupon?.couponId) {
-                                fetch(`/api/coupons/used/${_appliedCoupon.couponId}`, { method: 'POST' }).catch(() => {});
-                            }
                             localStorage.removeItem('kripa_cart');
                             window.location.href = `/order-success?id=${vData.orderId}`;
                         } else { alert('Payment verification failed.'); btn.disabled = false; btnLabel.textContent = payText(); }

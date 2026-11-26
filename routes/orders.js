@@ -6,6 +6,37 @@ const router = express.Router();
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
 const pool = require('../db/pool');
+const adminRouter = require('./admin');
+
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
+
+// ── Authorization helper for orders ───────────────────────────────────────────
+function canAccessOrder(req, order) {
+    if (!order) return false;
+    // 1. Admin via token or session
+    const token = req.headers['x-admin-token'] || req.query.token;
+    if (token && (adminRouter.validTokens?.has(token) || req.session?.adminToken === token)) return true;
+    if (req.session?.isAdmin) return true;
+    if (req.isAuthenticated?.() && ADMIN_EMAILS.includes((req.user?.email || '').toLowerCase())) return true;
+
+    // 2. Authenticated user who owns this order
+    if (req.user && order.user_id && String(order.user_id) === String(req.user.id)) return true;
+
+    // 3. Guest order in current browser session
+    if (req.session?.guestOrders && Array.isArray(req.session.guestOrders) && req.session.guestOrders.includes(order.id)) return true;
+
+    // 4. Guest verification with matching phone or email
+    const reqPhone = (req.query.phone || req.headers['x-order-phone'] || '').replace(/\D/g, '');
+    const reqEmail = (req.query.email || req.headers['x-order-email'] || '').trim().toLowerCase();
+    const addr = typeof order.address === 'string' ? JSON.parse(order.address || '{}') : (order.address || {});
+    const orderPhone = String(addr.phone || '').replace(/\D/g, '');
+    const orderEmail = String(order.guest_email || addr.email || '').trim().toLowerCase();
+
+    if (reqPhone && orderPhone && (reqPhone === orderPhone || reqPhone.slice(-10) === orderPhone.slice(-10))) return true;
+    if (reqEmail && orderEmail && reqEmail === orderEmail) return true;
+
+    return false;
+}
 
 // ── Razorpay instance ─────────────────────────────────────────────────────────
 let rzp = null;
@@ -25,34 +56,40 @@ const NATIONAL_BASE      = 120;  // ₹120 base delivery outside Kerala
 const EXTRA_ITEM_RATE    = 10;   // ₹10 per additional item (volumetric offset)
 
 // ── POST /api/orders/create ───────────────────────────────────────────────────
-// Body: { items: [{id,name,price,qty,thumb}], address: {name,phone,line1,city,state,pincode}, email? }
+// Body: { items: [{id,name,price,qty,thumb}], address: {name,phone,line1,city,state,pincode}, email?, couponCode?, couponId? }
 router.post('/create', express.json(), async (req, res) => {
     try {
-        const { items, address, email } = req.body;
+        const { items, address, email, couponCode, couponId } = req.body;
         if (!items?.length) return res.status(400).json({ error: 'Cart is empty' });
         if (!address?.name || !address?.phone || !address?.line1 || !address?.pincode)
             return res.status(400).json({ error: 'Incomplete address' });
 
         // Validate items against DB prices (prevent price tampering)
-        const ids = items.map(i => i.id);
+        const ids = items.map(i => i.id).filter(Boolean);
+        if (!ids.length) return res.status(400).json({ error: 'Invalid items in cart' });
+
         const { rows: dbProducts } = await pool.query(
             `SELECT id::text, price, weight_prices FROM products WHERE id = ANY($1::uuid[])`, [ids]
         );
         const priceMap = Object.fromEntries(dbProducts.map(p => [p.id, p]));
 
+        // Ensure every item actually exists in the database
+        for (const item of items) {
+            if (!priceMap[item.id]) {
+                return res.status(400).json({ error: `Product not found or unavailable: ${item.name || item.id}` });
+            }
+        }
+
         let subtotal = 0;
         const validatedItems = items.map(item => {
             const dbProduct = priceMap[item.id];
-            let dbPrice = parseFloat(item.price); // fallback
-            if (dbProduct) {
-                dbPrice = parseFloat(dbProduct.price);
-                let weightData = (item.selectedSize && dbProduct.weight_prices) ? dbProduct.weight_prices[item.selectedSize] : undefined;
-                if (weightData !== undefined) {
-                    if (typeof weightData === 'number') {
-                        dbPrice = parseFloat(weightData);
-                    } else if (typeof weightData === 'object' && weightData !== null) {
-                        dbPrice = parseFloat(weightData.is_on_sale && weightData.sale_price ? weightData.sale_price : weightData.price);
-                    }
+            let dbPrice = parseFloat(dbProduct.price);
+            let weightData = (item.selectedSize && dbProduct.weight_prices) ? dbProduct.weight_prices[item.selectedSize] : undefined;
+            if (weightData !== undefined) {
+                if (typeof weightData === 'number') {
+                    dbPrice = parseFloat(weightData);
+                } else if (typeof weightData === 'object' && weightData !== null) {
+                    dbPrice = parseFloat(weightData.is_on_sale && weightData.sale_price ? weightData.sale_price : weightData.price);
                 }
             }
             const qty = Math.max(1, parseInt(item.qty) || 1);
@@ -60,12 +97,33 @@ router.post('/create', express.json(), async (req, res) => {
             return { ...item, price: dbPrice, qty };
         });
 
+        // Server-side Coupon validation & discount calculation
+        let discountAmount = 0;
+        let appliedCoupon = null;
+        if (couponCode || couponId) {
+            const couponQuery = couponId
+                ? `SELECT * FROM coupons WHERE id=$1 AND active=true AND (expires_at IS NULL OR expires_at > NOW()) AND (max_uses IS NULL OR uses_count < max_uses)`
+                : `SELECT * FROM coupons WHERE UPPER(code)=UPPER($1) AND active=true AND (expires_at IS NULL OR expires_at > NOW()) AND (max_uses IS NULL OR uses_count < max_uses)`;
+            const { rows: couponRows } = await pool.query(couponQuery, [couponId || String(couponCode).trim()]);
+            if (couponRows.length) {
+                const c = couponRows[0];
+                if (subtotal >= parseFloat(c.min_order || 0)) {
+                    appliedCoupon = c;
+                    if (c.discount_type === 'percent') {
+                        discountAmount = Math.round((subtotal * parseFloat(c.discount_value)) / 100);
+                    } else {
+                        discountAmount = Math.min(parseFloat(c.discount_value), subtotal);
+                    }
+                }
+            }
+        }
+
         // Zone-based + volumetric delivery charge
         const totalItems    = validatedItems.reduce((s, i) => s + i.qty, 0);
         const isKerala      = (address?.state || '').trim() === 'Kerala';
         const baseCharge    = isKerala ? KERALA_BASE : NATIONAL_BASE;
         const deliveryCharge = baseCharge + Math.max(0, totalItems - 1) * EXTRA_ITEM_RATE;
-        const total = subtotal + deliveryCharge;
+        const total = Math.max(0, subtotal - discountAmount) + deliveryCharge;
         const totalPaise = Math.round(total * 100); // Razorpay uses paise
 
         // Create Razorpay order
@@ -82,17 +140,24 @@ router.post('/create', express.json(), async (req, res) => {
         // Save pending order to DB
         const userId = req.user?.id || null;
         const { rows } = await pool.query(
-            `INSERT INTO orders (user_id, guest_email, items, address, subtotal, delivery_charge, total, razorpay_order_id, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'pending') RETURNING id`,
+            `INSERT INTO orders (user_id, guest_email, items, address, subtotal, delivery_charge, total, razorpay_order_id, status, discount, coupon_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'pending',$9,$10) RETURNING id`,
             [userId, email || null, JSON.stringify(validatedItems), JSON.stringify(address),
-                subtotal, deliveryCharge, total, rzpOrder.id]
+                subtotal, deliveryCharge, total, rzpOrder.id, discountAmount, appliedCoupon ? appliedCoupon.id : null]
         );
+
+        // Store guest order in session
+        if (!req.session.guestOrders) req.session.guestOrders = [];
+        req.session.guestOrders.push(rows[0].id);
 
         res.json({
             orderId: rows[0].id,
             razorpayOrderId: rzpOrder.id,
             amount: totalPaise,
             currency: 'INR',
+            subtotal,
+            discount: discountAmount,
+            total,
             keyId: process.env.RAZORPAY_KEY_ID,
             prefill: {
                 name: address.name,
@@ -132,6 +197,14 @@ router.post('/verify', express.json(), async (req, res) => {
        WHERE id=$3 RETURNING *`,
             [razorpayPaymentId, razorpaySignature, orderId]
         );
+
+        // Atomically increment coupon uses_count if a coupon was used
+        if (rows[0] && rows[0].coupon_id) {
+            await pool.query(
+                `UPDATE coupons SET uses_count = uses_count + 1 WHERE id = $1`,
+                [rows[0].coupon_id]
+            ).catch(e => console.warn('Coupon usage increment error:', e.message));
+        }
 
         // Deduct variant stock
         if (rows[0] && rows[0].items) {
@@ -188,6 +261,9 @@ router.get('/:id', async (req, res) => {
     try {
         const { rows } = await pool.query(`SELECT * FROM orders WHERE id=$1`, [req.params.id]);
         if (!rows.length) return res.status(404).json({ error: 'Order not found' });
+        if (!canAccessOrder(req, rows[0])) {
+            return res.status(403).json({ error: 'Access denied to this order.' });
+        }
         res.json(rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -195,8 +271,11 @@ router.get('/:id', async (req, res) => {
 // ── GET /api/orders/:id/tracking ──────────────────────────────────────────────
 router.get('/:id/tracking', async (req, res) => {
     try {
-        const { rows } = await pool.query(`SELECT tracking_id, tracking_data, tracking_updated_at FROM orders WHERE id=$1`, [req.params.id]);
+        const { rows } = await pool.query(`SELECT id, user_id, address, guest_email, tracking_id, tracking_data, tracking_updated_at FROM orders WHERE id=$1`, [req.params.id]);
         if (!rows.length) return res.status(404).json({ error: 'Order not found' });
+        if (!canAccessOrder(req, rows[0])) {
+            return res.status(403).json({ error: 'Access denied to tracking for this order.' });
+        }
         
         const { tracking_id, tracking_data, tracking_updated_at } = rows[0];
         if (!tracking_id) return res.json({ states: null });
@@ -248,6 +327,9 @@ router.get('/:id/invoice', async (req, res) => {
     try {
         const { rows } = await pool.query(`SELECT * FROM orders WHERE id=$1`, [req.params.id]);
         if (!rows.length) return res.status(404).send('Invoice not found');
+        if (!canAccessOrder(req, rows[0])) {
+            return res.status(403).send('Access denied to this invoice.');
+        }
         
         const { generateInvoicePdf } = require('../utils/invoice');
         res.setHeader('Content-Type', 'application/pdf');

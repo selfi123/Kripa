@@ -123,6 +123,7 @@
                 return;
             }
             const loc = (typeof getLang === 'function' && getLang() === 'ml') ? 'ml-IN' : 'en-IN';
+            const esc = typeof escapeHtml === 'function' ? escapeHtml : (s => String(s || '').replace(/</g, '&lt;'));
             container.innerHTML = _cachedOrders.map(order => {
                 const items = order.items || [];
                 const addr = order.address || {};
@@ -144,10 +145,10 @@
                     <div style="display:flex;flex-direction:column;gap:10px;">
                         ${items.map(i => `
                             <div style="display:flex;gap:12px;align-items:center;">
-                                <img class="order-thumb" src="${i.thumb || ''}" alt="${i.name}" onerror="this.style.display='none'" />
+                                <img class="order-thumb" src="${i.thumb || ''}" alt="${esc(i.name)}" onerror="this.style.display='none'" />
                                 <div>
-                                    <div style="font-size:14px;color:var(--leaf-deep);font-weight:600;">${i.name}</div>
-                                    ${i.selectedSize ? `<div style="font-size:11px;color:var(--kasavu);font-weight:700;text-transform:uppercase;">${t('cart_weight')}: ${i.selectedSize}</div>` : ''}
+                                    <div style="font-size:14px;color:var(--leaf-deep);font-weight:600;">${esc(i.name)}</div>
+                                    ${i.selectedSize ? `<div style="font-size:11px;color:var(--kasavu);font-weight:700;text-transform:uppercase;">${t('cart_weight')}: ${esc(i.selectedSize)}</div>` : ''}
                                     <div style="font-size:12px;color:var(--text-muted);">Qty: ${i.qty || 1} × ₹${parseFloat(i.price).toLocaleString('en-IN')}</div>
                                 </div>
                             </div>`).join('')}
@@ -160,7 +161,7 @@
                                 ${canCancel ? `<button class="btn btn-outline" style="padding:8px 16px;font-size:12px;border-color:rgba(185,56,34,0.4);color:var(--spice);" onclick="cancelOrder('${order.id}')">${t('orders_cancel_btn')}</button>` : ''}
                             </div>
                         </div>
-                        <div class="order-addr">📦 ${addr.name || ''}<br/>${addr.city || ''}, ${addr.state || ''} ${addr.pincode || ''}</div>
+                        <div class="order-addr">📦 ${esc(addr.name || '')}<br/>${esc(addr.city || '')}${addr.state ? ', ' + esc(addr.state) : ''} ${esc(addr.pincode || '')}</div>
                     </div>
                 </div>`;
             }).join('');

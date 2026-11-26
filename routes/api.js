@@ -210,27 +210,6 @@ router.post('/products/:id/reviews', express.json(), async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── GET /api/stats (admin revenue dashboard) ──────────────────────────────────
-router.get('/stats', async (req, res) => {
-    try {
-        const [orders, products, users, revenue] = await Promise.all([
-            pool.query(`SELECT COUNT(*), status FROM orders GROUP BY status`),
-            pool.query(`SELECT COUNT(*) FROM products`),
-            pool.query(`SELECT COUNT(*) FROM users`),
-            pool.query(`SELECT COALESCE(SUM(total),0) AS revenue FROM orders WHERE status IN ('paid','delivered','shipped')`)
-        ]);
-        const statusMap = {};
-        orders.rows.forEach(r => statusMap[r.status] = parseInt(r.count));
-        res.json({
-            totalOrders: Object.values(statusMap).reduce((a, b) => a + b, 0),
-            pending: statusMap.pending || 0,
-            revenue: parseFloat(revenue.rows[0].revenue),
-            products: parseInt(products.rows[0].count),
-            users: parseInt(users.rows[0].count)
-        });
-    } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
 // ── GET /api/debug ────────────────────────────────────────────────────────────
 router.get('/debug', async (req, res) => {
     try {

@@ -57,8 +57,8 @@ async function loadDashboard() {
 
 async function loadDashStats() {
     try {
-        const res = await fetch('/api/stats');
-        if (!res.ok) return;
+        const res = await apiFetch('/api/admin/stats');
+        if (!res || !res.ok) return;
         const s = await res.json();
         const fmt = v => '₹' + Math.round(v).toLocaleString('en-IN');
         document.getElementById('stat-revenue').textContent = fmt(s.revenue);

@@ -5,6 +5,16 @@
 
 const _t = (k, v) => (typeof window.t === 'function' ? window.t(k, v) : k);
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // ── CART STATE ────────────────────────────────────
 let cart = JSON.parse(localStorage.getItem('kripa_cart') || '[]');
 
@@ -376,14 +386,14 @@ function _runSearch(q) {
     p.name.toLowerCase().includes(q.toLowerCase()) ||
     (p.category || '').toLowerCase().includes(q.toLowerCase())
   ).slice(0, 10);
-  if (!matches.length) { results.innerHTML = `<p class="search-hint">${_t('search_none', { q })}</p>`; return; }
+  if (!matches.length) { results.innerHTML = `<p class="search-hint">${_t('search_none', { q: escapeHtml(q) })}</p>`; return; }
   results.innerHTML = matches.map(p => {
     const img = p.thumb || '';
-    return `<a class="search-result-item" href="/product.html?id=${p.id}" onclick="closeSearch()">
-      <img class="search-result-img" src="${img}" alt="${p.name}" onerror="this.style.display='none'"/>
+    return `<a class="search-result-item" href="/product.html?id=${encodeURIComponent(p.id)}" onclick="closeSearch()">
+      <img class="search-result-img" src="${img}" alt="${escapeHtml(p.name)}" onerror="this.style.display='none'"/>
       <div style="flex:1;min-width:0;">
-        <div class="search-result-name">${p.name}</div>
-        <div class="search-result-cat">${p.category}</div>
+        <div class="search-result-name">${escapeHtml(p.name)}</div>
+        <div class="search-result-cat">${escapeHtml(p.category)}</div>
       </div>
       <div class="search-result-price">₹${parseFloat(p.price).toLocaleString('en-IN')}</div>
     </a>`;

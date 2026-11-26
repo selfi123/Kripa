@@ -23,6 +23,8 @@ async function runMigration() {
         await pool.query('ALTER TABLE users ALTER COLUMN avatar TYPE TEXT').catch(() => {});
         await pool.query('ALTER TABLE bulk_inquiries ADD COLUMN IF NOT EXISTS packaging VARCHAR(120)').catch(() => {});
         await pool.query("ALTER TABLE bulk_inquiries ADD COLUMN IF NOT EXISTS items JSONB NOT NULL DEFAULT '[]'").catch(() => {});
+        await pool.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount DECIMAL(10,2) DEFAULT 0').catch(() => {});
+        await pool.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS coupon_id INTEGER').catch(() => {});
         console.log('✅ DB migration complete.');
     } catch (err) {
         console.warn('⚠️  DB migration warning (may already exist):', err.message);
@@ -73,6 +75,14 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
+// ── Security Headers ──────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    next();
+});
+
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -94,7 +104,8 @@ app.use(session({
     cookie: {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         secure: process.env.NODE_ENV === 'production',
-        httpOnly: true
+        httpOnly: true,
+        sameSite: 'lax'
     }
 }));
 

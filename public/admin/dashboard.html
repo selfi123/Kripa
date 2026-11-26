@@ -1101,6 +1101,17 @@
     <script src="/admin/admin.js"></script>
     <script>
         checkAuth();
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         const _showTab = showTab;
         window.showTab = function (tab) {
             _showTab(tab);
@@ -1115,8 +1126,6 @@
         };
 
         let allOrders = [];
-
-
 
         async function loadAdminOrders() {
             const tbody = document.getElementById('orders-tbody');
@@ -1143,8 +1152,8 @@
                 return `<tr>
                     <td style="font-size:11px;color:var(--gold);font-family:monospace;">#${o.id.slice(0, 8).toUpperCase()}</td>
                     <td>
-                        <div style="font-weight:500;">${addr.name || o.guest_email || 'Guest'}</div>
-                        <div style="font-size:11px;color:var(--text-muted);">${addr.phone || ''}</div>
+                        <div style="font-weight:500;">${escapeHtml(addr.name || o.guest_email || 'Guest')}</div>
+                        <div style="font-size:11px;color:var(--text-muted);">${escapeHtml(addr.phone || '')}</div>
                     </td>
                     <td>
                         <div style="display:flex;flex-direction:column;gap:8px;max-width:260px;">
@@ -1152,10 +1161,10 @@
                             <div style="display:flex;align-items:center;gap:8px;">
                                 <img src="${i.thumb || ''}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;border:1px solid rgba(201,169,110,0.15);background:#1a1a1a;flex-shrink:0;" onerror="this.style.display='none'"/>
                                 <div style="min-width:0;">
-                                    <div style="font-size:12px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">${i.name}</div>
+                                    <div style="font-size:12px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">${escapeHtml(i.name)}</div>
                                     <div style="font-size:10px;color:var(--text-muted);margin-top:1px;">
-                                        ${i.category || ''}
-                                        ${i.selectedSize ? ` · <span style="color:var(--gold);">Weight: ${i.selectedSize}</span>` : ''}
+                                        ${escapeHtml(i.category || '')}
+                                        ${i.selectedSize ? ` · <span style="color:var(--gold);">Weight: ${escapeHtml(i.selectedSize)}</span>` : ''}
                                         · Qty: ${i.qty || 1}
                                     </div>
                                     <div style="font-size:11px;color:var(--gold);">₹${(parseFloat(i.price) * (i.qty || 1)).toLocaleString('en-IN')}</div>
@@ -1246,16 +1255,16 @@
                 <div class="od-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;margin-top:24px;">
                     <div style="background:var(--dark);border:1px solid var(--border);border-radius:14px;padding:18px;">
                         <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;">Customer</p>
-                        <p style="font-weight:600;font-size:15px;color:var(--text);margin-bottom:4px;">${addr.name || '—'}</p>
-                        <p style="font-size:13px;color:var(--text-muted);margin-bottom:2px;">📞 ${addr.phone || '—'}</p>
-                        <p style="font-size:12px;color:var(--text-muted);">✉️ ${o.guest_email || '—'}</p>
+                        <p style="font-weight:600;font-size:15px;color:var(--text);margin-bottom:4px;">${escapeHtml(addr.name || '—')}</p>
+                        <p style="font-size:13px;color:var(--text-muted);margin-bottom:2px;">📞 ${escapeHtml(addr.phone || '—')}</p>
+                        <p style="font-size:12px;color:var(--text-muted);">✉️ ${escapeHtml(o.guest_email || '—')}</p>
                     </div>
                     <div style="background:var(--dark);border:1px solid var(--border);border-radius:14px;padding:18px;">
                         <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;">Delivery Address</p>
                         <p style="font-size:13px;color:var(--text);line-height:1.8;">
-                            ${addr.line1 || ''}${addr.line2 ? '<br>' + addr.line2 : ''}<br>
-                            ${addr.city || ''}${addr.state ? ', ' + addr.state : ''}${addr.pincode ? ' – ' + addr.pincode : ''}<br>
-                            ${addr.country || ''}
+                            ${escapeHtml(addr.line1 || '')}${addr.line2 ? '<br>' + escapeHtml(addr.line2) : ''}<br>
+                            ${escapeHtml(addr.city || '')}${addr.state ? ', ' + escapeHtml(addr.state) : ''}${addr.pincode ? ' – ' + escapeHtml(addr.pincode) : ''}<br>
+                            ${escapeHtml(addr.country || '')}
                         </p>
                     </div>
                 </div>
@@ -1540,9 +1549,9 @@
                     return;
                 }
                 tbody.innerHTML = rows.map(b => `<tr>
-                    <td style="color:var(--gold);font-weight:500;">${b.listing_name}</td>
-                    <td>${b.user_name || '—'}</td>
-                    <td style="color:var(--text-muted);font-size:12px;">${b.user_email || '—'}</td>
+                    <td style="color:var(--gold);font-weight:500;">${escapeHtml(b.listing_name)}</td>
+                    <td>${escapeHtml(b.user_name || '—')}</td>
+                    <td style="color:var(--text-muted);font-size:12px;">${escapeHtml(b.user_email || '—')}</td>
                     <td style="font-weight:600;">${b.quantity}</td>
                     <td style="font-size:12px;color:var(--text-muted);">${new Date(b.created_at).toLocaleDateString('en-IN')}</td>
                 </tr>`).join('');
@@ -1670,26 +1679,27 @@
                 tbody.innerHTML = rows.map(b => {
                     const items = Array.isArray(b.items) ? b.items : [];
                     const itemsMarkup = items.length
-                        ? items.map(i => `<div>• <strong>${i.name}</strong>: ${i.qty} ${i.unit}</div>`).join('')
-                        : `<div style="color:var(--text-muted);">${b.pickle_choices || 'Any / Mixed'}</div>`;
+                        ? items.map(i => `<div>• <strong>${escapeHtml(i.name)}</strong>: ${escapeHtml(i.qty)} ${escapeHtml(i.unit)}</div>`).join('')
+                        : `<div style="color:var(--text-muted);">${escapeHtml(b.pickle_choices || 'Any / Mixed')}</div>`;
+                    const cleanPhone = String(b.phone || '').replace(/[^0-9]/g, '');
                     return `<tr>
-                    <td style="font-family:monospace;color:var(--gold);font-weight:700;">#${b.id}</td>
-                    <td><span class="td-badge badge-featured">${b.event_type}</span></td>
+                    <td style="font-family:monospace;color:var(--gold);font-weight:700;">#${escapeHtml(b.id)}</td>
+                    <td><span class="td-badge badge-featured">${escapeHtml(b.event_type)}</span></td>
                     <td>
-                        <div style="font-weight:600;">${b.customer_name}</div>
-                        <div style="font-size:12px;"><a href="tel:${b.phone}" style="color:var(--gold);">${b.phone}</a> · <a href="https://wa.me/91${String(b.phone).replace(/[^0-9]/g, '').slice(-10)}" target="_blank" style="color:#16a34a;">WhatsApp</a></div>
-                        ${b.email ? `<div style="font-size:11px;color:var(--text-muted);">${b.email}</div>` : ''}
+                        <div style="font-weight:600;">${escapeHtml(b.customer_name)}</div>
+                        <div style="font-size:12px;"><a href="tel:${cleanPhone}" style="color:var(--gold);">${escapeHtml(b.phone)}</a> · <a href="https://wa.me/91${cleanPhone.slice(-10)}" target="_blank" style="color:#16a34a;">WhatsApp</a></div>
+                        ${b.email ? `<div style="font-size:11px;color:var(--text-muted);">${escapeHtml(b.email)}</div>` : ''}
                     </td>
                     <td style="font-size:12px;color:var(--text-muted);">
-                        ${b.event_date ? `<div>📅 ${b.event_date}</div>` : ''}
-                        <div>📍 ${b.location || '—'}</div>
-                        ${b.packaging ? `<div style="font-size:11px;margin-top:2px;">📦 ${b.packaging}</div>` : ''}
+                        ${b.event_date ? `<div>📅 ${escapeHtml(b.event_date)}</div>` : ''}
+                        <div>📍 ${escapeHtml(b.location || '—')}</div>
+                        ${b.packaging ? `<div style="font-size:11px;margin-top:2px;">📦 ${escapeHtml(b.packaging)}</div>` : ''}
                     </td>
                     <td style="font-size:12px;max-width:240px;">
-                        <div style="font-weight:700;color:var(--gold-dark);margin-bottom:4px;">${b.quantity_kg || 'Custom'}</div>
+                        <div style="font-weight:700;color:var(--gold-dark);margin-bottom:4px;">${escapeHtml(b.quantity_kg || 'Custom')}</div>
                         ${itemsMarkup}
                     </td>
-                    <td style="font-size:12px;color:var(--text-muted);max-width:180px;">${b.notes || '—'}</td>
+                    <td style="font-size:12px;color:var(--text-muted);max-width:180px;">${escapeHtml(b.notes || '—')}</td>
                     <td>
                         <select id="bulk-st-${b.id}" style="border:1px solid var(--border);border-radius:8px;padding:5px 8px;font-size:11px;text-transform:uppercase;">
                             ${statuses.map(s => `<option value="${s}" ${s === b.status ? 'selected' : ''}>${s}</option>`).join('')}

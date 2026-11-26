@@ -44,12 +44,10 @@ router.post('/apply', express.json(), async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── Increment coupon uses (called after order success) ────────────────────────
-router.post('/used/:id', async (req, res) => {
-    try {
-        await pool.query(`UPDATE coupons SET uses_count=uses_count+1 WHERE id=$1`, [req.params.id]);
-        res.json({ ok: true });
-    } catch { res.json({ ok: false }); }
+// ── Increment coupon uses (deprecated – handled atomically in /api/orders/verify) ─
+router.post('/used/:id', (req, res) => {
+    // No-op: Coupon usages are now securely verified and incremented server-side upon payment verification
+    res.json({ ok: true });
 });
 
 module.exports = router;
