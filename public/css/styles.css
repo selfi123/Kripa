@@ -77,7 +77,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 ::selection { background: var(--leaf); color: #fff; }
 
 /* ── Containers & Section Headers ──────────────────────────── */
-.container { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+.container { max-width: 1440px; width: 100%; margin: 0 auto; padding: 0 clamp(18px, 3vw, 44px); }
 .gold-text { color: var(--leaf); }
 
 .section-label {
@@ -188,10 +188,11 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 
 .nav-inner {
-  max-width: 1240px;
+  max-width: 1440px;
+  width: 100%;
   height: 100%;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 clamp(18px, 3vw, 44px);
   display: flex;
   align-items: center;
   justify-content: space-between;
