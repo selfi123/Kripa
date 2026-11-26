@@ -788,6 +788,161 @@ footer {
 .skeleton { background: linear-gradient(90deg, var(--bg-alt) 25%, #FAF5EA 50%, var(--bg-alt) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 12px; }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
+/* ── Bulk & Event Orders (Weddings, Temples, Catering) ─────── */
+.bulk-events-section {
+  padding: 76px 0;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--kasavu-soft) 100%);
+  border-top: 1px solid var(--border-kasavu);
+}
+.bulk-events-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.08fr;
+  gap: 32px;
+  align-items: start;
+}
+.bulk-occasions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 24px;
+}
+.bulk-occasion-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border-kasavu);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.bulk-occasion-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: var(--kasavu-soft); border: 1px solid var(--border-kasavu);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 10px;
+}
+.bulk-occasion-card h4 {
+  font-family: var(--font-heading); font-size: 17px; color: var(--monsoon); margin-bottom: 4px;
+}
+.bulk-occasion-card p { font-size: 12.5px; color: var(--text-muted); line-height: 1.55; }
+
+.bulk-form-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border-kasavu);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: var(--shadow-md);
+}
+.bulk-form-card h3 {
+  font-family: var(--font-heading); font-size: 24px; color: var(--monsoon); margin-bottom: 6px;
+}
+.bulk-form-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+.bulk-field { margin-bottom: 14px; }
+.bulk-field label {
+  display: block; font-size: 11px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;
+}
+.bulk-field input, .bulk-field select, .bulk-field textarea {
+  width: 100%; background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 11px 13px; color: var(--text); font-size: 14px;
+  font-family: var(--font-body); outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.bulk-field input:focus, .bulk-field select:focus, .bulk-field textarea:focus {
+  border-color: var(--leaf); box-shadow: 0 0 0 3px rgba(30, 81, 53, 0.1); background: var(--surface);
+}
+.bulk-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.bulk-chip {
+  padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  background: var(--bg); border: 1.5px solid var(--border); color: var(--text-muted);
+  transition: var(--transition-fast);
+}
+.bulk-chip:hover { border-color: var(--leaf); color: var(--monsoon); }
+.bulk-chip.active {
+  background: var(--monsoon); border-color: var(--monsoon); color: var(--kasavu-bright);
+}
+.bulk-actions-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.bulk-actions-row .btn { flex: 1; min-width: 170px; }
+.bulk-selected-wrap {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bulk-item-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 128px 30px;
+  gap: 8px;
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--border-kasavu);
+  border-radius: 12px;
+  padding: 8px 10px;
+}
+.bulk-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--monsoon);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bulk-item-row input, .bulk-item-row select {
+  padding: 7px 9px !important;
+  font-size: 13px !important;
+  border-radius: 8px !important;
+  background: var(--surface) !important;
+}
+.bulk-item-remove {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--spice); background: var(--spice-soft); font-size: 13px; font-weight: 700;
+}
+.bulk-summary-bar {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--leaf-soft);
+  color: var(--monsoon);
+  font-size: 12.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+@media (max-width: 640px) {
+  .bulk-item-row {
+    grid-template-columns: 1fr 30px;
+    gap: 8px;
+  }
+  .bulk-item-name { grid-column: 1 / 2; }
+  .bulk-item-remove { grid-column: 2 / 3; grid-row: 1 / 2; justify-self: end; }
+  .bulk-item-row input { grid-column: 1 / 2; font-size: 16px !important; }
+  .bulk-item-row select { grid-column: 1 / -1; font-size: 16px !important; }
+}
+.bulk-alert {
+  display: none; margin-top: 14px; padding: 12px 14px; border-radius: 12px;
+  font-size: 13px; font-weight: 600;
+}
+.bulk-alert.ok { display: block; background: var(--leaf-soft); color: var(--monsoon); border: 1px solid rgba(30,81,53,0.25); }
+.bulk-alert.err { display: block; background: var(--spice-soft); color: var(--spice); border: 1px solid rgba(185,56,34,0.25); }
+
+@media (max-width: 960px) {
+  .bulk-events-grid { grid-template-columns: 1fr; gap: 24px; }
+}
+@media (max-width: 640px) {
+  .bulk-events-section { padding: 44px 0; }
+  .bulk-occasions-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .bulk-occasion-card { padding: 14px; border-radius: 14px; }
+  .bulk-occasion-card h4 { font-size: 14.5px; }
+  .bulk-occasion-card p { font-size: 11.5px; }
+  .bulk-form-card { padding: 20px 16px; border-radius: 18px; }
+  .bulk-form-grid { grid-template-columns: 1fr; gap: 0; }
+  .bulk-field input, .bulk-field select, .bulk-field textarea { font-size: 16px !important; }
+  .bulk-actions-row { flex-direction: column; }
+  .bulk-actions-row .btn { width: 100%; }
+}
+
 /* ── Mobile Ergonomics & Responsive Refinements ────────────── */
 .pantry-tabs::-webkit-scrollbar { display: none; }
 

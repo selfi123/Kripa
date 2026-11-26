@@ -128,3 +128,21 @@ CREATE TABLE IF NOT EXISTS prebook_requests (
 );
 CREATE INDEX IF NOT EXISTS idx_prebook_listing ON prebook_requests (listing_id);
 CREATE INDEX IF NOT EXISTS idx_prebook_user    ON prebook_requests (user_id);
+
+-- ── BULK & EVENT INQUIRIES ───────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS bulk_inquiries (
+  id              SERIAL PRIMARY KEY,
+  event_type      VARCHAR(100) NOT NULL,
+  customer_name   VARCHAR(255) NOT NULL,
+  phone           VARCHAR(40) NOT NULL,
+  email           VARCHAR(255),
+  event_date      VARCHAR(100),
+  location        VARCHAR(255),
+  packaging       VARCHAR(120),
+  items           JSONB NOT NULL DEFAULT '[]',
+  pickle_choices  TEXT,
+  quantity_kg     VARCHAR(100),
+  notes           TEXT,
+  status          VARCHAR(40) NOT NULL DEFAULT 'new',
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);

@@ -21,6 +21,8 @@ async function runMigration() {
     try {
         await pool.query(sql);
         await pool.query('ALTER TABLE users ALTER COLUMN avatar TYPE TEXT').catch(() => {});
+        await pool.query('ALTER TABLE bulk_inquiries ADD COLUMN IF NOT EXISTS packaging VARCHAR(120)').catch(() => {});
+        await pool.query("ALTER TABLE bulk_inquiries ADD COLUMN IF NOT EXISTS items JSONB NOT NULL DEFAULT '[]'").catch(() => {});
         console.log('✅ DB migration complete.');
     } catch (err) {
         console.warn('⚠️  DB migration warning (may already exist):', err.message);
@@ -121,14 +123,20 @@ const ordersRouter = require('./routes/orders');
 const couponsRouter = require('./routes/coupons');
 const preordersRouter = require('./routes/preorders');
 const pushRouter = require('./routes/push');
+const bulkRouter = require('./routes/bulk');
 
-app.use('/api', apiRouter);
+// ── Specific API sub-routers MUST come before the generic /api router ─────────
 app.use('/api/admin', adminRouter);
-app.use('/auth', authRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/coupons', couponsRouter);
 app.use('/api/preorders', preordersRouter);
 app.use('/api/push', pushRouter);
+app.use('/api/bulk', bulkRouter);
+// ── Generic /api router (products, categories, stats, etc.) ──────────────────
+app.use('/api', apiRouter);
+app.use('/auth', authRouter);
+// ── API 404 fallback – catches unmatched /api/* after all routers ─────────────
+app.use('/api', (req, res) => res.status(404).json({ error: 'API endpoint not found' }));
 
 // ── Page routes ───────────────────────────────────────────────────────────────
 app.get('/checkout', (req, res) => res.sendFile(path.join(__dirname, 'public', 'checkout.html')));

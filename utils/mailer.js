@@ -183,4 +183,44 @@ async function sendAdminOrderAlert(order) {
     await transporter.sendMail({ from: FROM, to: ADMIN_EMAIL, subject, html });
 }
 
-module.exports = { sendOrderConfirmation, sendAdminOrderAlert };
+// ── Send bulk/event inquiry alert to admin ────────────────────────────────────
+async function sendAdminBulkAlert(inquiry) {
+    if (!ADMIN_EMAIL) return;
+    const subject = `🎉 Bulk Inquiry #${inquiry.id} (${inquiry.event_type}) – ${inquiry.customer_name}`;
+    const items = Array.isArray(inquiry.items) ? inquiry.items : [];
+    const itemsHtml = items.length
+        ? `<table style="width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:13px;">
+            <thead><tr style="background:#f4ede0;"><th style="padding:7px;text-align:left;">Pickle</th><th style="padding:7px;text-align:right;">Qty &amp; Pack</th></tr></thead>
+            <tbody>${items.map(i => `<tr><td style="padding:7px;border-bottom:1px solid #eee;">${i.name}</td><td style="padding:7px;border-bottom:1px solid #eee;text-align:right;font-weight:bold;">${i.qty} ${i.unit}</td></tr>`).join('')}</tbody>
+          </table>`
+        : `<p><strong>Pickles Requested:</strong> ${inquiry.pickle_choices || 'N/A'}</p>`;
+    const html = `
+    <div style="font-family:sans-serif;color:#333;max-width:600px;margin:0 auto;border:1px solid #eee;border-radius:8px;overflow:hidden;">
+        <div style="background:#133522;color:#DFB95E;padding:20px;">
+            <h2 style="margin:0;">🎉 New Bulk / Event Order Inquiry #${inquiry.id}</h2>
+        </div>
+        <div style="padding:20px;line-height:1.7;">
+            <p><strong>Event Type:</strong> ${inquiry.event_type}</p>
+            <p><strong>Name:</strong> ${inquiry.customer_name}</p>
+            <p><strong>Phone / WhatsApp:</strong> <a href="tel:${inquiry.phone}">${inquiry.phone}</a></p>
+            <p><strong>Email:</strong> ${inquiry.email || 'N/A'}</p>
+            <p><strong>Event Date:</strong> ${inquiry.event_date || 'N/A'}</p>
+            <p><strong>Location:</strong> ${inquiry.location || 'N/A'}</p>
+            <p><strong>Packaging:</strong> ${inquiry.packaging || 'N/A'}</p>
+            <p><strong>Total Summary:</strong> ${inquiry.quantity_kg || 'Custom'}</p>
+            ${itemsHtml}
+            <p><strong>Notes:</strong> ${inquiry.notes || 'None'}</p>
+            <div style="margin-top:20px;">
+                <a href="${process.env.APP_URL || 'https://kripapickles.onrender.com'}/admin" style="display:inline-block;background:#1F5135;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;font-weight:bold;">Open Admin Portal</a>
+            </div>
+        </div>
+    </div>`;
+
+    if (process.env.RESEND_API_KEY) {
+        return sendViaResend(ADMIN_EMAIL, subject, html);
+    }
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return;
+    await transporter.sendMail({ from: FROM, to: ADMIN_EMAIL, subject, html });
+}
+
+module.exports = { sendOrderConfirmation, sendAdminOrderAlert, sendAdminBulkAlert };

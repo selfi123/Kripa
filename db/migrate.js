@@ -94,6 +94,24 @@ async function migrate() {
       `CREATE INDEX IF NOT EXISTS idx_prebook_user ON prebook_requests (user_id)`,
       `ALTER TABLE preorder_listings ADD COLUMN IF NOT EXISTS available_sizes JSONB DEFAULT NULL`,
       `ALTER TABLE products ADD COLUMN IF NOT EXISTS available_colors TEXT[] DEFAULT NULL`,
+      `CREATE TABLE IF NOT EXISTS bulk_inquiries (
+              id SERIAL PRIMARY KEY,
+              event_type VARCHAR(100) NOT NULL,
+              customer_name VARCHAR(255) NOT NULL,
+              phone VARCHAR(40) NOT NULL,
+              email VARCHAR(255),
+              event_date VARCHAR(100),
+              location VARCHAR(255),
+              packaging VARCHAR(120),
+              items JSONB NOT NULL DEFAULT '[]',
+              pickle_choices TEXT,
+              quantity_kg VARCHAR(100),
+              notes TEXT,
+              status VARCHAR(40) NOT NULL DEFAULT 'new',
+              created_at TIMESTAMPTZ DEFAULT NOW()
+            )`,
+      `ALTER TABLE bulk_inquiries ADD COLUMN IF NOT EXISTS packaging VARCHAR(120)`,
+      `ALTER TABLE bulk_inquiries ADD COLUMN IF NOT EXISTS items JSONB NOT NULL DEFAULT '[]'`,
     ];
     for (const sql of alterations) {
       await client.query(sql);
