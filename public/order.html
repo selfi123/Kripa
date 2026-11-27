@@ -5,62 +5,298 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Order Details – KRIPA Pickles</title>
-    <link rel="stylesheet" href="/css/styles.css?v=3.6" />
+    <link rel="stylesheet" href="/css/styles.css?v=3.7" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
     <style>
-        .wrap { max-width: 920px; margin: 0 auto; padding: 36px 24px 80px; }
-        .wrap h1 { font-family: var(--font-heading); font-size: 34px; color: var(--leaf-deep); margin: 10px 0 4px; }
-        .sub-heading { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+        .wrap {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 36px 24px 80px;
+        }
+
+        .wrap h1 {
+            font-family: var(--font-heading);
+            font-size: 34px;
+            color: var(--leaf-deep);
+            margin: 10px 0 4px;
+        }
+
+        .sub-heading {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
         .tracking-container {
-            background: var(--surface); border: 1px solid var(--border-kasavu);
-            border-radius: 18px; padding: 36px 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm);
+            background: var(--surface);
+            border: 1px solid var(--border-kasavu);
+            border-radius: 18px;
+            padding: 36px 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
         }
-        .stepper { display: flex; align-items: center; justify-content: space-between; position: relative; max-width: 680px; margin: 0 auto; }
-        .stepper::before { content: ''; position: absolute; top: 16px; left: 0; width: 100%; height: 4px; background: var(--bg-alt); z-index: 1; }
-        .stepper-progress { position: absolute; top: 16px; left: 0; height: 4px; background: var(--leaf); z-index: 2; transition: width 0.5s ease; }
-        .step { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; width: 84px; }
+
+        .stepper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .stepper::before {
+            content: '';
+            position: absolute;
+            top: 16px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--bg-alt);
+            z-index: 1;
+        }
+
+        .stepper-progress {
+            position: absolute;
+            top: 16px;
+            left: 0;
+            height: 4px;
+            background: var(--leaf);
+            z-index: 2;
+            transition: width 0.5s ease;
+        }
+
+        .step {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 84px;
+        }
+
         .step-circle {
-            width: 36px; height: 36px; border-radius: 50%; background: var(--surface);
-            border: 3px solid var(--bg-alt); display: flex; align-items: center; justify-content: center;
-            margin-bottom: 10px; color: var(--text-subtle);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 3px solid var(--bg-alt);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            color: var(--text-subtle);
         }
-        .step.active .step-circle, .step.completed .step-circle { background: var(--leaf); border-color: var(--leaf); color: #fff; }
-        .step-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-align: center; }
-        .step.active .step-label { color: var(--leaf-deep); }
-        .live-timeline { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
-        .live-timeline h3 { font-family: var(--font-heading); font-size: 18px; color: var(--leaf-deep); margin-bottom: 16px; }
-        .timeline-item { position: relative; padding-left: 24px; padding-bottom: 16px; border-left: 2px solid var(--border); margin-left: 6px; }
-        .timeline-item:last-child { border-left-color: transparent; padding-bottom: 0; }
-        .timeline-dot { position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--kasavu); }
-        .timeline-item.current .timeline-dot { background: var(--leaf); box-shadow: 0 0 0 4px var(--leaf-soft); }
-        .timeline-status { font-weight: 600; font-size: 13.5px; color: var(--leaf-deep); }
-        .timeline-location, .timeline-date { font-size: 12px; color: var(--text-muted); }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-        @media(max-width:680px) { .info-grid { grid-template-columns: 1fr; } }
-        .info-box, .items-box {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 18px; padding: 24px; box-shadow: var(--shadow-sm);
+
+        .step.active .step-circle,
+        .step.completed .step-circle {
+            background: var(--leaf);
+            border-color: var(--leaf);
+            color: #fff;
         }
-        .info-title { font-size: 11px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--kasavu); margin-bottom: 14px; }
-        .info-content { font-size: 13.5px; color: var(--text-muted); line-height: 1.7; }
-        .action-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-        .action-link { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--leaf-soft); color: var(--leaf-deep); }
-        .action-link.danger { background: var(--spice-soft); color: var(--spice); }
-        .order-item { display: flex; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .order-item:last-child { border-bottom: none; }
-        .item-img { width: 58px; height: 58px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border); }
-        .item-name { font-weight: 600; font-size: 14px; color: var(--leaf-deep); }
-        .item-specs { font-size: 12px; color: var(--text-muted); }
-        .item-price { font-weight: 700; font-size: 14px; color: var(--leaf); margin-top: 2px; }
+
+        .step-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .step.active .step-label {
+            color: var(--leaf-deep);
+        }
+
+        .live-timeline {
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .live-timeline h3 {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            color: var(--leaf-deep);
+            margin-bottom: 16px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 24px;
+            padding-bottom: 16px;
+            border-left: 2px solid var(--border);
+            margin-left: 6px;
+        }
+
+        .timeline-item:last-child {
+            border-left-color: transparent;
+            padding-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -6px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--kasavu);
+        }
+
+        .timeline-item.current .timeline-dot {
+            background: var(--leaf);
+            box-shadow: 0 0 0 4px var(--leaf-soft);
+        }
+
+        .timeline-status {
+            font-weight: 600;
+            font-size: 13.5px;
+            color: var(--leaf-deep);
+        }
+
+        .timeline-location,
+        .timeline-date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        @media(max-width:680px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-box,
+        .items-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .info-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            color: var(--kasavu);
+            margin-bottom: 14px;
+        }
+
+        .info-content {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .action-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .action-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--leaf-soft);
+            color: var(--leaf-deep);
+        }
+
+        .action-link.danger {
+            background: var(--spice-soft);
+            color: var(--spice);
+        }
+
+        .order-item {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-img {
+            width: 58px;
+            height: 58px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--border);
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--leaf-deep);
+        }
+
+        .item-specs {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .item-price {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--leaf);
+            margin-top: 2px;
+        }
+
         @media(max-width:600px) {
-            .wrap { padding: 22px 14px 56px; }
-            .wrap h1 { font-size: 26px; }
-            .tracking-container { padding: 22px 12px; border-radius: 14px; }
-            .step { width: auto; flex: 1; }
-            .step-circle { width: 30px; height: 30px; margin-bottom: 8px; }
-            .stepper::before, .stepper-progress { top: 14px; }
-            .step-label { font-size: 10.5px; }
-            .info-box, .items-box { padding: 18px 16px; border-radius: 14px; }
+            .wrap {
+                padding: 22px 14px 56px;
+            }
+
+            .wrap h1 {
+                font-size: 26px;
+            }
+
+            .tracking-container {
+                padding: 22px 12px;
+                border-radius: 14px;
+            }
+
+            .step {
+                width: auto;
+                flex: 1;
+            }
+
+            .step-circle {
+                width: 30px;
+                height: 30px;
+                margin-bottom: 8px;
+            }
+
+            .stepper::before,
+            .stepper-progress {
+                top: 14px;
+            }
+
+            .step-label {
+                font-size: 10.5px;
+            }
+
+            .info-box,
+            .items-box {
+                padding: 18px 16px;
+                border-radius: 14px;
+            }
         }
     </style>
 </head>
@@ -69,21 +305,29 @@
     <nav id="navbar" class="scrolled">
         <div class="nav-inner">
             <a href="/" class="nav-logo"><span>KRIPA</span><span class="nav-logo-ml">കൃപ</span></a>
-            <ul class="nav-links"><li><a href="/" data-i18n="nav_home">Home</a></li><li><a href="/orders" data-i18n="nav_my_orders">My Orders</a></li></ul>
+            <ul class="nav-links">
+                <li><a href="/" data-i18n="nav_home">Home</a></li>
+                <li><a href="/orders" data-i18n="nav_my_orders">My Orders</a></li>
+            </ul>
             <div class="nav-actions">
-                <button type="button" class="lang-toggle-btn" onclick="toggleLanguage()" aria-label="Switch language"><span class="lang-active">ML</span> <span class="lang-sep">|</span> <span>EN</span></button>
+                <button type="button" class="lang-toggle-btn" onclick="toggleLanguage()"
+                    aria-label="Switch language"><span class="lang-active">ML</span> <span class="lang-sep">|</span>
+                    <span>EN</span></button>
                 <div id="nav-user-slot" style="display:flex;align-items:center;"></div>
             </div>
         </div>
     </nav>
 
     <div class="wrap">
-        <div class="breadcrumb"><a href="/orders" data-i18n="orders_title">Your Orders</a><span>›</span><span id="bc-id" data-i18n="order_details_title">Order Details</span></div>
+        <div class="breadcrumb"><a href="/orders" data-i18n="orders_title">Your Orders</a><span>›</span><span id="bc-id"
+                data-i18n="order_details_title">Order Details</span></div>
         <h1 data-i18n="order_details_title">Order Details</h1>
         <p class="sub-heading" id="order-date-text">Loading…</p>
 
         <div class="tracking-container" id="tracking-container">
-            <div class="stepper" id="stepper"><div class="stepper-progress" id="stepper-progress" style="width:0%;"></div></div>
+            <div class="stepper" id="stepper">
+                <div class="stepper-progress" id="stepper-progress" style="width:0%;"></div>
+            </div>
             <div id="live-timeline-container"></div>
         </div>
 
@@ -97,9 +341,17 @@
                 <div class="info-content">
                     <p style="margin-bottom:6px;"><strong>ID:</strong> <span id="info-id">…</span></p>
                     <p style="margin-bottom:10px;"><strong>Razorpay</strong></p>
-                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span data-i18n="co_subtotal">Subtotal</span><span id="info-subtotal">…</span></div>
-                    <div style="display:flex;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);"><span data-i18n="cart_shipping">Delivery</span><span id="info-delivery">…</span></div>
-                    <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--leaf-deep);font-size:16px;"><span data-i18n="co_grand_total">Grand Total</span><span id="info-total" style="color:var(--leaf);">…</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span
+                            data-i18n="co_subtotal">Subtotal</span><span id="info-subtotal">…</span></div>
+                    <div
+                        style="display:flex;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">
+                        <span data-i18n="cart_shipping">Delivery</span><span id="info-delivery">…</span>
+                    </div>
+                    <div
+                        style="display:flex;justify-content:space-between;font-weight:700;color:var(--leaf-deep);font-size:16px;">
+                        <span data-i18n="co_grand_total">Grand Total</span><span id="info-total"
+                            style="color:var(--leaf);">…</span>
+                    </div>
                 </div>
                 <div class="action-links" id="action-links"></div>
             </div>
@@ -151,15 +403,14 @@
 
         function renderTrackingTimeline(states) {
             const loc = (typeof getLang === 'function' && getLang() === 'ml') ? 'ml-IN' : 'en-IN';
-            const esc = typeof escapeHtml === 'function' ? escapeHtml : (s => String(s || '').replace(/</g, '&lt;'));
             document.getElementById('live-timeline-container').innerHTML = `
                 <div class="live-timeline">
                     <h3>${typeof t === 'function' ? t('order_live_updates') : 'Live Courier Updates'}</h3>
                     ${states.map((state, i) => `
                         <div class="timeline-item ${i === 0 ? 'current' : ''}">
                             <div class="timeline-dot"></div>
-                            <div class="timeline-status">${esc(state.status)}</div>
-                            ${state.location ? `<div class="timeline-location">${esc(state.location)}</div>` : ''}
+                            <div class="timeline-status">${state.status}</div>
+                            ${state.location ? `<div class="timeline-location">${state.location}</div>` : ''}
                             <div class="timeline-date">${new Date(state.date).toLocaleString(loc, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
                         </div>
                     `).join('')}
@@ -172,12 +423,11 @@
             document.getElementById('bc-id').textContent = `#${order.id.slice(0, 8).toUpperCase()}`;
             document.getElementById('order-date-text').textContent = dateStr;
             const addr = order.address || {};
-            const esc = typeof escapeHtml === 'function' ? escapeHtml : (s => String(s || '').replace(/</g, '&lt;'));
             document.getElementById('shipping-address').innerHTML = `
-                <p style="font-weight:700;color:var(--leaf-deep);">${esc(addr.name || '')}</p>
-                <p>${esc(addr.line1 || '')}</p>${addr.line2 ? `<p>${esc(addr.line2)}</p>` : ''}
-                <p>${esc(addr.city || '')}${addr.state ? ', ' + esc(addr.state) : ''} ${esc(addr.pincode || '')}</p>
-                <p style="margin-top:6px;">${esc(addr.phone || '')}</p>`;
+                <p style="font-weight:700;color:var(--leaf-deep);">${addr.name || ''}</p>
+                <p>${addr.line1 || ''}</p>${addr.line2 ? `<p>${addr.line2}</p>` : ''}
+                <p>${addr.city || ''}, ${addr.state || ''} ${addr.pincode || ''}</p>
+                <p style="margin-top:6px;">${addr.phone || ''}</p>`;
             document.getElementById('info-id').textContent = order.id.slice(0, 8).toUpperCase();
             document.getElementById('info-subtotal').textContent = `₹${parseFloat(order.subtotal).toLocaleString('en-IN')}`;
             document.getElementById('info-delivery').textContent = parseFloat(order.delivery_charge) === 0 ? 'FREE' : `₹${parseFloat(order.delivery_charge).toLocaleString('en-IN')}`;
@@ -185,7 +435,7 @@
 
             const invTxt = typeof t === 'function' ? t('order_invoice_btn') : 'Download Invoice';
             const canTxt = typeof t === 'function' ? t('order_cancel_btn') : 'Cancel Order';
-            let actionsHtml = `<a href="/api/orders/${encodeURIComponent(order.id)}/invoice" class="action-link"><i data-lucide="file-text" style="width:15px;height:15px;"></i> ${invTxt}</a>`;
+            let actionsHtml = `<a href="/api/orders/${order.id}/invoice" class="action-link"><i data-lucide="file-text" style="width:15px;height:15px;"></i> ${invTxt}</a>`;
             if (['pending', 'paid', 'processing'].includes(order.status)) {
                 actionsHtml += `<a href="#" onclick="cancelOrder('${order.id}', event)" class="action-link danger"><i data-lucide="x-circle" style="width:15px;height:15px;"></i> ${canTxt}</a>`;
             }
@@ -198,8 +448,8 @@
                 <div class="order-item">
                     <img src="${i.thumb || ''}" class="item-img" onerror="this.style.display='none'"/>
                     <div>
-                        <div class="item-name">${esc(i.name)}</div>
-                        ${i.selectedSize ? `<div class="item-specs" style="color:var(--kasavu);font-weight:700;">${wLabel}: ${esc(i.selectedSize)}</div>` : ''}
+                        <div class="item-name">${i.name}</div>
+                        ${i.selectedSize ? `<div class="item-specs" style="color:var(--kasavu);font-weight:700;">${wLabel}: ${i.selectedSize}</div>` : ''}
                         <div class="item-specs">Qty: ${i.qty || 1}</div>
                         <div class="item-price">₹${(parseFloat(i.price) * (i.qty || 1)).toLocaleString('en-IN')}</div>
                     </div>

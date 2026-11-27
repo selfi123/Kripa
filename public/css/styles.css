@@ -77,7 +77,12 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 ::selection { background: var(--leaf); color: #fff; }
 
 /* ── Containers & Section Headers ──────────────────────────── */
-.container { max-width: 1440px; width: 100%; margin: 0 auto; padding: 0 clamp(18px, 3vw, 44px); }
+.container {
+  width: 100%;
+  max-width: min(96vw, 1840px);
+  margin: 0 auto;
+  padding: 0 clamp(16px, 2vw, 36px);
+}
 .gold-text { color: var(--leaf); }
 
 .section-label {
@@ -188,11 +193,11 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 
 .nav-inner {
-  max-width: 1440px;
+  max-width: min(96vw, 1840px);
   width: 100%;
   height: 100%;
   margin: 0 auto;
-  padding: 0 clamp(18px, 3vw, 44px);
+  padding: 0 clamp(16px, 2vw, 36px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -519,15 +524,17 @@ html[lang="ml"] body {
 
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 22px;
 }
 
 .category-card {
   position: relative;
-  border-radius: 18px;
+  border-radius: 20px;
   overflow: hidden;
-  aspect-ratio: 16 / 11;
+  aspect-ratio: 16 / 8;
+  min-height: 220px;
+  max-height: 320px;
   cursor: pointer;
   background: var(--monsoon);
   border: 1.5px solid var(--border-kasavu);

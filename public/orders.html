@@ -5,38 +5,177 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>My Orders – KRIPA Pickles</title>
-    <link rel="stylesheet" href="/css/styles.css?v=3.6" />
+    <link rel="stylesheet" href="/css/styles.css?v=3.7" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
     <style>
-        .orders-wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
-        .orders-wrap h1 { font-family: var(--font-heading); font-size: clamp(28px, 4vw, 40px); color: var(--leaf-deep); margin-bottom: 6px; }
-        .page-sub { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--kasavu); text-transform: uppercase; margin-bottom: 32px; }
+        .orders-wrap {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        .orders-wrap h1 {
+            font-family: var(--font-heading);
+            font-size: clamp(28px, 4vw, 40px);
+            color: var(--leaf-deep);
+            margin-bottom: 6px;
+        }
+
+        .page-sub {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--kasavu);
+            text-transform: uppercase;
+            margin-bottom: 32px;
+        }
+
         .order-card {
-            background: var(--surface); border: 1px solid var(--border-kasavu);
-            border-radius: 18px; padding: 24px; margin-bottom: 18px; box-shadow: var(--shadow-sm);
+            background: var(--surface);
+            border: 1px solid var(--border-kasavu);
+            border-radius: 18px;
+            padding: 24px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow-sm);
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        .order-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-        .order-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-        .order-id { font-size: 13px; letter-spacing: 1.2px; color: var(--leaf); font-weight: 700; font-family: monospace; }
-        .order-date { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
-        .status-badge { padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
-        .status-paid, .status-delivered { background: var(--leaf-soft); color: var(--leaf); border: 1px solid rgba(31,81,53,0.2); }
-        .status-pending { background: #FEF4E4; color: #B4690E; border: 1px solid rgba(217,138,28,0.25); }
-        .status-processing, .status-shipped { background: #EBF3FA; color: #1E6091; border: 1px solid rgba(30,96,145,0.2); }
-        .status-cancelled, .status-failed { background: var(--spice-soft); color: var(--spice); border: 1px solid rgba(185,56,34,0.2); }
-        .order-thumb { width: 54px; height: 54px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border); background: var(--bg-alt); }
-        .order-footer { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
-        .order-total { font-size: 18px; font-weight: 700; color: var(--leaf-deep); }
-        .order-total small { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); }
-        .order-addr { font-size: 12.5px; color: var(--text-muted); text-align: right; line-height: 1.6; }
-        .no-orders { text-align: center; padding: 64px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; }
-        .no-orders h3 { font-family: var(--font-heading); font-size: 26px; color: var(--leaf-deep); margin: 12px 0 8px; }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .order-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .order-id {
+            font-size: 13px;
+            letter-spacing: 1.2px;
+            color: var(--leaf);
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .order-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .status-paid,
+        .status-delivered {
+            background: var(--leaf-soft);
+            color: var(--leaf);
+            border: 1px solid rgba(31, 81, 53, 0.2);
+        }
+
+        .status-pending {
+            background: #FEF4E4;
+            color: #B4690E;
+            border: 1px solid rgba(217, 138, 28, 0.25);
+        }
+
+        .status-processing,
+        .status-shipped {
+            background: #EBF3FA;
+            color: #1E6091;
+            border: 1px solid rgba(30, 96, 145, 0.2);
+        }
+
+        .status-cancelled,
+        .status-failed {
+            background: var(--spice-soft);
+            color: var(--spice);
+            border: 1px solid rgba(185, 56, 34, 0.2);
+        }
+
+        .order-thumb {
+            width: 54px;
+            height: 54px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--border);
+            background: var(--bg-alt);
+        }
+
+        .order-footer {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .order-total {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--leaf-deep);
+        }
+
+        .order-total small {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .order-addr {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            text-align: right;
+            line-height: 1.6;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 64px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+
+        .no-orders h3 {
+            font-family: var(--font-heading);
+            font-size: 26px;
+            color: var(--leaf-deep);
+            margin: 12px 0 8px;
+        }
+
         @media(max-width:600px) {
-            .orders-wrap { padding: 22px 14px 56px; }
-            .order-card { padding: 18px 16px; border-radius: 14px; }
-            .order-addr { text-align: left; }
-            .no-orders { padding: 44px 18px; }
+            .orders-wrap {
+                padding: 22px 14px 56px;
+            }
+
+            .order-card {
+                padding: 18px 16px;
+                border-radius: 14px;
+            }
+
+            .order-addr {
+                text-align: left;
+            }
+
+            .no-orders {
+                padding: 44px 18px;
+            }
         }
     </style>
 </head>
@@ -50,7 +189,9 @@
                 <li><a href="/#categories" data-i18n="nav_shop">Our Pickles</a></li>
             </ul>
             <div class="nav-actions">
-                <button type="button" class="lang-toggle-btn" onclick="toggleLanguage()" aria-label="Switch language"><span class="lang-active">ML</span> <span class="lang-sep">|</span> <span>EN</span></button>
+                <button type="button" class="lang-toggle-btn" onclick="toggleLanguage()"
+                    aria-label="Switch language"><span class="lang-active">ML</span> <span class="lang-sep">|</span>
+                    <span>EN</span></button>
                 <div id="nav-user-slot" style="display:flex;align-items:center;"></div>
                 <button class="nav-icon-btn" id="cart-btn" aria-label="Cart">
                     <i data-lucide="shopping-bag" style="width:18px;height:18px;"></i>
@@ -63,7 +204,8 @@
     <div class="mobile-menu" id="mobile-menu">
         <a href="/" onclick="closeMobileMenu()" data-i18n="nav_home">Home</a>
         <a href="/#categories" onclick="closeMobileMenu()" data-i18n="nav_shop">Our Pickles</a>
-        <div id="mobile-user-slot" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:16px;"></div>
+        <div id="mobile-user-slot"
+            style="width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:16px;"></div>
     </div>
 
     <div class="orders-wrap">
@@ -77,7 +219,10 @@
 
     <div class="cart-overlay" id="cart-overlay"></div>
     <div class="cart-drawer" id="cart-drawer">
-        <div class="cart-header"><h3 data-i18n="cart_title">YOUR BASKET</h3><button class="cart-close" id="cart-close"><i data-lucide="x" style="width:20px;height:20px;"></i></button></div>
+        <div class="cart-header">
+            <h3 data-i18n="cart_title">YOUR BASKET</h3><button class="cart-close" id="cart-close"><i data-lucide="x"
+                    style="width:20px;height:20px;"></i></button>
+        </div>
         <div class="cart-items" id="cart-items-list"></div>
         <div class="cart-footer" id="cart-footer" style="display:none;"></div>
     </div>
@@ -123,7 +268,6 @@
                 return;
             }
             const loc = (typeof getLang === 'function' && getLang() === 'ml') ? 'ml-IN' : 'en-IN';
-            const esc = typeof escapeHtml === 'function' ? escapeHtml : (s => String(s || '').replace(/</g, '&lt;'));
             container.innerHTML = _cachedOrders.map(order => {
                 const items = order.items || [];
                 const addr = order.address || {};
@@ -145,10 +289,10 @@
                     <div style="display:flex;flex-direction:column;gap:10px;">
                         ${items.map(i => `
                             <div style="display:flex;gap:12px;align-items:center;">
-                                <img class="order-thumb" src="${i.thumb || ''}" alt="${esc(i.name)}" onerror="this.style.display='none'" />
+                                <img class="order-thumb" src="${i.thumb || ''}" alt="${i.name}" onerror="this.style.display='none'" />
                                 <div>
-                                    <div style="font-size:14px;color:var(--leaf-deep);font-weight:600;">${esc(i.name)}</div>
-                                    ${i.selectedSize ? `<div style="font-size:11px;color:var(--kasavu);font-weight:700;text-transform:uppercase;">${t('cart_weight')}: ${esc(i.selectedSize)}</div>` : ''}
+                                    <div style="font-size:14px;color:var(--leaf-deep);font-weight:600;">${i.name}</div>
+                                    ${i.selectedSize ? `<div style="font-size:11px;color:var(--kasavu);font-weight:700;text-transform:uppercase;">${t('cart_weight')}: ${i.selectedSize}</div>` : ''}
                                     <div style="font-size:12px;color:var(--text-muted);">Qty: ${i.qty || 1} × ₹${parseFloat(i.price).toLocaleString('en-IN')}</div>
                                 </div>
                             </div>`).join('')}
@@ -161,7 +305,7 @@
                                 ${canCancel ? `<button class="btn btn-outline" style="padding:8px 16px;font-size:12px;border-color:rgba(185,56,34,0.4);color:var(--spice);" onclick="cancelOrder('${order.id}')">${t('orders_cancel_btn')}</button>` : ''}
                             </div>
                         </div>
-                        <div class="order-addr">📦 ${esc(addr.name || '')}<br/>${esc(addr.city || '')}${addr.state ? ', ' + esc(addr.state) : ''} ${esc(addr.pincode || '')}</div>
+                        <div class="order-addr">📦 ${addr.name || ''}<br/>${addr.city || ''}, ${addr.state || ''} ${addr.pincode || ''}</div>
                     </div>
                 </div>`;
             }).join('');

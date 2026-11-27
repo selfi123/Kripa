@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout – KRIPA Pickles</title>
-    <link rel="stylesheet" href="/css/styles.css?v=3.6" />
+    <link rel="stylesheet" href="/css/styles.css?v=3.7" />
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
     <style>
@@ -14,12 +14,14 @@
             margin: 0 auto;
             padding: 40px 24px 80px;
         }
+
         h1.page-title {
             font-family: var(--font-heading);
             font-size: clamp(28px, 4vw, 42px);
             color: var(--leaf-deep);
             margin-bottom: 6px;
         }
+
         .page-sub {
             font-size: 12px;
             font-weight: 700;
@@ -28,13 +30,20 @@
             text-transform: uppercase;
             margin-bottom: 32px;
         }
+
         .checkout-grid {
             display: grid;
             grid-template-columns: 1fr 400px;
             gap: 28px;
             align-items: start;
         }
-        @media(max-width:880px) { .checkout-grid { grid-template-columns: 1fr; } }
+
+        @media(max-width:880px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .card {
             background: var(--surface);
             border: 1px solid var(--border-kasavu);
@@ -42,6 +51,7 @@
             padding: 28px;
             box-shadow: var(--shadow-sm);
         }
+
         .card-title {
             font-family: var(--font-heading);
             font-size: 20px;
@@ -51,6 +61,7 @@
             align-items: center;
             gap: 12px;
         }
+
         .step-badge {
             width: 28px;
             height: 28px;
@@ -64,9 +75,23 @@
             align-items: center;
             justify-content: center;
         }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        @media(max-width:520px) { .form-row { grid-template-columns: 1fr; } }
-        .form-group { margin-bottom: 16px; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        @media(max-width:520px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
         .form-group label {
             display: block;
             font-size: 11px;
@@ -76,7 +101,9 @@
             color: var(--text-muted);
             margin-bottom: 7px;
         }
-        .form-group input, .form-group select {
+
+        .form-group input,
+        .form-group select {
             width: 100%;
             background: var(--bg);
             border: 1.5px solid var(--border);
@@ -88,39 +115,161 @@
             outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .form-group input:focus, .form-group select:focus {
+
+        .form-group input:focus,
+        .form-group select:focus {
             border-color: var(--leaf);
             box-shadow: 0 0 0 3px rgba(31, 81, 53, 0.1);
             background: var(--surface);
         }
-        .order-items { display: flex; flex-direction: column; gap: 12px; max-height: 280px; overflow-y: auto; }
-        .order-item { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-        .order-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .order-item img { width: 54px; height: 54px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border-kasavu); flex-shrink: 0; }
-        .order-item-info { flex: 1; min-width: 0; }
-        .order-item-name { font-weight: 600; font-size: 13.5px; color: var(--leaf-deep); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .order-item-cat { font-size: 11px; color: var(--text-muted); }
-        .order-item-qty { font-size: 11.5px; color: var(--text-muted); font-weight: 500; }
-        .order-item-price { font-weight: 700; font-size: 14px; color: var(--leaf); }
-        .price-row { display: flex; justify-content: space-between; font-size: 14px; color: var(--text-muted); margin-bottom: 10px; }
-        .price-row.total { font-size: 18px; font-weight: 700; color: var(--leaf-deep); margin-top: 8px; margin-bottom: 0; }
-        .pay-btn {
-            width: 100%; margin-top: 20px; padding: 15px; border-radius: 999px;
-            background: var(--leaf); color: #fff; font-size: 13px; font-weight: 700;
-            letter-spacing: 0.8px; text-transform: uppercase;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            box-shadow: 0 8px 24px rgba(31, 81, 53, 0.25); transition: var(--transition-fast);
+
+        .order-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 280px;
+            overflow-y: auto;
         }
-        .pay-btn:hover { background: var(--leaf-deep); transform: translateY(-2px); }
-        .pay-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .pay-btn svg { width: 16px; height: 16px; }
-        .secure-note { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; color: var(--text-subtle); margin-top: 12px; }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .order-item img {
+            width: 54px;
+            height: 54px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--border-kasavu);
+            flex-shrink: 0;
+        }
+
+        .order-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .order-item-name {
+            font-weight: 600;
+            font-size: 13.5px;
+            color: var(--leaf-deep);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .order-item-cat {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .order-item-qty {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .order-item-price {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--leaf);
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .price-row.total {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--leaf-deep);
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+
+        .pay-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 999px;
+            background: var(--leaf);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 24px rgba(31, 81, 53, 0.25);
+            transition: var(--transition-fast);
+        }
+
+        .pay-btn:hover {
+            background: var(--leaf-deep);
+            transform: translateY(-2px);
+        }
+
+        .pay-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .pay-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .secure-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-subtle);
+            margin-top: 12px;
+        }
+
         @media(max-width:640px) {
-            .checkout-wrap { padding: 20px 14px 56px; }
-            .card { padding: 20px 16px; border-radius: 16px; position: static !important; }
-            .form-group input, .form-group select, #coupon-input { font-size: 16px !important; }
-            .page-sub { margin-bottom: 18px; }
-            .nav-actions .btn-outline { padding: 6px 10px !important; font-size: 11px !important; }
+            .checkout-wrap {
+                padding: 20px 14px 56px;
+            }
+
+            .card {
+                padding: 20px 16px;
+                border-radius: 16px;
+                position: static !important;
+            }
+
+            .form-group input,
+            .form-group select,
+            #coupon-input {
+                font-size: 16px !important;
+            }
+
+            .page-sub {
+                margin-bottom: 18px;
+            }
+
+            .nav-actions .btn-outline {
+                padding: 6px 10px !important;
+                font-size: 11px !important;
+            }
         }
     </style>
 </head>
@@ -134,9 +283,12 @@
                 <li><a href="/#categories" data-i18n="nav_shop">Our Pickles</a></li>
             </ul>
             <div class="nav-actions">
-                <button type="button" class="lang-toggle-btn" onclick="toggleLanguage()" aria-label="Switch language"><span class="lang-active">ML</span> <span class="lang-sep">|</span> <span>EN</span></button>
+                <button type="button" class="lang-toggle-btn" onclick="toggleLanguage()"
+                    aria-label="Switch language"><span class="lang-active">ML</span> <span class="lang-sep">|</span>
+                    <span>EN</span></button>
                 <div id="nav-user-slot" style="display:flex;align-items:center;"></div>
-                <a href="/" class="btn btn-outline" style="padding:8px 16px;font-size:12px;" data-i18n="nav_back_store">← Back to Store</a>
+                <a href="/" class="btn btn-outline" style="padding:8px 16px;font-size:12px;"
+                    data-i18n="nav_back_store">← Back to Store</a>
             </div>
         </div>
     </nav>
@@ -147,59 +299,98 @@
 
         <div id="empty-cart" class="empty-state" style="display:none;margin-top:24px;">
             <h3 data-i18n="co_empty_title">Your basket is empty</h3>
-            <p style="color:var(--text-muted);margin-bottom:24px;" data-i18n="co_empty_desc">Add some delicious homemade Kerala pickles before checking out.</p>
+            <p style="color:var(--text-muted);margin-bottom:24px;" data-i18n="co_empty_desc">Add some delicious homemade
+                Kerala pickles before checking out.</p>
             <a href="/#categories" class="btn btn-gold" data-i18n="co_browse_btn">Browse Pickles</a>
         </div>
 
         <div class="checkout-grid" id="checkout-grid">
             <!-- LEFT: Address -->
             <div class="card">
-                <div class="card-title"><div class="step-badge">1</div><span data-i18n="co_step1">Delivery Address</span></div>
-                <div class="form-row">
-                    <div class="form-group"><label data-i18n="co_fullname">Full Name *</label><input type="text" id="f-name" data-i18n-ph="co_fullname" placeholder="Full Name" required /></div>
-                    <div class="form-group"><label data-i18n="co_phone">Phone Number *</label><input type="tel" id="f-phone" placeholder="10-digit mobile number" maxlength="10" required /></div>
+                <div class="card-title">
+                    <div class="step-badge">1</div><span data-i18n="co_step1">Delivery Address</span>
                 </div>
-                <div class="form-group"><label data-i18n="co_email">Email (for order receipt &amp; invoice)</label><input type="email" id="f-email" placeholder="you@example.com" /></div>
-                <div class="form-group"><label data-i18n="co_addr1">Address Line 1 *</label><input type="text" id="f-line1" placeholder="House / Flat / Building name" required /></div>
-                <div class="form-group"><label data-i18n="co_addr2">Address Line 2 (Optional)</label><input type="text" id="f-line2" placeholder="Street, Landmark, Area" /></div>
                 <div class="form-row">
-                    <div class="form-group"><label data-i18n="co_city">City *</label><input type="text" id="f-city" placeholder="City / Town" required /></div>
+                    <div class="form-group"><label data-i18n="co_fullname">Full Name *</label><input type="text"
+                            id="f-name" data-i18n-ph="co_fullname" placeholder="Full Name" required /></div>
+                    <div class="form-group"><label data-i18n="co_phone">Phone Number *</label><input type="tel"
+                            id="f-phone" placeholder="10-digit mobile number" maxlength="10" required /></div>
+                </div>
+                <div class="form-group"><label data-i18n="co_email">Email (for order receipt &amp;
+                        invoice)</label><input type="email" id="f-email" placeholder="you@example.com" /></div>
+                <div class="form-group"><label data-i18n="co_addr1">Address Line 1 *</label><input type="text"
+                        id="f-line1" placeholder="House / Flat / Building name" required /></div>
+                <div class="form-group"><label data-i18n="co_addr2">Address Line 2 (Optional)</label><input type="text"
+                        id="f-line2" placeholder="Street, Landmark, Area" /></div>
+                <div class="form-row">
+                    <div class="form-group"><label data-i18n="co_city">City *</label><input type="text" id="f-city"
+                            placeholder="City / Town" required /></div>
                     <div class="form-group">
                         <label data-i18n="co_state">State *</label>
                         <select id="f-state" required>
                             <option value="" data-i18n="co_select_state">Select state…</option>
-                            <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option>
-                            <option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option>
-                            <option>Delhi</option><option>Goa</option><option>Gujarat</option><option>Haryana</option>
-                            <option>Himachal Pradesh</option><option>Jammu &amp; Kashmir</option><option>Jharkhand</option>
-                            <option>Karnataka</option><option>Kerala</option><option>Ladakh</option>
-                            <option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
-                            <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option>
-                            <option>Odisha</option><option>Puducherry</option><option>Punjab</option>
-                            <option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option>
-                            <option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
-                            <option>Uttarakhand</option><option>West Bengal</option>
+                            <option>Andhra Pradesh</option>
+                            <option>Arunachal Pradesh</option>
+                            <option>Assam</option>
+                            <option>Bihar</option>
+                            <option>Chandigarh</option>
+                            <option>Chhattisgarh</option>
+                            <option>Delhi</option>
+                            <option>Goa</option>
+                            <option>Gujarat</option>
+                            <option>Haryana</option>
+                            <option>Himachal Pradesh</option>
+                            <option>Jammu &amp; Kashmir</option>
+                            <option>Jharkhand</option>
+                            <option>Karnataka</option>
+                            <option>Kerala</option>
+                            <option>Ladakh</option>
+                            <option>Madhya Pradesh</option>
+                            <option>Maharashtra</option>
+                            <option>Manipur</option>
+                            <option>Meghalaya</option>
+                            <option>Mizoram</option>
+                            <option>Nagaland</option>
+                            <option>Odisha</option>
+                            <option>Puducherry</option>
+                            <option>Punjab</option>
+                            <option>Rajasthan</option>
+                            <option>Sikkim</option>
+                            <option>Tamil Nadu</option>
+                            <option>Telangana</option>
+                            <option>Tripura</option>
+                            <option>Uttar Pradesh</option>
+                            <option>Uttarakhand</option>
+                            <option>West Bengal</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label data-i18n="co_pincode">Pincode *</label><input type="text" id="f-pincode" placeholder="6-digit pincode" maxlength="6" required /></div>
-                    <div class="form-group"><label data-i18n="co_country">Country</label><input type="text" value="India" readonly style="opacity:0.65;cursor:default;" /></div>
+                    <div class="form-group"><label data-i18n="co_pincode">Pincode *</label><input type="text"
+                            id="f-pincode" placeholder="6-digit pincode" maxlength="6" required /></div>
+                    <div class="form-group"><label data-i18n="co_country">Country</label><input type="text"
+                            value="India" readonly style="opacity:0.65;cursor:default;" /></div>
                 </div>
             </div>
 
             <!-- RIGHT: Summary -->
             <div class="card" style="position:sticky;top:calc(var(--nav-height) + 20px);">
-                <div class="card-title"><div class="step-badge">2</div><span data-i18n="co_step2">Order Summary</span></div>
+                <div class="card-title">
+                    <div class="step-badge">2</div><span data-i18n="co_step2">Order Summary</span>
+                </div>
                 <div class="order-items" id="summary-items"></div>
                 <div class="divider-h"></div>
-                <div class="price-row"><span data-i18n="co_subtotal">Subtotal</span><span id="sum-subtotal" style="font-weight:600;color:var(--text);">₹0</span></div>
-                <div class="price-row"><span data-i18n="co_shipping_lbl">Shipping (Kerala ₹70 / India ₹120)</span><span id="sum-delivery" data-i18n="co_select_state">Select state</span></div>
+                <div class="price-row"><span data-i18n="co_subtotal">Subtotal</span><span id="sum-subtotal"
+                        style="font-weight:600;color:var(--text);">₹0</span></div>
+                <div class="price-row"><span data-i18n="co_shipping_lbl">Shipping (Kerala ₹70 / India ₹120)</span><span
+                        id="sum-delivery" data-i18n="co_select_state">Select state</span></div>
 
                 <div style="display:flex;gap:8px;margin:16px 0 8px;">
-                    <input id="coupon-input" type="text" data-i18n-ph="co_coupon_ph" placeholder="Coupon code" autocomplete="off"
+                    <input id="coupon-input" type="text" data-i18n-ph="co_coupon_ph" placeholder="Coupon code"
+                        autocomplete="off"
                         style="flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:12.5px;outline:none;text-transform:uppercase;" />
-                    <button onclick="applyCoupon()" id="coupon-btn" class="btn btn-outline" style="padding:10px 18px;font-size:12px;" data-i18n="co_coupon_apply">Apply</button>
+                    <button onclick="applyCoupon()" id="coupon-btn" class="btn btn-outline"
+                        style="padding:10px 18px;font-size:12px;" data-i18n="co_coupon_apply">Apply</button>
                 </div>
                 <div id="coupon-msg" style="font-size:12px;min-height:16px;margin-bottom:8px;"></div>
                 <div class="price-row" id="discount-row" style="display:none;">
@@ -207,14 +398,21 @@
                     <span id="sum-discount" style="color:var(--leaf);font-weight:700;">-₹0</span>
                 </div>
                 <div class="divider-h"></div>
-                <div class="price-row total"><span data-i18n="co_grand_total">Grand Total</span><span id="sum-total" style="color:var(--leaf);">₹0</span></div>
+                <div class="price-row total"><span data-i18n="co_grand_total">Grand Total</span><span id="sum-total"
+                        style="color:var(--leaf);">₹0</span></div>
 
                 <button class="pay-btn" id="pay-btn" onclick="initiatePayment()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="1" y="4" width="22" height="16" rx="2" />
+                        <line x1="1" y1="10" x2="23" y2="10" />
+                    </svg>
                     <span id="pay-btn-label" data-i18n="co_pay_btn">Pay Securely</span>
                 </button>
                 <p class="secure-note">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" />
+                        <path d="M7 11V7a5 5 0 0110 0v4" />
+                    </svg>
                     <span data-i18n="co_ssl_note">256-bit SSL secured · Powered by Razorpay</span>
                 </p>
             </div>
@@ -372,7 +570,6 @@
                         address: { name, phone, line1, line2, city, state, pincode, country: 'India', email },
                         email,
                         couponId: _appliedCoupon?.couponId || null,
-                        couponCode: _appliedCoupon?.code || null,
                         discount: _appliedCoupon ? _appliedCoupon.discount : 0
                     })
                 });
@@ -397,6 +594,9 @@
                         });
                         const vData = await verify.json();
                         if (verify.ok && vData.success) {
+                            if (_appliedCoupon?.couponId) {
+                                fetch(`/api/coupons/used/${_appliedCoupon.couponId}`, { method: 'POST' }).catch(() => { });
+                            }
                             localStorage.removeItem('kripa_cart');
                             window.location.href = `/order-success?id=${vData.orderId}`;
                         } else { alert('Payment verification failed.'); btn.disabled = false; btnLabel.textContent = payText(); }
