@@ -948,10 +948,26 @@
             <div id="tab-orders" class="tab-content" style="display:none;">
                 <div class="table-wrap">
                     <div class="table-header">
-                        <span style="font-size:14px;letter-spacing:1px;color:var(--gold);">All Orders</span>
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <div class="search-box"><input type="text" placeholder="Search by name, ID…"
-                                    oninput="filterOrders(this.value)" /></div>
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <span style="font-size:14px;letter-spacing:1px;color:var(--gold);">All Orders</span>
+                            <span id="orders-filter-count" style="display:none;font-size:11px;background:rgba(201,169,110,0.15);color:var(--gold);padding:3px 10px;border-radius:20px;font-weight:600;"></span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                            <div class="search-box">
+                                <input type="text" id="order-search-input" placeholder="Search by name, ID, phone…" oninput="applyOrdersFilter()" />
+                            </div>
+                            <select id="order-time-filter" onchange="onTimeFilterChange()"
+                                style="background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 12px;font-size:11.5px;letter-spacing:0.5px;outline:none;cursor:pointer;">
+                                <option value="all">📅 All Dates</option>
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="7days">Last 7 Days</option>
+                                <option value="30days">Last 30 Days</option>
+                                <option value="this_month">This Month</option>
+                                <option value="custom">Specific Date…</option>
+                            </select>
+                            <input type="date" id="order-custom-date" onchange="applyOrdersFilter()"
+                                style="display:none;background:var(--dark);border:1px solid var(--gold);color:var(--text);border-radius:8px;padding:6px 10px;font-size:11.5px;outline:none;" />
                             <button onclick="exportOrdersCSV()"
                                 style="padding:8px 16px;background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.3);color:var(--gold);border-radius:8px;font-size:11px;font-weight:600;letter-spacing:1px;cursor:pointer;white-space:nowrap;transition:all 0.2s;"
                                 onmouseover="this.style.background='rgba(201,169,110,0.2)'"
@@ -1126,13 +1142,14 @@
         };
 
         let allOrders = [];
+        let currentFilteredOrders = [];
 
         async function loadAdminOrders() {
             const tbody = document.getElementById('orders-tbody');
             try {
                 const res = await fetch('/api/admin/orders', { headers: { 'x-admin-token': getToken() } });
                 allOrders = await res.json();
-                renderOrdersTable(allOrders);
+                applyOrdersFilter();
             } catch (e) {
                 tbody.innerHTML = `<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--text-muted);">Failed to load orders.</td></tr>`;
             }
@@ -1185,9 +1202,10 @@
                         </select>
                     </td>
                     <td>
-                        <div style="display:flex;gap:6px;">
-                            <button onclick="openOrderDetail('${o.id}')" class="btn btn-outline" style="font-size:11px;padding:6px 12px;">👁 View</button>
-                            <button onclick="updateOrderStatus('${o.id}')" class="btn btn-outline" style="font-size:11px;padding:6px 12px;">Update</button>
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <button onclick="openOrderDetail('${o.id}')" class="btn btn-outline" style="font-size:11px;padding:6px 10px;" title="View Details">👁 View</button>
+                            <button onclick="updateOrderStatus('${o.id}')" class="btn btn-outline" style="font-size:11px;padding:6px 10px;" title="Update Status">Update</button>
+                            <button onclick="deleteAdminOrder('${o.id}', '${o.status}')" class="btn btn-outline" style="font-size:11px;padding:6px 10px;border-color:rgba(217,83,79,0.35);color:#d9534f;" title="Delete Order">🗑</button>
                         </div>
                     </td>
                 </tr>`;
@@ -1304,6 +1322,7 @@
                     </select>
                     <button onclick="updateOrderStatusFromDetail('${o.id}')" class="btn btn-gold" style="white-space:nowrap;">Save Status</button>
                     <a href="/api/orders/${o.id}/invoice" target="_blank" class="btn btn-outline" style="white-space:nowrap;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:10px 14px;">Download Invoice</a>
+                    <button onclick="deleteAdminOrder('${o.id}', '${o.status}', true)" class="btn btn-outline" style="white-space:nowrap;border-color:rgba(217,83,79,0.45);color:#d9534f;padding:10px 14px;" title="Permanently delete this order">🗑 Delete Order</button>
                 </div>
             `;
             
@@ -1396,21 +1415,140 @@
             return { paid: '92,184,92', pending: '240,173,78', processing: '91,192,222', shipped: '158,122,64', delivered: '92,184,92', cancelled: '217,83,79', refunding: '240,173,78', refunded: '91,192,222' }[s] || '136,136,136';
         }
 
-        function filterOrders(q) {
-            const filtered = allOrders.filter(o => {
+        function onTimeFilterChange() {
+            const sel = document.getElementById('order-time-filter');
+            const customInput = document.getElementById('order-custom-date');
+            if (sel && customInput) {
+                if (sel.value === 'custom') {
+                    customInput.style.display = 'inline-block';
+                    if (!customInput.value) {
+                        const d = new Date();
+                        const yyyy = d.getFullYear();
+                        const mm = String(d.getMonth() + 1).padStart(2, '0');
+                        const dd = String(d.getDate()).padStart(2, '0');
+                        customInput.value = `${yyyy}-${mm}-${dd}`;
+                    }
+                } else {
+                    customInput.style.display = 'none';
+                }
+            }
+            applyOrdersFilter();
+        }
+
+        function applyOrdersFilter() {
+            const searchInput = document.getElementById('order-search-input');
+            const q = (searchInput ? searchInput.value : '').trim().toLowerCase();
+            const timeFilter = document.getElementById('order-time-filter')?.value || 'all';
+            const customDateVal = document.getElementById('order-custom-date')?.value || '';
+
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const tomorrowStart = new Date(todayStart);
+            tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+
+            const yesterdayStart = new Date(todayStart);
+            yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+
+            const sevenDaysAgo = new Date(todayStart);
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+
+            const thirtyDaysAgo = new Date(todayStart);
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
+
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            currentFilteredOrders = allOrders.filter(o => {
                 const addr = o.address || {};
-                return (addr.name || '').toLowerCase().includes(q.toLowerCase()) ||
-                    o.id.toLowerCase().includes(q.toLowerCase()) ||
-                    (o.guest_email || '').toLowerCase().includes(q.toLowerCase());
+                const matchesQuery = !q ||
+                    (addr.name || '').toLowerCase().includes(q) ||
+                    o.id.toLowerCase().includes(q) ||
+                    (o.guest_email || '').toLowerCase().includes(q) ||
+                    (addr.phone || '').includes(q) ||
+                    (o.status || '').toLowerCase().includes(q);
+
+                if (!matchesQuery) return false;
+
+                if (timeFilter === 'all') return true;
+
+                const orderDate = new Date(o.created_at);
+                if (isNaN(orderDate.getTime())) return true;
+
+                if (timeFilter === 'today') {
+                    return orderDate >= todayStart && orderDate < tomorrowStart;
+                } else if (timeFilter === 'yesterday') {
+                    return orderDate >= yesterdayStart && orderDate < todayStart;
+                } else if (timeFilter === '7days') {
+                    return orderDate >= sevenDaysAgo && orderDate < tomorrowStart;
+                } else if (timeFilter === '30days') {
+                    return orderDate >= thirtyDaysAgo && orderDate < tomorrowStart;
+                } else if (timeFilter === 'this_month') {
+                    return orderDate >= monthStart && orderDate < tomorrowStart;
+                } else if (timeFilter === 'custom' && customDateVal) {
+                    const ordYear = orderDate.getFullYear();
+                    const ordMonth = String(orderDate.getMonth() + 1).padStart(2, '0');
+                    const ordDay = String(orderDate.getDate()).padStart(2, '0');
+                    const ordDateStr = `${ordYear}-${ordMonth}-${ordDay}`;
+                    return ordDateStr === customDateVal;
+                }
+
+                return true;
             });
-            renderOrdersTable(filtered);
+
+            renderOrdersTable(currentFilteredOrders);
+
+            const countBadge = document.getElementById('orders-filter-count');
+            if (countBadge) {
+                if (timeFilter !== 'all' || q) {
+                    countBadge.textContent = `${currentFilteredOrders.length} of ${allOrders.length} orders`;
+                    countBadge.style.display = 'inline-block';
+                } else {
+                    countBadge.style.display = 'none';
+                }
+            }
+        }
+
+        // Backward compatibility
+        function filterOrders(q) {
+            applyOrdersFilter();
+        }
+
+        async function deleteAdminOrder(id, status, fromModal = false) {
+            const isPaid = ['paid', 'processing', 'shipped', 'delivered'].includes(status);
+            let confirmMsg = `Are you sure you want to permanently delete order #${id.slice(0, 8).toUpperCase()}?\n\nThis will remove it from the database completely.`;
+            if (isPaid) {
+                confirmMsg = `⚠️ CAUTION: Order #${id.slice(0, 8).toUpperCase()} is marked as ${status.toUpperCase()}!\n\nDeleting will permanently delete the customer's payment and shipping records from accounting.\n\nAre you sure you want to proceed?`;
+            }
+
+            if (!confirm(confirmMsg)) return;
+
+            try {
+                const res = await fetch(`/api/admin/orders/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'x-admin-token': getToken() }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to delete order');
+
+                if (fromModal) {
+                    closeOrderDetail();
+                }
+
+                allOrders = allOrders.filter(o => o.id !== id);
+                applyOrdersFilter();
+
+                if (typeof loadDashStats === 'function') loadDashStats();
+                alert(`Order #${id.slice(0, 8).toUpperCase()} has been deleted.`);
+            } catch (err) {
+                alert('Error deleting order: ' + err.message);
+            }
         }
 
         function exportOrdersCSV() {
-            if (!allOrders.length) { alert('No orders to export.'); return; }
+            const exportList = (currentFilteredOrders && currentFilteredOrders.length) ? currentFilteredOrders : allOrders;
+            if (!exportList.length) { alert('No orders to export.'); return; }
             const esc = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
             const headers = ['Order ID', 'Date', 'Customer', 'Phone', 'Email', 'Items', 'Address', 'Subtotal', 'Delivery', 'Total', 'Status'];
-            const rows = allOrders.map(o => {
+            const rows = exportList.map(o => {
                 const addr = o.address || {};
                 const items = (o.items || []).map(i => {
                     let desc = i.name;

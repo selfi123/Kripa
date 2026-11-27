@@ -111,6 +111,20 @@ router.patch('/orders/:id/status', auth, express.json(), async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── DELETE /api/admin/orders/:id – permanently remove order ───────────────────
+router.delete('/orders/:id', auth, async (req, res) => {
+    try {
+        const { rows } = await pool.query(
+            `DELETE FROM orders WHERE id = $1 RETURNING id, status, total`,
+            [req.params.id]
+        );
+        if (!rows.length) return res.status(404).json({ error: 'Order not found' });
+        res.json({ message: 'Order successfully deleted', order: rows[0] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ── POST /api/admin/login ─────────────────────────────────────────────────────
 router.post('/login', (req, res) => {
     const { password } = req.body;
