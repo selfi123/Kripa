@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ഉൽപ്പന്നം – KRIPA Pickles</title>
     <meta name="description" content="View pickle details at KRIPA Pickles. Authentic homemade Kerala pickles." />
-    <link rel="stylesheet" href="/css/styles.css?v=4.0" />
+    <link rel="stylesheet" href="/css/styles.css?v=4.1" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
     <style>
         @media (max-width: 640px) {
@@ -173,7 +173,7 @@
             style="max-height:85vh;max-width:90vw;border-radius:14px;object-fit:contain;" />
     </div>
 
-    <script src="/js/i18n.js"></script>
+    <script src="/js/i18n.js?v=4.1"></script>
     <script src="/js/main.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
@@ -215,6 +215,13 @@
 
             const images = (p.imageUrls && p.imageUrls.length) ? p.imageUrls : (p.images && p.images.length ? p.images : []);
             const imgSrc = images.length ? images[0] : '/images/hero/kerala_pickle.png';
+
+            const purityTitle = (typeof t === 'function' && t('prod_purity_title') !== 'prod_purity_title')
+              ? t('prod_purity_title')
+              : '100% വീട്ടിലുണ്ടാക്കിയത് · പാക്കറ്റ് അച്ചാർ പൊടികളില്ല';
+            const purityDesc = (typeof t === 'function' && t('prod_purity_desc') !== 'prod_purity_desc')
+              ? t('prod_purity_desc')
+              : 'കടയിൽ നിന്ന് വാങ്ങുന്ന റെഡിമെയ്ഡ് അച്ചാർ പൊടികളോ കൃത്രിമ പ്രിസർവേറ്റീവുകളോ ഒട്ടും ചേർക്കുന്നില്ല. വീട്ടിൽ തന്നെ വെയിലിൽ ഉണക്കി വറുത്തുപൊടിച്ച സുഗന്ധവ്യഞ്ജനങ്ങളും ശുദ്ധമായ എള്ളെണ്ണയും മാത്രം.';
 
             document.getElementById('product-content').innerHTML = `
                 <div class="product-gallery">
@@ -296,10 +303,10 @@
                   <div class="product-purity-badge" style="margin-top:24px;padding:16px 20px;border-radius:14px;background:var(--leaf-soft);border:1.5px solid rgba(30,81,53,0.18);">
                     <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--leaf-deep);margin-bottom:5px;">
                       <i data-lucide="shield-check" style="width:17px;height:17px;color:var(--leaf);flex-shrink:0;"></i>
-                      <span>${t('prod_purity_title')}</span>
+                      <span>${purityTitle}</span>
                     </div>
                     <p style="font-size:12.5px;color:var(--text-muted);line-height:1.5;margin:0;">
-                      ${t('prod_purity_desc')}
+                      ${purityDesc}
                     </p>
                   </div>
 
