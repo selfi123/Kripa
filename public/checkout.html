@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout – KRIPA Pickles</title>
-    <link rel="stylesheet" href="/css/styles.css?v=3.8" />
+    <link rel="stylesheet" href="/css/styles.css?v=3.9" />
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
     <style>
@@ -294,7 +294,7 @@
     </nav>
 
     <div class="checkout-wrap">
-        <p class="page-sub" data-i18n="co_sub">✦ Secure Checkout</p>
+        <p class="page-sub" data-i18n="co_sub">Secure Checkout</p>
         <h1 class="page-title" data-i18n="co_title">Complete Your Order</h1>
 
         <div id="empty-cart" class="empty-state" style="display:none;margin-top:24px;">
@@ -519,13 +519,13 @@
                 if (res.ok) {
                     _appliedCoupon = data;
                     msgEl.style.color = 'var(--leaf)';
-                    msgEl.textContent = `✅ "${data.code}" applied — ${data.description}`;
+                    msgEl.textContent = `Coupon "${data.code}" applied — ${data.description}`;
                 } else {
                     _appliedCoupon = null;
                     msgEl.style.color = 'var(--spice)';
-                    msgEl.textContent = '❌ ' + (data.error || 'Invalid coupon');
+                    msgEl.textContent = data.error || 'Invalid coupon';
                 }
-            } catch { msgEl.style.color = 'var(--spice)'; msgEl.textContent = '❌ Network error'; }
+            } catch { msgEl.style.color = 'var(--spice)'; msgEl.textContent = 'Network error. Please try again.'; }
             document.getElementById('coupon-btn').textContent = typeof t === 'function' ? t('co_coupon_apply') : 'Apply';
             recalcSummary();
         }

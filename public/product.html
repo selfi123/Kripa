@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ഉൽപ്പന്നം – KRIPA Pickles</title>
     <meta name="description" content="View pickle details at KRIPA Pickles. Authentic homemade Kerala pickles." />
-    <link rel="stylesheet" href="/css/styles.css?v=3.8" />
+    <link rel="stylesheet" href="/css/styles.css?v=3.9" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
     <style>
         @media (max-width: 640px) {
@@ -70,7 +70,7 @@
             style="padding:64px 0;background:var(--bg-alt);border-top:1px solid var(--border-kasavu);border-bottom:1px solid var(--border-kasavu);">
             <div class="container">
                 <div style="text-align:center;margin-bottom:40px;" class="reveal">
-                    <p class="section-label" data-i18n="related_label">✦ നിങ്ങൾക്ക് ഇഷ്ടമായേക്കാവുന്നവ</p>
+                    <p class="section-label" data-i18n="related_label">നിങ്ങൾക്ക് ഇഷ്ടമായേക്കാവുന്നവ</p>
                     <h2 class="section-title" data-i18n-html="related_title">സമാന <span
                             class="gold-text">അച്ചാറുകൾ</span></h2>
                 </div>
@@ -81,7 +81,7 @@
         <section id="reviews-section" style="padding:72px 0;">
             <div class="container" style="max-width:860px;">
                 <div style="text-align:center;margin-bottom:40px;">
-                    <p class="section-label" data-i18n="reviews_label">✦ ഉപഭോക്തൃ അഭിപ്രായങ്ങൾ</p>
+                    <p class="section-label" data-i18n="reviews_label">ഉപഭോക്തൃ അഭിപ്രായങ്ങൾ</p>
                     <h2 class="section-title" data-i18n-html="reviews_title">ഉപഭോക്താക്കൾ <span
                             class="gold-text">പറയുന്നത്</span></h2>
                     <div id="avg-rating-display"
@@ -441,7 +441,7 @@
                 const url = window.location.href;
                 const text = `${p.name} – KRIPA Pickles (₹${parseFloat(p.price).toLocaleString('en-IN')})`;
                 if (mode === 'whatsapp') window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
-                else navigator.clipboard?.writeText(url).then(() => showToast('🔗 Link copied!')).catch(() => showToast(url));
+                else navigator.clipboard?.writeText(url).then(() => showToast('Link copied!')).catch(() => showToast(url));
             };
 
             setupReveal();

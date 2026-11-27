@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>My Orders – KRIPA Pickles</title>
-    <link rel="stylesheet" href="/css/styles.css?v=3.8" />
+    <link rel="stylesheet" href="/css/styles.css?v=3.9" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
     <style>
         .orders-wrap {
@@ -209,7 +209,7 @@
     </div>
 
     <div class="orders-wrap">
-        <p class="page-sub" data-i18n="orders_sub">✦ Account</p>
+        <p class="page-sub" data-i18n="orders_sub">Account</p>
         <h1 data-i18n="orders_title">My Orders</h1>
         <div id="orders-container">
             <div class="skeleton" style="height:160px;margin-bottom:16px;"></div>
@@ -250,21 +250,23 @@
             if (!container) return;
             if (_ordersAuthRequired) {
                 container.innerHTML = `<div class="no-orders">
-                    <p style="font-size:40px">🔐</p>
+                    <div style="width:48px;height:48px;margin:0 auto 14px;border-radius:12px;background:var(--kasavu-soft);display:flex;align-items:center;justify-content:center;color:var(--monsoon);"><i data-lucide="lock" style="width:24px;height:24px;"></i></div>
                     <h3>${t('orders_signin_title')}</h3>
                     <p style="color:var(--text-muted);margin-bottom:24px;">${t('orders_signin_desc')}</p>
                     <a href="/login" class="btn btn-gold">${t('nav_signin')}</a>
                 </div>`;
+                if (window.lucide) lucide.createIcons();
                 return;
             }
             if (!_cachedOrders) return;
             if (!_cachedOrders.length) {
                 container.innerHTML = `<div class="no-orders">
-                    <p style="font-size:40px">🫙</p>
+                    <div style="width:48px;height:48px;margin:0 auto 14px;border-radius:12px;background:var(--kasavu-soft);display:flex;align-items:center;justify-content:center;color:var(--monsoon);"><i data-lucide="package" style="width:24px;height:24px;"></i></div>
                     <h3>${t('orders_none_title')}</h3>
                     <p style="color:var(--text-muted);margin-bottom:24px;">${t('orders_none_desc')}</p>
                     <a href="/" class="btn btn-gold">${t('orders_shop_now')}</a>
                 </div>`;
+                if (window.lucide) lucide.createIcons();
                 return;
             }
             const loc = (typeof getLang === 'function' && getLang() === 'ml') ? 'ml-IN' : 'en-IN';
@@ -305,10 +307,11 @@
                                 ${canCancel ? `<button class="btn btn-outline" style="padding:8px 16px;font-size:12px;border-color:rgba(185,56,34,0.4);color:var(--spice);" onclick="cancelOrder('${order.id}')">${t('orders_cancel_btn')}</button>` : ''}
                             </div>
                         </div>
-                        <div class="order-addr">📦 ${addr.name || ''}<br/>${addr.city || ''}, ${addr.state || ''} ${addr.pincode || ''}</div>
+                        <div class="order-addr">${escapeHtml(addr.name || '')}<br/>${escapeHtml(addr.city || '')}, ${escapeHtml(addr.state || '')} ${escapeHtml(addr.pincode || '')}</div>
                     </div>
                 </div>`;
             }).join('');
+            if (window.lucide) lucide.createIcons();
         }
 
         async function cancelOrder(orderId) {

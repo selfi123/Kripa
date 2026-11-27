@@ -148,8 +148,9 @@ function showToast(message, duration = 3000) {
   if (!container) return;
   const toast = document.createElement('div');
   toast.className = 'toast';
-  toast.innerHTML = `<span class="toast-icon">✦</span><span>${message}</span>`;
+  toast.innerHTML = `<span class="toast-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></span><span>${message}</span>`;
   container.appendChild(toast);
+  if (window.lucide) lucide.createIcons();
   setTimeout(() => {
     toast.style.opacity = '0';
     toast.style.transform = 'translateX(80px)';
@@ -229,7 +230,7 @@ async function subscribeToPush() {
 
     const reg = await navigator.serviceWorker.ready;
     let sub = await reg.pushManager.getSubscription();
-    if (sub) return showToast('Already subscribed! 🔔');
+    if (sub) return showToast('Already subscribed to batch alerts.');
 
     const res = await fetch('/api/push/vapidPublicKey');
     if (!res.ok) throw new Error('Server push not configured');
@@ -252,7 +253,7 @@ async function subscribeToPush() {
       body: JSON.stringify(sub)
     });
 
-    showToast('Batch drop alerts enabled! 🔔');
+    showToast('Batch drop alerts enabled.');
     document.querySelectorAll('.push-subscribe-btn').forEach(el => el.style.display = 'none');
   } catch (e) {
     console.error('Subscribe error:', e);
@@ -329,7 +330,9 @@ function renderUserSlot() {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         ${_t('nav_signin')}
       </a>
-      <button class="push-subscribe-btn nav-icon-btn" onclick="subscribeToPush()" title="Enable Push Alerts">🔔</button>
+      <button class="push-subscribe-btn nav-icon-btn" onclick="subscribeToPush()" title="Enable Push Alerts" aria-label="Alerts">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      </button>
     `;
 
     if (mobileUserSlot) {
