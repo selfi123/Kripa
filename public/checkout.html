@@ -603,7 +603,16 @@
                     },
                     modal: { ondismiss: () => { btn.disabled = false; btnLabel.textContent = payText(); } }
                 };
-                new Razorpay(options).open();
+                const rzpInstance = new Razorpay(options);
+                rzpInstance.on('payment.failed', function (resp) {
+                    console.error('Razorpay payment failed:', resp.error);
+                    btn.disabled = false;
+                    btnLabel.textContent = payText();
+                    if (resp.error && resp.error.description) {
+                        alert('Payment failed: ' + resp.error.description);
+                    }
+                });
+                rzpInstance.open();
             } catch (e) { alert('Something went wrong: ' + e.message); btn.disabled = false; btnLabel.textContent = payText(); }
         }
     </script>
