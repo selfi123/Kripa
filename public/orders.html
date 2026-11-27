@@ -279,6 +279,10 @@
                     processing: 'status-processing', cancelled: 'status-cancelled'
                 }[order.status] || 'status-pending';
                 const canCancel = ['pending', 'paid', 'processing'].includes(order.status);
+                const isPaid = ['paid', 'processing', 'shipped', 'delivered'].includes(order.status);
+                const totalLabel = isPaid
+                    ? t('orders_total_paid')
+                    : (order.status === 'cancelled' ? t('orders_total_cancelled') : t('orders_total_due'));
 
                 return `<div class="order-card">
                     <div class="order-header">
@@ -301,7 +305,7 @@
                     </div>
                     <div class="order-footer">
                         <div>
-                            <div class="order-total"><small>${t('orders_total_paid')}</small>₹${parseFloat(order.total).toLocaleString('en-IN')}</div>
+                            <div class="order-total"><small>${totalLabel}</small>₹${parseFloat(order.total).toLocaleString('en-IN')}</div>
                             <div style="display:flex;gap:8px;margin-top:12px;">
                                 <a href="/order.html?id=${order.id}" class="btn btn-gold" style="padding:8px 16px;font-size:12px;">${t('orders_track_btn')}</a>
                                 ${canCancel ? `<button class="btn btn-outline" style="padding:8px 16px;font-size:12px;border-color:rgba(185,56,34,0.4);color:var(--spice);" onclick="cancelOrder('${order.id}')">${t('orders_cancel_btn')}</button>` : ''}
